@@ -4,6 +4,8 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import bokarev.st.dbcalculationtest.entities.Calculation
+import bokarev.st.dbcalculationtest.entities.Client
 import bokarev.st.dbcalculationtest.entities.TypeCategory
 import bokarev.st.dbcalculationtest.entities.TypeOfWork
 import javax.security.auth.Subject
@@ -12,9 +14,10 @@ import javax.security.auth.Subject
     entities = [
         TypeOfWork::class,
         TypeCategory::class,
-
+        Calculation::class,
+        Client::class,
     ],
-    version = 1
+    version = 3
 )
 abstract class CategoriesDataBase : RoomDatabase() {
 
@@ -30,7 +33,7 @@ abstract class CategoriesDataBase : RoomDatabase() {
                     context.applicationContext,
                     CategoriesDataBase::class.java,
                     "Calculator.db"
-                ).build().also {
+                ).fallbackToDestructiveMigration().build().also {
                     INSTANCE = it
                 }
             }
