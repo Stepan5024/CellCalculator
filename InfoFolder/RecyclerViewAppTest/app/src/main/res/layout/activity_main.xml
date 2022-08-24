@@ -8,32 +8,90 @@
     tools:context=".MainActivity">
 
 
-    <androidx.recyclerview.widget.RecyclerView
+    <!--<androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvTodos"
         android:layout_width="match_parent"
         android:layout_weight="2"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent" />-->
+
+    <EditText
+        android:id="@+id/nameInput"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:hint="Enter your name"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <EditText
+        android:id="@+id/emailInput"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:hint="Enter your email"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/nameInput" />
+
+    <EditText
+        android:id="@+id/phoneInput"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:hint="Enter your phone number"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/emailInput" />
+
+    <Button
+        android:id="@+id/saveButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:text="Save"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/phoneInput" />
+
     <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="3"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/saveButton" />
+
+   <!-- <EditText
+        android:id="@+id/etTodo"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:ems="8"
+        android:hint="New ToDo"
+
+        />
+        <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvSchools"
         android:layout_width="match_parent"
-        android:layout_weight="2"
-        android:layout_height="match_parent" />
+        android:layout_height="0dp"
+        android:layout_weight="2"/>
+        <!-android:layout_height="match_parent"
+        -->
+<!--
     <EditText
         android:id="@+id/etTodo"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
         android:layout_weight="3"
         android:ems="8"
         android:hint="New ToDo"
 
         />
-
-    <Button
+    <!-android:layout_height="match_parent" -->
+ <!--   <Button
         android:id="@+id/btnAddTodo"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_weight="3"
         android:text="Add Todo" />
+
     <EditText
         android:id="@+id/etSchool"
         android:layout_width="match_parent"
@@ -50,5 +108,5 @@
         android:layout_height="match_parent"
         android:layout_weight="3"
         android:text="Add School" />
-
+-->
 </LinearLayout>
