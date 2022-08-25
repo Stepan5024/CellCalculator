@@ -1,5 +1,6 @@
 package bokarev.st.recyclerviewapptest
 
+import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,7 +16,29 @@ class RecyclerViewAdapter2(val listener: RowClickListener2): RecyclerView.Adapte
     fun setListData(data: ArrayList<UserEntity2>) {
         this.items = data
     }
+    fun removeItem(position: Int) {
+        items.removeAt(position)
+        notifyItemRemoved(position)
 
+
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    fun addList(newList: ArrayList<UserEntity2>) {
+        items.addAll(newList)
+        notifyDataSetChanged()
+    }
+
+    fun addEntity(newUser: UserEntity2, position: Int) {
+        items.add(position, newUser)
+        setListData(items)
+        notifyItemRemoved(position)
+    }
+    @SuppressLint("NotifyDataSetChanged")
+    fun clear() {
+        items.clear()
+        notifyDataSetChanged()
+    }
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyViewHolder {
        val inflater = LayoutInflater.from(parent.context).inflate(R.layout.recyclerview_row, parent, false)
         return MyViewHolder(inflater, listener)
