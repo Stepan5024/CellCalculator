@@ -1,43 +1,42 @@
-package bokarev.st.recyclerviewapptest
+package com.demo.roomdemo
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
-import bokarev.st.recyclerviewapptest.db.RoomAppDb
+import com.demo.roomdemo.db.RoomAppDb
+import com.demo.roomdemo.db.UserEntity
 
-
-
-class MainActivityViewModel2(app: Application): AndroidViewModel(app) {
-    var allUsers : MutableLiveData<List<UserEntity2>> = MutableLiveData()
+class MainActivityViewModel(app: Application): AndroidViewModel(app) {
+    var allUsers : MutableLiveData<List<UserEntity>> = MutableLiveData()
 
     init{
         getAllUsers()
     }
 
-    fun getAllUsersObservers(): MutableLiveData<List<UserEntity2>> {
+    fun getAllUsersObservers(): MutableLiveData<List<UserEntity>> {
         return allUsers
     }
 
-    fun getAllUsers() {
+    private fun getAllUsers() {
         val userDao = RoomAppDb.getAppDatabase((getApplication()))?.userDao()
         val list = userDao?.getAllUserInfo()
 
         allUsers.postValue(list)
     }
 
-    fun insertUserInfo(entity: UserEntity2){
+    fun insertUserInfo(entity: UserEntity){
         val userDao = RoomAppDb.getAppDatabase(getApplication())?.userDao()
         userDao?.insertUser(entity)
         getAllUsers()
     }
 
-    fun updateUserInfo(entity: UserEntity2){
+    fun updateUserInfo(entity: UserEntity){
         val userDao = RoomAppDb.getAppDatabase(getApplication())?.userDao()
         userDao?.updateUser(entity)
         getAllUsers()
     }
 
-    fun deleteUserInfo(entity: UserEntity2){
+    fun deleteUserInfo(entity: UserEntity){
         val userDao = RoomAppDb.getAppDatabase(getApplication())?.userDao()
         userDao?.deleteUser(entity)
         getAllUsers()

@@ -1,12 +1,16 @@
 package bokarev.st.recyclerviewapptest
 
 import android.annotation.SuppressLint
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.withContext
+import kotlin.coroutines.coroutineContext
 
 
 class RecyclerViewAdapter2(val listener: RowClickListener2): RecyclerView.Adapter<RecyclerViewAdapter2.MyViewHolder>() {
@@ -19,6 +23,7 @@ class RecyclerViewAdapter2(val listener: RowClickListener2): RecyclerView.Adapte
     fun removeItem(position: Int) {
         items.removeAt(position)
         notifyItemRemoved(position)
+        Log.d("mytag", "position in list = ${position}}")
 
 
     }

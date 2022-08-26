@@ -14,7 +14,9 @@ import androidx.recyclerview.widget.RecyclerView.SmoothScroller
 
 class MainActivity : AppCompatActivity(), SchoolAdapter.RowClickListener, RecyclerViewAdapter2.RowClickListener2 {
 
-    var userList = arrayListOf<UserEntity2>(
+    lateinit var viewModel: MainActivityViewModel2
+
+   var userList = arrayListOf<UserEntity2>(
         UserEntity2(0, "Test 1", "email 1", "phone 1"),
         UserEntity2(0, "Test 2", "email 1", "phone 1"),
         UserEntity2(0, "Test 3", "email 1", "phone 1"),
@@ -27,6 +29,9 @@ class MainActivity : AppCompatActivity(), SchoolAdapter.RowClickListener, Recycl
 
 
         )
+
+
+
     private val userAdapter = RecyclerViewAdapter2(this@MainActivity)
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -119,14 +124,16 @@ class MainActivity : AppCompatActivity(), SchoolAdapter.RowClickListener, Recycl
                 userAdapter.notifyItemInserted(userList.size - 1)*/
 
                 //отвечает за медленную прокрутку
-                userList.add(0, user);
+                userList.add(0, user)
+                viewModel.insertUserInfo(user)
                 userAdapter.notifyItemInserted(0)
-                rvUsers.smoothScrollToPosition(0);
+                rvUsers.smoothScrollToPosition(0)
 
             } else {
                  //= UserEntity2(0, name, email, phone)
                 //userList.remove(user)
                 var user = UserEntity2(nameInput.getTag(nameInput.id).toString().toInt(), name, email, phone)
+                viewModel.updateUserInfo(user)
                 //viewModel.updateUserInfo(user)
                 userList.add(user)
                 userAdapter.notifyItemInserted(userList.size - 1)
@@ -174,9 +181,17 @@ class MainActivity : AppCompatActivity(), SchoolAdapter.RowClickListener, Recycl
     override fun onItemClickListener2(user: UserEntity2) {
         val toast = Toast.makeText(applicationContext, "${user.name} + ${userList.indexOf(user)}", Toast.LENGTH_SHORT)
         toast.show()
-        val num = userList.indexOf(user)
-        userAdapter.removeItem(num)
-        //userAdapter.notifyItemRemoved(userList.indexOf(user))
+
+        val position = userList.indexOf(user)
+        Log.d("mytag", "size main list = ${userList.size}}")
+
+        Log.d("mytag", "position in main list = ${position}}")
+
+
+        userAdapter.setListData(userList)
+        userAdapter.removeItem(position)
+        userList.removeAt(position - 1)
+    //userAdapter.notifyItemRemoved(userList.indexOf(user))
         //userList.removeAt(num)
 
        /* val nameInput = findViewById<EditText>(R.id.nameInput)
