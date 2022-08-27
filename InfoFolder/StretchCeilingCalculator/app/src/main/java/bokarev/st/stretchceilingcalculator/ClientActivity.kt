@@ -78,7 +78,7 @@ class ClientActivity : AppCompatActivity() {
                 viewModel.insertUserInfo(user)
 
                 //переход на активность смета
-                val intent = Intent(this, Clients::class.java).also {
+                val intent = Intent(this, Calculation::class.java).also {
                     it.putExtra("KEY1", "value1")
                     it.putExtra("KEY2", "value1")
                     it.putExtra("KEY3", "value1")
