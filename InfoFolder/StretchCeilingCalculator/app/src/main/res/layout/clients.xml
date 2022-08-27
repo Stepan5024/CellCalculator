@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:background="#D9D9D9"
     android:orientation="vertical"
-    tools:context=".MainActivity">
+    tools:context=".Clients">
 
 
     <LinearLayout
@@ -19,10 +19,11 @@
         <RelativeLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="1">
+            android:layout_weight="1"
+            tools:ignore="NestedWeights">
 
             <ImageView
-                android:id="@+id/imageView"
+                android:id="@+id/btnReturnToHome"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentStart="true"
@@ -40,7 +41,7 @@
                 android:textSize="26sp" />
 
             <ImageView
-                android:id="@+id/imageView2"
+                android:id="@+id/btnCorrectListOfClients"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
@@ -62,19 +63,24 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="10"
+            android:layout_margin="10dp"
+            android:background="@drawable/button_background"
             android:orientation="vertical">
 
             <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/ClientsRecyclerView"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+                android:layout_height="match_parent"
+                />
         </LinearLayout>
 
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="0dp"
-            android:layout_weight="3"
-            android:layout_gravity="center">
+            android:layout_gravity="center"
+            android:layout_marginTop="10dp"
+            android:layout_weight="3">
 
             <RelativeLayout
                 android:id="@+id/addNewClient"
@@ -94,12 +100,12 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerVertical="true"
-                    android:layout_toEndOf="@+id/imgAddNewClient"
                     android:layout_marginStart="20dp"
                     android:layout_marginEnd="20dp"
-                    android:textSize="26sp"
+                    android:layout_toEndOf="@+id/imgAddNewClient"
                     android:text="Добавить"
-                    android:textColor="@color/black" />
+                    android:textColor="@color/black"
+                    android:textSize="26sp" />
             </RelativeLayout>
 
         </LinearLayout>
