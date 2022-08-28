@@ -8,6 +8,17 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+
+        val list = arrayListOf("3", "8", "4", "1", "9")
+        for ((index, element) in list.withIndex()){
+            println("$index: $element")
+        }
+        list.add(1, "90")
+
+        for ((index, element) in list.withIndex()){
+            println("$index: $element")
+        }
+
         var myLovelyCats = listOf( // Переменная Мои ненаглядные коты
             // Это неизменяемый список!!!
             "Мурзик", // первый кот в списке
@@ -59,10 +70,7 @@ class MainActivity : AppCompatActivity() {
 
         println(listOf(1, 2, 3, 4, 5).indexOf(4)) // 3
 
-        val list = arrayListOf("3", "8", "4", "1", "9")
-        for ((index, element) in list.withIndex()){
-            println("$index: $element")
-        }
+
 
 // Результат
       /*  0: 3

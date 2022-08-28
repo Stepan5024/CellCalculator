@@ -14,7 +14,10 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import bokarev.st.stretchceilingcalculator.entities.Client
 import bokarev.st.stretchceilingcalculator.entities.relations.ClientAndEstimate
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter.RowClickListener {
 
@@ -34,6 +37,40 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter.Ro
             val client = getClientFromPreviousActivity()
             idTypeOfWork = intent.getIntExtra("idTypeOfWork", 0)
 
+
+            if (previousActivity == "Calculation") {
+                var sum = 0
+                val job = GlobalScope.launch(Dispatchers.Default) {
+
+                    val dao = CategoriesDataBase.getInstance(this@TypeOfWorkActivity).categoriesDao
+                    val someList =
+                        dao.getUnionClientAndEstimateAndTypeCategory2(
+                            getClientFromPreviousActivity()._id,
+                            idTypeOfWork
+                        )
+
+                    for (i in someList) {
+                        sum += i.Price * i.Count
+
+                        Log.d(
+                            "mytag",
+                            "calculation items CategoryName = ${i.CategoryName} Price = ${i.Price} Count = ${i.Count}"
+                        )
+                    }
+                }
+                runBlocking {
+                    // waiting for the coroutine to finish it"s work
+                    job.join()
+                    //set view
+
+                    val tvSum = findViewById<TextView>(R.id.textView2)
+
+                    tvSum.text = "сумма: ${sum} ₽"
+
+                    Log.d("mytag", "Main Thread is Running")
+                }
+            }
+
             Log.d(
                 "mytag",
                 "previousActivity = $previousActivity nameOfClient = ${client.ClientName} idClient = ${client._id}"
@@ -43,11 +80,26 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter.Ro
         }
         val btnReturnToHome: ImageView = findViewById(R.id.btnReturnToHome)
         btnReturnToHome.setOnClickListener {
-            val intent = Intent(this, Calculation::class.java).also {
-                it.putExtra("ClientEntity", getClientFromPreviousActivity())
-                it.putExtra("PreviousActivity", "TypeOfWorkActivity")
+            val someList = typeOfWorkRecyclerViewAdapter.getListData()
+            val job = GlobalScope.launch(Dispatchers.Default) {
+
+                val dao = CategoriesDataBase.getInstance(this@TypeOfWorkActivity).categoriesDao
+                for (i in someList) {
+                    dao.updateCountStrokesEstimateByClient(
+                        getClientFromPreviousActivity()._id,
+                        i._idTypeCategory,
+                        i.Count
+                    )
+                    Log.d("mytag", "items back print = ${i.CategoryName}")
+                }
             }
-            startActivity(intent)
+
+            runBlocking {
+                // waiting for the coroutine to finish it"s work
+                job.join()
+                gettransition()
+                Log.d("mytag", "Main Thread is Running")
+            }
         }
 
         val recyclerView: RecyclerView = findViewById(R.id.TypeOfWorkRecyclerView)
@@ -80,6 +132,30 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter.Ro
 
     // Kotlin
     override fun onBackPressed() {
+        val someList = typeOfWorkRecyclerViewAdapter.getListData()
+        val job = GlobalScope.launch(Dispatchers.Default) {
+
+            val dao = CategoriesDataBase.getInstance(this@TypeOfWorkActivity).categoriesDao
+            for (i in someList) {
+                dao.updateCountStrokesEstimateByClient(
+                    getClientFromPreviousActivity()._id,
+                    i._idTypeCategory,
+                    i.Count
+                )
+                Log.d("mytag", "items back print = ${i.CategoryName}")
+            }
+        }
+
+        runBlocking {
+            // waiting for the coroutine to finish it"s work
+            job.join()
+            gettransition()
+            Log.d("mytag", "Main Thread is Running")
+        }
+
+    }
+
+    fun gettransition() {
         val intent = Intent(this, Calculation::class.java).also {
             it.putExtra("ClientEntity", getClientFromPreviousActivity())
             it.putExtra("PreviousActivity", "TypeOfWorkActivity")
@@ -106,16 +182,43 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter.Ro
 
     }
 
-    override fun onChangeClick(data: TypeOfWorkDataClass, typeChange: String) {
+    override fun onChangeClick(
+        data: ClientAndEstimate,
+        typeChange: String,
+        priceOld: Int,
+        countOld: Int
+    ) {
         val tv = findViewById<TextView>(R.id.textView2)
-        val oldSum = tv.text.split(" ").get(1).toInt()
+        val oldSum = tv.text.split(" ")[1].toInt()
         if (typeChange == "down") {
             val newSum = oldSum - data.Price
             tv.text = "сумма: ${newSum} ₽"
-        } else if (typeChange == "up"){
+
+        } else if (typeChange == "up") {
             val newSum = oldSum + data.Price
             tv.text = "сумма: ${newSum} ₽"
         }
+
+        val indexPrevious = typeOfWorkRecyclerViewAdapter.getListData().indexOf(
+            ClientAndEstimate(
+                data.ClientName,
+                countOld,
+                data._idTypeCategory,
+                data._idTypeOfWork,
+                priceOld,
+                data.CategoryName
+            )
+        )
+        val items = typeOfWorkRecyclerViewAdapter.getListData()
+
+        items.add(indexPrevious, data)
+        items.removeAt(indexPrevious + 1)
+
+        for (i in items) {
+            Log.d("mytag", "items print = ${i.CategoryName}")
+        }
+        typeOfWorkRecyclerViewAdapter.setListData(items)
+        typeOfWorkRecyclerViewAdapter.notifyDataSetChanged()
     }
 
     override fun onItemClickListener(user: ClientAndEstimate) {

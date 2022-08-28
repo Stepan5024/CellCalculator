@@ -1,5 +1,6 @@
 package bokarev.st.stretchceilingcalculator
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,6 +18,10 @@ class TypeOfWorkRecyclerViewAdapter(val listener: RowClickListener) :
 
     fun setListData(data: ArrayList<ClientAndEstimate>) {
         this.items = data
+    }
+
+    fun getListData(): ArrayList<ClientAndEstimate>{
+        return items
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyViewHolder {
@@ -51,36 +56,42 @@ class TypeOfWorkRecyclerViewAdapter(val listener: RowClickListener) :
 
             val priseStr = "${data.Price} ₽"
             price.text = priseStr
-            countOfElement.text = data.Count.toString()
+            countOfElement.text = "${data.Count} шт"
 
 
             btnUpCounter.setOnClickListener {
-                val pred = countOfElement.text.toString().split(" ")
-
-                    countOfElement.text = "${pred.get(0).toInt() + 1} шт"
+                val previousCount = countOfElement.text.toString().split(" ")[0].toInt()
+                Log.d("mytag", "previousCount = $previousCount")
+                if (previousCount >= 0) {
+                    countOfElement.text = "${previousCount + 1} шт"
 
                     listener.onChangeClick(
-                        TypeOfWorkDataClass(
-                            pred.get(0).toInt() + 1,
-                            price.text.toString().split(" ").get(0).toInt(),
+                        ClientAndEstimate(
+                            data.ClientName,
+                            previousCount + 1,
+                            data._idTypeCategory,
+                            data._idTypeOfWork,
+                            price.text.toString().split(" ")[0].toInt(),
                             nameOfWork.text.toString()
-                        ), "up"
+                        ), "up", data.Price, data.Count
                     )
-
+                }
             }
             btnDownCounter.setOnClickListener {
-                val pred = countOfElement.text.toString().split(" ")
+                val previousCount = countOfElement.text.toString().split(" ")[0].toInt()
 
-                if (pred.get(0).toInt() - 1 < 0) countOfElement.text = "0 шт"
-                else {
-                    countOfElement.text = "${pred.get(0).toInt() - 1} шт"
+                if (previousCount > 0) {
+                    countOfElement.text = "${previousCount - 1} шт"
 
                     listener.onChangeClick(
-                        TypeOfWorkDataClass(
-                            pred.get(0).toInt() - 1,
-                            price.text.toString().split(" ").get(0).toInt(),
+                        ClientAndEstimate(
+                            data.ClientName,
+                            previousCount - 1,
+                            data._idTypeCategory,
+                            data._idTypeOfWork,
+                            price.text.toString().split(" ")[0].toInt(),
                             nameOfWork.text.toString()
-                        ), "down"
+                        ), "down", data.Price, data.Count
                     )
                 }
             }
@@ -89,7 +100,7 @@ class TypeOfWorkRecyclerViewAdapter(val listener: RowClickListener) :
 
     interface RowClickListener {
         fun onDeleteUserClickListener(user: ClientAndEstimate)
-        fun onChangeClick(data: TypeOfWorkDataClass, typeChange: String)
+        fun onChangeClick(data: ClientAndEstimate, typeChange: String, priceOld:Int, countOld:Int)
         fun onItemClickListener(user: ClientAndEstimate)
     }
 }

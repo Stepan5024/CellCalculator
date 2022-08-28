@@ -124,8 +124,8 @@ class Clients : AppCompatActivity(), ClientsRecyclerViewAdapter.RowClickListener
         } else {
             // открываем смету выбранного клиента и заполненные данные клиента
 
-            val toast = Toast.makeText(applicationContext, "имя клиента ${user.ClientName}", Toast.LENGTH_SHORT)
-            toast.show()
+            /*val toast = Toast.makeText(applicationContext, "имя клиента ${user.ClientName}", Toast.LENGTH_SHORT)
+            toast.show()*/
 
             val intent = Intent(this, Calculation::class.java).also {
 

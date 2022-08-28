@@ -9,6 +9,10 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import bokarev.st.stretchceilingcalculator.entities.Client
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 class Calculation : AppCompatActivity() {
 
@@ -17,6 +21,7 @@ class Calculation : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.calculation)
+
 
         val tvNameOfClient: TextView = findViewById(R.id.textView2)
 
@@ -32,9 +37,38 @@ class Calculation : AppCompatActivity() {
 
             if ((previousActivity == "ClientActivity") or (previousActivity == "Clients") or (previousActivity == "TypeOfWorkActivity")) {
                 tvNameOfClient.text = client.ClientName
+                var sum = 0
+                val job = GlobalScope.launch(Dispatchers.Default) {
+
+                    val dao = CategoriesDataBase.getInstance(this@Calculation).categoriesDao
+                    val someList =
+                        dao.selectStrokesEstimateByClient(getClientFromPreviousActivity()._id)
+
+                    for (i in someList) {
+                        sum += i.Price * i.Count
+
+                        Log.d(
+                            "mytag",
+                            "calculation items CategoryName = ${i.CategoryName} Price = ${i.Price} Count = ${i.Count}"
+                        )
+                    }
+                }
+                runBlocking {
+                    // waiting for the coroutine to finish it"s work
+                    job.join()
+                    //set view
+
+                    val tvSum = findViewById<TextView>(R.id.MainSumCalculation)
+
+                    tvSum.text = "$sum ₽"
+
+                    Log.d("mytag", "Main Thread is Running")
+                }
+
             } else {
                 tvNameOfClient.text = ""
             }
+
 
         } catch (exp: RuntimeException) {
 
@@ -173,6 +207,12 @@ class Calculation : AppCompatActivity() {
             }
             "StartActivity" -> {
                 intent = Intent(this, MainActivity::class.java).also {
+                    it.putExtra("ClientEntity", setNullClient())
+                    it.putExtra("PreviousActivity", "Calculation")
+                }
+            }
+            "TypeOfWorkActivity" -> {
+                intent = Intent(this, Clients::class.java).also {
                     it.putExtra("ClientEntity", setNullClient())
                     it.putExtra("PreviousActivity", "Calculation")
                 }

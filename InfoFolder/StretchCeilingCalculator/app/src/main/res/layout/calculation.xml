@@ -149,24 +149,24 @@
                 android:id="@+id/textView4"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="26sp"
-                android:textColor="@color/black"
-                android:paddingTop="20dp"
                 android:layout_alignParentTop="true"
                 android:layout_centerHorizontal="true"
+                android:paddingTop="20dp"
                 android:text="Общая сумма:"
-                />
+                android:textColor="@color/black"
+                android:textSize="26sp" />
+
             <TextView
+                android:id="@+id/MainSumCalculation"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="26sp"
-                android:textColor="@color/black"
-                android:paddingTop="10dp"
-                android:layout_centerHorizontal="true"
                 android:layout_alignParentBottom="true"
+                android:layout_centerHorizontal="true"
+                android:paddingTop="10dp"
                 android:paddingBottom="50dp"
                 android:text="0 ₽"
-                />
+                android:textColor="@color/black"
+                android:textSize="26sp" />
         </RelativeLayout>
     </LinearLayout>
 

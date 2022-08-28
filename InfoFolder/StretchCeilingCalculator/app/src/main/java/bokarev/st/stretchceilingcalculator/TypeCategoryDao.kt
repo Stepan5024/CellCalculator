@@ -42,12 +42,15 @@ interface TypeCategoryDao {
 
     @Transaction
     @Query("SELECT  Client.ClientName, Estimate.Count, Estimate._idTypeCategory, TypeCategory._idTypeOfWork, TypeCategory.Price, TypeCategory.CategoryName FROM Client, Estimate, TypeCategory where Estimate._idClient = :clientId")
-    suspend fun getClientAndEstimate(clientId:Int): List<ClientAndEstimate>
+    suspend fun getClientAndEstimate(clientId: Int): List<ClientAndEstimate>
 
 
     @Transaction
     @Query("SELECT Client.ClientName, Estimate.Count, Estimate._idTypeCategory, TypeCategory._idTypeOfWork, TypeCategory.Price, TypeCategory.CategoryName FROM Estimate INNER JOIN Client ON Estimate._idClient = Client._id INNER JOIN  TypeCategory ON Estimate._idTypeCategory =  TypeCategory._id where Estimate._idClient = :clientId  AND TypeCategory._idTypeOfWork = :typeCategoryId")
-    fun getUnionClientAndEstimateAndTypeCategory2(clientId:Int, typeCategoryId: Int): List<ClientAndEstimate>
+    fun getUnionClientAndEstimateAndTypeCategory2(
+        clientId: Int,
+        typeCategoryId: Int
+    ): List<ClientAndEstimate>
 
 
     @Insert
@@ -57,9 +60,20 @@ interface TypeCategoryDao {
     fun deleteUser(user: Client?)
 
     @Transaction
-    @Query("DELETE FROM Estimate where _idClient = :clientId")
-    fun deleteStrokesEstimateByClient(clientId:Int)
+    @Query("SELECT Client.ClientName, Estimate.Count, Estimate._idTypeCategory, TypeCategory._idTypeOfWork, TypeCategory.Price, TypeCategory.CategoryName FROM Estimate INNER JOIN Client ON Estimate._idClient = Client._id INNER JOIN  TypeCategory ON Estimate._idTypeCategory =  TypeCategory._id where Estimate._idClient = :clientId")
+    fun selectStrokesEstimateByClient(clientId: Int): List<ClientAndEstimate>
 
+    @Transaction
+    @Query("DELETE FROM Estimate where _idClient = :clientId")
+    fun deleteStrokesEstimateByClient(clientId: Int)
+
+    @Transaction
+    @Query("UPDATE Estimate SET Count = :newCount  where _idClient = :clientId AND _idTypeCategory = :idTypeCategory")
+    suspend fun updateCountStrokesEstimateByClient(
+        clientId: Int,
+        idTypeCategory: Int,
+        newCount: Int
+    )
 
     @Update
     fun updateUser(user: Client?)
@@ -70,13 +84,13 @@ interface TypeCategoryDao {
 
     @Transaction
     @Query("DELETE FROM Estimate where _id = :Id")
-    fun deleteEstimateById(Id:Int)
+    fun deleteEstimateById(Id: Int)
 
     @Transaction
     @Query("DELETE FROM Estimate where _idClient = :Id")
-    fun deleteEstimateByClientId(Id:Int)
+    fun deleteEstimateByClientId(Id: Int)
 
     @Transaction
     @Query("DELETE FROM Client where _id = :Id")
-    fun deleteClientById(Id:Int)
+    fun deleteClientById(Id: Int)
 }
