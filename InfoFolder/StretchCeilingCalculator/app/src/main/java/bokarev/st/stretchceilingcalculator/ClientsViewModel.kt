@@ -1,43 +1,60 @@
 package bokarev.st.stretchceilingcalculator
 
+
+import android.annotation.SuppressLint
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import bokarev.st.stretchceilingcalculator.entities.Client
+import bokarev.st.stretchceilingcalculator.entities.Estimate
+import java.text.SimpleDateFormat
+import java.util.*
 
-class ClientsViewModel(app: Application): AndroidViewModel(app) {
-    var allUsers : MutableLiveData<List<Client>> = MutableLiveData()
+class ClientsViewModel(app: Application) : AndroidViewModel(app) {
+    private var allUsers: MutableLiveData<List<Client>> = MutableLiveData()
 
-    init{
+    init {
+        //lifecycleScope.launch {
         getAllUsers()
+        //}
     }
 
     fun getAllUsersObservers(): MutableLiveData<List<Client>> {
         return allUsers
     }
 
-    private fun getAllUsers() {
+     fun getAllUsers() {
         val userDao = CategoriesDataBase.getInstance((getApplication())).categoriesDao
         val list = userDao.getAllUserInfo()
 
         allUsers.postValue(list)
     }
+    suspend fun getAllUsersForStepan(name: String, date:String): Client {
+        val userDao = CategoriesDataBase.getInstance((getApplication())).categoriesDao
+        return userDao.getClient(name, date)
 
-    fun insertUserInfo(entity: Client){
+
+    }
+    @SuppressLint("SimpleDateFormat")
+    fun insertUserInfo(entity: Client) {
         val userDao = CategoriesDataBase.getInstance(getApplication()).categoriesDao
         userDao.insertUser(entity)
+
+
         getAllUsers()
     }
 
-    fun updateUserInfo(entity: Client){
+    fun updateUserInfo(entity: Client) {
         val userDao = CategoriesDataBase.getInstance(getApplication()).categoriesDao
-        userDao?.updateUser(entity)
+        userDao.updateUser(entity)
         getAllUsers()
     }
 
-    fun deleteUserInfo(entity: Client){
+    fun deleteUserInfo(entity: Client) {
         val userDao = CategoriesDataBase.getInstance(getApplication()).categoriesDao
-        userDao?.deleteUser(entity)
+        userDao.deleteStrokesEstimateByClient(entity._id)
+        userDao.deleteUser(entity)
         getAllUsers()
     }
 }

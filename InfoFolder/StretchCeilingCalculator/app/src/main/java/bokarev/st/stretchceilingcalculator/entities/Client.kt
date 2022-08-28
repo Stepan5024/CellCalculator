@@ -2,6 +2,7 @@ package bokarev.st.stretchceilingcalculator.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import java.io.Serializable
 
 @Entity
 data class Client(
@@ -16,4 +17,4 @@ data class Client(
     val IsArchive: Boolean,
     val DateOfCreation: String,
     val DateOfEditing: String,
-    )
+    ) : Serializable

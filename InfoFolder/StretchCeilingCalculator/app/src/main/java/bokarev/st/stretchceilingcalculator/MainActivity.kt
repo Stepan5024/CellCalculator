@@ -20,13 +20,23 @@ class MainActivity : AppCompatActivity() {
         val btnGoToClients: Button = findViewById(R.id.btnGoToClients)
         val btnGoToPrices: Button = findViewById(R.id.btnGoToPrices)
 
+        try {
+            val client = getClientFromPreviousActivity()
+            val previousActivity = intent.getStringExtra("PreviousActivity")
+            Log.d(
+                "mytag",
+                "previousActivity = $previousActivity nameOfClient = ${client.ClientName}"
+            )
+        } catch (exp: RuntimeException) {
+
+        }
+
         btnGoToClients.setOnClickListener {
 
             val intent = Intent(this, Clients::class.java).also {
-                it.putExtra("KEY1", "value1")
-                it.putExtra("KEY2", "value1")
-                it.putExtra("KEY3", "value1")
-                //it.putExtra("School 6", School("School 6", false))
+                it.putExtra("ClientEntity", setNullClient())
+                it.putExtra("PreviousActivity", "StartActivity")
+
             }
             startActivity(intent)
 
@@ -34,10 +44,8 @@ class MainActivity : AppCompatActivity() {
 
         btnGoToPrices.setOnClickListener {
             val intent = Intent(this, Calculation::class.java).also {
-                it.putExtra("KEY1", "value1")
-                it.putExtra("KEY2", "value1")
-                it.putExtra("KEY3", "value1")
-                //it.putExtra("School 6", School("School 6", false))
+                it.putExtra("ClientEntity", setNullClient())
+                it.putExtra("PreviousActivity", "StartActivity")
             }
             startActivity(intent)
 
@@ -45,10 +53,12 @@ class MainActivity : AppCompatActivity() {
 
         val dao = CategoriesDataBase.getInstance(this).categoriesDao
 
+
         val typeOfWork = listOf(
-            TypeOfWork(1, "Освещение"),
-            TypeOfWork(2, "Потолки"),
-            TypeOfWork(3, "Другой вид работы")
+            TypeOfWork(1, "Система"),
+            TypeOfWork(2, "Освещение"),
+            TypeOfWork(3, "Доп. работы"),
+            TypeOfWork(4, "Материалы")
         )
 
         val typeCategory = listOf(
@@ -121,16 +131,23 @@ class MainActivity : AppCompatActivity() {
         )
 
 
+
         lifecycleScope.launch {
             typeOfWork.forEach { dao.insertTypeOfWork(it) }
             typeCategory.forEach { dao.insertTypeCategory(it) }
-            estimate.forEach { dao.insertEstimate(it) }
+            //dao.deleteClientById(12)
+            //dao.deleteClientById(13)
+            //dao.deleteClientById(14)
+            dao.deleteEstimateByClientId(14)
+            //for (i in 0..12)  dao.deleteEstimate(estimate.get(i)) // удаляет по полю _id
+            //for (i in 5..11)  dao.deleteEstimate(estimate.get(i)) // ервый параметр НЕ включается в цикл. А последний параметр должен быть на 1 меньше чем _id в БД
+            //estimate.forEach { dao.insertEstimate(it) }
             //clients.forEach { dao.insertClient(it) }
 
             val typeOfWorkWithTypeCategory = dao.getTypeOfWorkWithTypeCategory(2)
             val typeCategoryInEstimate = dao.getTypeCategoryInEstimate(2)
             val clientsWithEstimate = dao.getClientWithEstimate(2)
-            //val unionEstimateWithClient = dao.getUnionEstimateWithClient(2)
+
             val getClientAndEstimate = dao.getUnionClientAndEstimateAndTypeCategory2(1, 1)
 
             val someList = arrayOf(getClientAndEstimate)
@@ -141,5 +158,50 @@ class MainActivity : AppCompatActivity() {
             }
 
         }
+    }
+
+    fun setNullClient(): Client {
+
+        return Client(
+            0, "", "", "", IsNew = false, IsPurchase = false, IsArchive = false,
+            DateOfCreation = "",
+            DateOfEditing = ""
+        )
+
+    }
+
+    private fun getClientFromPreviousActivity(): Client {
+
+        return intent.getSerializableExtra("ClientEntity") as Client
+    }
+
+    override fun onStart() {
+        super.onStart()
+        Log.i("MainActivity", "onStart() called")
+    }
+
+    override fun onRestart() {
+        super.onRestart()
+        Log.i("MainActivity", "onRestart() called")
+    }
+
+    override fun onResume() {
+        super.onResume()
+        Log.i("MainActivity", "onResume() called")
+    }
+
+    override fun onPause() {
+        super.onPause()
+        Log.i("MainActivity", "onPause() called")
+    }
+
+    override fun onStop() {
+        super.onStop()
+        Log.i("MainActivity", "onStop() called")
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        Log.i("MainActivity", "onDestroy() called")
     }
 }

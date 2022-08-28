@@ -45,14 +45,14 @@
             android:text="550 ₽"
             android:textAlignment="center"
             android:textColor="@color/black"
-            android:textSize="16sp" />
+            android:textSize="20sp" />
 
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_weight="3"
+        android:layout_weight="5"
         android:background="@drawable/stroke_black_line"
         android:orientation="horizontal">
 
@@ -66,7 +66,7 @@
             android:text="0 шт"
             android:textAlignment="center"
             android:textColor="@color/black"
-            android:textSize="16sp" />
+            android:textSize="20sp" />
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
@@ -75,19 +75,21 @@
 
             <ImageView
                 android:id="@+id/btnCounterUp"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
                 android:layout_gravity="center"
                 android:layout_weight="1"
                 android:layout_marginTop="5dp"
+                android:layout_marginEnd="5dp"
                 app:srcCompat="@drawable/ic_btn_up_counter" />
             <ImageView
                 android:id="@+id/btnCounterDown"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
                 android:layout_gravity="center"
                 android:layout_weight="1"
                 android:layout_marginBottom="5dp"
+                android:layout_marginEnd="5dp"
                 app:srcCompat="@drawable/ic_btn_down_counter" />
         </LinearLayout>
 

@@ -27,6 +27,7 @@
         <activity android:name=".Calculation" />
         <activity android:name=".ClientActivity" />
         <activity android:name=".TypeOfWorkActivity" />
+        <activity android:name=".ClientsViewModel" />
     </application>
 
 </manifest>

@@ -10,16 +10,18 @@ import bokarev.st.stretchceilingcalculator.entities.Client
 import bokarev.st.stretchceilingcalculator.entities.relations.ClientAndEstimate
 
 
-class TypeOfWorkRecyclerViewAdapter(val listener: RowClickListener): RecyclerView.Adapter<TypeOfWorkRecyclerViewAdapter.MyViewHolder>() {
+class TypeOfWorkRecyclerViewAdapter(val listener: RowClickListener) :
+    RecyclerView.Adapter<TypeOfWorkRecyclerViewAdapter.MyViewHolder>() {
 
-    var items  = ArrayList<ClientAndEstimate>()
+    var items = ArrayList<ClientAndEstimate>()
 
     fun setListData(data: ArrayList<ClientAndEstimate>) {
         this.items = data
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyViewHolder {
-       val inflater = LayoutInflater.from(parent.context).inflate(R.layout.type_of_work_recyclerview_row, parent, false)
+        val inflater = LayoutInflater.from(parent.context)
+            .inflate(R.layout.type_of_work_recyclerview_row, parent, false)
         return MyViewHolder(inflater, listener)
     }
 
@@ -36,11 +38,13 @@ class TypeOfWorkRecyclerViewAdapter(val listener: RowClickListener): RecyclerVie
 
     }
 
-    class MyViewHolder(view: View, val listener: RowClickListener): RecyclerView.ViewHolder(view) {
+    class MyViewHolder(view: View, val listener: RowClickListener) : RecyclerView.ViewHolder(view) {
 
         val nameOfWork = view.findViewById<TextView>(R.id.NameOfWork)
         val price = view.findViewById<TextView>(R.id.Price)
         val countOfElement = view.findViewById<TextView>(R.id.CountOfElement)
+        val btnUpCounter = view.findViewById<ImageView>(R.id.btnCounterUp)
+        val btnDownCounter = view.findViewById<ImageView>(R.id.btnCounterDown)
 
         fun bind(data: ClientAndEstimate) {
             nameOfWork.text = data.CategoryName
@@ -49,14 +53,43 @@ class TypeOfWorkRecyclerViewAdapter(val listener: RowClickListener): RecyclerVie
             price.text = priseStr
             countOfElement.text = data.Count.toString()
 
-          //  deleteUserID.setOnClickListener {
-                //listener.onDeleteUserClickListener(data)
-            //}
+
+            btnUpCounter.setOnClickListener {
+                val pred = countOfElement.text.toString().split(" ")
+
+                    countOfElement.text = "${pred.get(0).toInt() + 1} шт"
+
+                    listener.onChangeClick(
+                        TypeOfWorkDataClass(
+                            pred.get(0).toInt() + 1,
+                            price.text.toString().split(" ").get(0).toInt(),
+                            nameOfWork.text.toString()
+                        ), "up"
+                    )
+
+            }
+            btnDownCounter.setOnClickListener {
+                val pred = countOfElement.text.toString().split(" ")
+
+                if (pred.get(0).toInt() - 1 < 0) countOfElement.text = "0 шт"
+                else {
+                    countOfElement.text = "${pred.get(0).toInt() - 1} шт"
+
+                    listener.onChangeClick(
+                        TypeOfWorkDataClass(
+                            pred.get(0).toInt() - 1,
+                            price.text.toString().split(" ").get(0).toInt(),
+                            nameOfWork.text.toString()
+                        ), "down"
+                    )
+                }
+            }
         }
     }
 
-    interface RowClickListener{
+    interface RowClickListener {
         fun onDeleteUserClickListener(user: ClientAndEstimate)
+        fun onChangeClick(data: TypeOfWorkDataClass, typeChange: String)
         fun onItemClickListener(user: ClientAndEstimate)
     }
 }

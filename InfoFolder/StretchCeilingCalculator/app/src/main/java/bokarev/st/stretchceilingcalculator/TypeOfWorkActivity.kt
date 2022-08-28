@@ -1,12 +1,12 @@
 package bokarev.st.stretchceilingcalculator
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.widget.ImageView
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat.startActivity
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -19,28 +19,33 @@ import kotlinx.coroutines.launch
 class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter.RowClickListener {
 
 
-    val dao = CategoriesDataBase.getInstance(this).categoriesDao
+    private val dao = CategoriesDataBase.getInstance(this).categoriesDao
 
-    lateinit var typeOfWorkRecyclerViewAdapter: TypeOfWorkRecyclerViewAdapter
+    private lateinit var typeOfWorkRecyclerViewAdapter: TypeOfWorkRecyclerViewAdapter
 
+    @SuppressLint("NotifyDataSetChanged")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.type_of_work_activity)
+        var idTypeOfWork = 0
+
         try {
-            val name = intent.getStringExtra("KEY1")
-            //val school6 = intent.getSerializableExtra("School 6") as School
-            //val age = intent.getIntExtra("KEY2", 0)
-            //Log.d("mytag", "school 6 = ${school6.title}")
+            val previousActivity = intent.getStringExtra("PreviousActivity").toString()
+            val client = getClientFromPreviousActivity()
+            idTypeOfWork = intent.getIntExtra("idTypeOfWork", 0)
+
+            Log.d(
+                "mytag",
+                "previousActivity = $previousActivity nameOfClient = ${client.ClientName} idClient = ${client._id}"
+            )
         } catch (exp: RuntimeException) {
 
         }
         val btnReturnToHome: ImageView = findViewById(R.id.btnReturnToHome)
         btnReturnToHome.setOnClickListener {
             val intent = Intent(this, Calculation::class.java).also {
-                it.putExtra("KEY1", "value1")
-                it.putExtra("KEY2", "value1")
-                it.putExtra("KEY3", "value1")
-                //it.putExtra("School 6", School("School 6", false))
+                it.putExtra("ClientEntity", getClientFromPreviousActivity())
+                it.putExtra("PreviousActivity", "TypeOfWorkActivity")
             }
             startActivity(intent)
         }
@@ -59,7 +64,10 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter.Ro
         //Without ViewModelFactory
         lifecycleScope.launch {
 
-            val getClientAndEstimate = dao.getUnionClientAndEstimateAndTypeCategory2(1, 1)
+            val getClientAndEstimate = dao.getUnionClientAndEstimateAndTypeCategory2(
+                getClientFromPreviousActivity()._id,
+                idTypeOfWork
+            )
 
             typeOfWorkRecyclerViewAdapter.setListData(ArrayList(getClientAndEstimate))
             typeOfWorkRecyclerViewAdapter.notifyDataSetChanged()
@@ -72,17 +80,42 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter.Ro
 
     // Kotlin
     override fun onBackPressed() {
-        val intent = Intent(this, MainActivity::class.java).also {
-            it.putExtra("KEY1", "value1")
-            it.putExtra("KEY2", "value1")
-            it.putExtra("KEY3", "value1")
-            //it.putExtra("School 6", School("School 6", false))
+        val intent = Intent(this, Calculation::class.java).also {
+            it.putExtra("ClientEntity", getClientFromPreviousActivity())
+            it.putExtra("PreviousActivity", "TypeOfWorkActivity")
         }
         startActivity(intent)
     }
 
+    fun setNullClient(): Client {
+
+        return Client(
+            0, "", "", "", IsNew = false, IsPurchase = false, IsArchive = false,
+            DateOfCreation = "",
+            DateOfEditing = ""
+        )
+
+    }
+
+    private fun getClientFromPreviousActivity(): Client {
+
+        return intent.getSerializableExtra("ClientEntity") as Client
+    }
+
     override fun onDeleteUserClickListener(user: ClientAndEstimate) {
 
+    }
+
+    override fun onChangeClick(data: TypeOfWorkDataClass, typeChange: String) {
+        val tv = findViewById<TextView>(R.id.textView2)
+        val oldSum = tv.text.split(" ").get(1).toInt()
+        if (typeChange == "down") {
+            val newSum = oldSum - data.Price
+            tv.text = "сумма: ${newSum} ₽"
+        } else if (typeChange == "up"){
+            val newSum = oldSum + data.Price
+            tv.text = "сумма: ${newSum} ₽"
+        }
     }
 
     override fun onItemClickListener(user: ClientAndEstimate) {

@@ -3,6 +3,7 @@ package bokarev.st.stretchceilingcalculator
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.ImageView
 import android.widget.RelativeLayout
 import android.widget.Toast
@@ -18,18 +19,19 @@ import kotlinx.coroutines.launch
 
 class Clients : AppCompatActivity(), ClientsRecyclerViewAdapter.RowClickListener {
 
-    lateinit var clientsRecyclerViewAdapter: ClientsRecyclerViewAdapter
-    lateinit var viewModel: ClientsViewModel
+    private lateinit var clientsRecyclerViewAdapter: ClientsRecyclerViewAdapter
+    private lateinit var viewModel: ClientsViewModel
+    private var flagOfEditing: Boolean = false
 
     @SuppressLint("NotifyDataSetChanged")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.clients)
         try {
-            val name = intent.getStringExtra("KEY1")
-            //val school6 = intent.getSerializableExtra("School 6") as School
-            //val age = intent.getIntExtra("KEY2", 0)
-            //Log.d("mytag", "school 6 = ${school6.title}")
+            val client = getClientFromPreviousActivity()
+            val previousActivity = intent.getStringExtra("PreviousActivity")
+            Log.d("mytag", "previousActivity = $previousActivity nameOfClient = ${client.ClientName}")
+
         } catch (exp: RuntimeException) {
 
         }
@@ -37,31 +39,33 @@ class Clients : AppCompatActivity(), ClientsRecyclerViewAdapter.RowClickListener
         val btnReturnToHome: ImageView = findViewById(R.id.btnReturnToHome)
         btnReturnToHome.setOnClickListener {
             val intent = Intent(this, MainActivity::class.java).also {
-                it.putExtra("KEY1", "value1")
-                it.putExtra("KEY2", "value1")
-                it.putExtra("KEY3", "value1")
-                //it.putExtra("School 6", School("School 6", false))
+                it.putExtra("ClientEntity", setNullClient())
+                it.putExtra("PreviousActivity", "ClientsActivity")
+
             }
             startActivity(intent)
         }
 
-        val btnCorrectListOfClients: ImageView= findViewById(R.id.btnCorrectListOfClients)
-        btnCorrectListOfClients.setOnClickListener{
-            val toast = Toast.makeText(applicationContext, "Correct btn pressed", Toast.LENGTH_SHORT)
+        val btnCorrectListOfClients: ImageView = findViewById(R.id.btnCorrectListOfClients)
+        btnCorrectListOfClients.setOnClickListener {
+            val toast = Toast.makeText(
+                applicationContext,
+                "Теперь нажмите на любую запись для редактирования",
+                Toast.LENGTH_LONG
+            )
             toast.show()
-
+            flagOfEditing = !flagOfEditing
         }
         val addNewClient: RelativeLayout = findViewById(R.id.addNewClient)
-        addNewClient.setOnClickListener{
+        addNewClient.setOnClickListener {
 
             /*val toast = Toast.makeText(applicationContext, "Relative Layout pressed", Toast.LENGTH_SHORT)
             toast.show()*/
 
             val intent = Intent(this, ClientActivity::class.java).also {
-                it.putExtra("KEY1", "value1")
-                it.putExtra("KEY2", "value1")
-                it.putExtra("KEY3", "value1")
-                //it.putExtra("School 6", School("School 6", false))
+                it.putExtra("ClientEntity", setNullClient())
+                it.putExtra("PreviousActivity", "Clients")
+
             }
             startActivity(intent)
         }
@@ -71,7 +75,8 @@ class Clients : AppCompatActivity(), ClientsRecyclerViewAdapter.RowClickListener
             layoutManager = LinearLayoutManager(this@Clients)
             clientsRecyclerViewAdapter = ClientsRecyclerViewAdapter(this@Clients)
             adapter = clientsRecyclerViewAdapter
-            val divider = DividerItemDecoration(applicationContext, StaggeredGridLayoutManager.VERTICAL)
+            val divider =
+                DividerItemDecoration(applicationContext, StaggeredGridLayoutManager.VERTICAL)
             addItemDecoration(divider)
         }
 
@@ -88,25 +93,47 @@ class Clients : AppCompatActivity(), ClientsRecyclerViewAdapter.RowClickListener
         }
 
 
-
     }
 
     // Kotlin
     override fun onBackPressed() {
         val intent = Intent(this, MainActivity::class.java).also {
-            it.putExtra("KEY1", "value1")
-            it.putExtra("KEY2", "value1")
-            it.putExtra("KEY3", "value1")
-            //it.putExtra("School 6", School("School 6", false))
+            it.putExtra("ClientEntity", setNullClient())
+            it.putExtra("PreviousActivity", "Clients")
         }
         startActivity(intent)
     }
+
     override fun onDeleteUserClickListener(user: Client) {
         viewModel.deleteUserInfo(user)
     }
 
     override fun onItemClickListener(user: Client) {
+        //обработка нажатия в recyclerView
 
+
+        if (flagOfEditing) {
+            // открываем активность Клиента и заполняем поля
+            val intent = Intent(this, ClientActivity::class.java).also {
+
+                it.putExtra("PreviousActivity", "Clients")
+                it.putExtra("ClientEntity", user)
+
+            }
+            startActivity(intent)
+        } else {
+            // открываем смету выбранного клиента и заполненные данные клиента
+
+            val toast = Toast.makeText(applicationContext, "имя клиента ${user.ClientName}", Toast.LENGTH_SHORT)
+            toast.show()
+
+            val intent = Intent(this, Calculation::class.java).also {
+
+                it.putExtra("PreviousActivity", "Clients")
+                it.putExtra("ClientEntity", user)
+            }
+            startActivity(intent)
+        }
 
         /*nameInput.setText(user.name)
         emailInput.setText(user.email)
@@ -114,5 +141,19 @@ class Clients : AppCompatActivity(), ClientsRecyclerViewAdapter.RowClickListener
         nameInput.setTag(nameInput.id, user.id)
         saveButton.setText("Update")*/
 
+    }
+    private fun setNullClient(): Client {
+
+        return Client(
+            0, "", "", "", IsNew = false, IsPurchase = false, IsArchive = false,
+            DateOfCreation = "",
+            DateOfEditing = ""
+        )
+
+    }
+
+    private fun getClientFromPreviousActivity(): Client {
+
+        return intent.getSerializableExtra("ClientEntity") as Client
     }
 }
