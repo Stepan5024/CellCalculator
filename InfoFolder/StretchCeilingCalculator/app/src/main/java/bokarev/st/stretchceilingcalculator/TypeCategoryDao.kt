@@ -1,13 +1,8 @@
 package bokarev.st.stretchceilingcalculator
 
 import androidx.room.*
-import bokarev.st.stretchceilingcalculator.entities.Estimate
-import bokarev.st.stretchceilingcalculator.entities.Client
-import bokarev.st.stretchceilingcalculator.entities.TypeCategory
-import bokarev.st.stretchceilingcalculator.entities.TypeOfWork
-import bokarev.st.stretchceilingcalculator.entities.relations.ClientWithEstimate
-import bokarev.st.stretchceilingcalculator.entities.relations.TypeCategoryInEstimate
-import bokarev.st.stretchceilingcalculator.entities.relations.TypeOfWorkWithTypeCategory
+import bokarev.st.stretchceilingcalculator.entities.*
+import bokarev.st.stretchceilingcalculator.entities.relations.*
 
 @Dao
 interface TypeCategoryDao {
@@ -37,8 +32,22 @@ interface TypeCategoryDao {
     @Query("SELECT * FROM Client WHERE _id = :clientId")
     suspend fun getClientWithEstimate(clientId: Int): List<ClientWithEstimate>
 
+
+    @Transaction
     @Query("SELECT * FROM Client ORDER BY DateOfEditing DESC")
     fun getAllUserInfo(): List<Client>?
+
+    @Transaction
+    @Query("SELECT  Client.ClientName, Estimate.Count, Estimate._idTypeCategory, TypeCategory._idTypeOfWork, TypeCategory.Price, TypeCategory.CategoryName FROM Client, Estimate, TypeCategory where Estimate._idClient = :clientId")
+    suspend fun getClientAndEstimate(clientId:Int): List<ClientAndEstimate>
+
+  /*  @Transaction
+    @Query("SELECT Client.ClientName, Estimate.Count, Estimate._idTypeCategory, TypeCategory._idTypeOfWork, TypeCategory.Price, TypeCategory.CategoryName, TypeOfWork.TypeOfWorkName FROM Estimate INNER JOIN Client ON Estimate._idClient = Client._id INNER JOIN  TypeCategory ON Estimate._idTypeCategory =  TypeCategory._id INNER JOIN TypeOfWork ON TypeCategory._idTypeOfWork = TypeOfWork._id where Estimate._idClient = :clientId")
+    suspend fun getUnionClientAndEstimateAndTypeCategory(clientId:Int): List<ClientAndEstimate>
+*/
+    @Transaction
+    @Query("SELECT Client.ClientName, Estimate.Count, Estimate._idTypeCategory, TypeCategory._idTypeOfWork, TypeCategory.Price, TypeCategory.CategoryName FROM Estimate INNER JOIN Client ON Estimate._idClient = Client._id INNER JOIN  TypeCategory ON Estimate._idTypeCategory =  TypeCategory._id where Estimate._idClient = :clientId  AND TypeCategory._idTypeOfWork = :typeCategoryId")
+    suspend fun getUnionClientAndEstimateAndTypeCategory2(clientId:Int, typeCategoryId: Int): List<ClientAndEstimate>
 
 
     @Insert
@@ -49,4 +58,6 @@ interface TypeCategoryDao {
 
     @Update
     fun updateUser(user: Client?)
+
+
 }

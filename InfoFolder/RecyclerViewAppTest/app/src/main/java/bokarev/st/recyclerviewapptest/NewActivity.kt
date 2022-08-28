@@ -20,11 +20,12 @@ class NewActivity : AppCompatActivity() {
             val school6 = intent.getSerializableExtra("School 6") as School
             //val age = intent.getIntExtra("KEY2", 0)
             Log.d("mytag", "school 6 = ${school6.title}")
-        }catch (exp: RuntimeException) {
+        } catch (exp: RuntimeException) {
 
         }
 
     }
+
     // Kotlin
     override fun onBackPressed() {
         val intent = Intent(this, MainActivity::class.java).also {

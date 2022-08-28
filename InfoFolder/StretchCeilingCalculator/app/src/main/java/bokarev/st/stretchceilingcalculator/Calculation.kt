@@ -53,18 +53,39 @@ class Calculation : AppCompatActivity() {
         }
         val btnGoToLight: Button = findViewById(R.id.btnGoToLight)
         btnGoToLight.setOnClickListener{
-            val toast = Toast.makeText(applicationContext, "btnGoToLight открываем активность тип работы с Освещением", Toast.LENGTH_SHORT)
-            toast.show()
+            //val toast = Toast.makeText(applicationContext, "btnGoToLight открываем активность тип работы с Освещением", Toast.LENGTH_SHORT)
+            //toast.show()
+            val intent = Intent(this, TypeOfWorkActivity::class.java).also {
+                it.putExtra("KEY1", "value1")
+                it.putExtra("KEY2", "value1")
+                it.putExtra("KEY3", "value1")
+                //it.putExtra("School 6", School("School 6", false))
+            }
+            startActivity(intent)
         }
         val btnGoToBonusWork: Button = findViewById(R.id.btnGoToBonusWork)
         btnGoToBonusWork.setOnClickListener{
-            val toast = Toast.makeText(applicationContext, "btnGoToBonusWork открываем активность тип работы с Доп. работы", Toast.LENGTH_SHORT)
-            toast.show()
+            /*val toast = Toast.makeText(applicationContext, "btnGoToBonusWork открываем активность тип работы с Доп. работы", Toast.LENGTH_SHORT)
+            toast.show()*/
+            val intent = Intent(this, TypeOfWorkActivity::class.java).also {
+                it.putExtra("KEY1", "value1")
+                it.putExtra("KEY2", "value1")
+                it.putExtra("KEY3", "value1")
+                //it.putExtra("School 6", School("School 6", false))
+            }
+            startActivity(intent)
         }
         val btnGoToMaterials: Button = findViewById(R.id.btnGoToMaterials)
         btnGoToMaterials.setOnClickListener{
-            val toast = Toast.makeText(applicationContext, "btnGoToMaterials открываем активность тип работы Материалы", Toast.LENGTH_SHORT)
-            toast.show()
+           /* val toast = Toast.makeText(applicationContext, "btnGoToMaterials открываем активность тип работы Материалы", Toast.LENGTH_SHORT)
+            toast.show()*/
+            val intent = Intent(this, TypeOfWorkActivity::class.java).also {
+                it.putExtra("KEY1", "value1")
+                it.putExtra("KEY2", "value1")
+                it.putExtra("KEY3", "value1")
+                //it.putExtra("School 6", School("School 6", false))
+            }
+            startActivity(intent)
         }
 
     }

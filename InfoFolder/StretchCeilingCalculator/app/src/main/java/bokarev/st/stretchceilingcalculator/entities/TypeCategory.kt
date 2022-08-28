@@ -10,6 +10,6 @@ data class TypeCategory(
     val _id: Int,
     val CategoryName: String,
     val Price: Int,
-    val _idTypeOfWork: Int
+    val _idTypeOfWork: Int,
 
 )

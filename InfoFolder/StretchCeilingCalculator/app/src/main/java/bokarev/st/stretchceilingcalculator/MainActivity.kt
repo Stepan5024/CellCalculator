@@ -122,17 +122,18 @@ class MainActivity : AppCompatActivity() {
 
 
         lifecycleScope.launch {
-            //typeOfWork.forEach { dao.insertTypeOfWork(it) }
-            //typeCategory.forEach { dao.insertTypeCategory(it) }
-            //estimate.forEach { dao.insertEstimate(it) }
+            typeOfWork.forEach { dao.insertTypeOfWork(it) }
+            typeCategory.forEach { dao.insertTypeCategory(it) }
+            estimate.forEach { dao.insertEstimate(it) }
             //clients.forEach { dao.insertClient(it) }
 
             val typeOfWorkWithTypeCategory = dao.getTypeOfWorkWithTypeCategory(2)
             val typeCategoryInEstimate = dao.getTypeCategoryInEstimate(2)
             val clientsWithEstimate = dao.getClientWithEstimate(2)
+            //val unionEstimateWithClient = dao.getUnionEstimateWithClient(2)
+            val getClientAndEstimate = dao.getUnionClientAndEstimateAndTypeCategory2(1, 1)
 
-
-            val someList = arrayOf(clientsWithEstimate)
+            val someList = arrayOf(getClientAndEstimate)
             for (i in someList) {
 
                 Log.d("mytag", "listDB = ${i.joinToString(" || ")}")

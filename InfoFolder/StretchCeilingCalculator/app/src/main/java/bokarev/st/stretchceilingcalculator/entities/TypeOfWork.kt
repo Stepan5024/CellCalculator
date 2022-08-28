@@ -8,7 +8,7 @@ data class TypeOfWork(
 
     @PrimaryKey(autoGenerate = true)
     val _id: Int,
-    val typeOfWorkName: String
+    val TypeOfWorkName: String,
 
 
 )

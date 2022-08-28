@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">StretchCeilingCalculator</string>
+    <string name="d_100"><![CDATA[Светильник встроенный D < 100 мм]]></string>
 </resources>
