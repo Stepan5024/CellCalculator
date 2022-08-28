@@ -47,7 +47,7 @@ interface TypeCategoryDao {
 */
     @Transaction
     @Query("SELECT Client.ClientName, Estimate.Count, Estimate._idTypeCategory, TypeCategory._idTypeOfWork, TypeCategory.Price, TypeCategory.CategoryName FROM Estimate INNER JOIN Client ON Estimate._idClient = Client._id INNER JOIN  TypeCategory ON Estimate._idTypeCategory =  TypeCategory._id where Estimate._idClient = :clientId  AND TypeCategory._idTypeOfWork = :typeCategoryId")
-    suspend fun getUnionClientAndEstimateAndTypeCategory2(clientId:Int, typeCategoryId: Int): List<ClientAndEstimate>
+    fun getUnionClientAndEstimateAndTypeCategory2(clientId:Int, typeCategoryId: Int): List<ClientAndEstimate>
 
 
     @Insert
@@ -58,6 +58,7 @@ interface TypeCategoryDao {
 
     @Update
     fun updateUser(user: Client?)
+
 
 
 }

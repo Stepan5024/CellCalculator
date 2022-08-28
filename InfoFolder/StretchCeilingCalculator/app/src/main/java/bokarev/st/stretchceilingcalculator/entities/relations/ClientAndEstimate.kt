@@ -1,4 +1,4 @@
-package bokarev.st.stretchceilingcalculator.entities
+package bokarev.st.stretchceilingcalculator.entities.relations
 
 
 

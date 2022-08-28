@@ -48,8 +48,17 @@ class Calculation : AppCompatActivity() {
 
         val btnGoToSystem: Button = findViewById(R.id.btnGoToSystem)
         btnGoToSystem.setOnClickListener{
-            val toast = Toast.makeText(applicationContext, "btnGoToSystem открываем активность тип работы с Системой", Toast.LENGTH_SHORT)
+            /*val toast = Toast.makeText(applicationContext, "btnGoToSystem открываем активность тип работы с Системой", Toast.LENGTH_SHORT)
             toast.show()
+            
+             */
+            val intent = Intent(this, TypeOfWorkActivity::class.java).also {
+                it.putExtra("KEY1", "value1")
+                it.putExtra("KEY2", "value1")
+                it.putExtra("KEY3", "value1")
+                //it.putExtra("School 6", School("School 6", false))
+            }
+            startActivity(intent)
         }
         val btnGoToLight: Button = findViewById(R.id.btnGoToLight)
         btnGoToLight.setOnClickListener{
