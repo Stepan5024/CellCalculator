@@ -18,6 +18,10 @@ class MainActivity : AppCompatActivity() {
         for ((index, element) in list.withIndex()){
             println("$index: $element")
         }
+        list.set(0, "751")
+        for ((index, element) in list.withIndex()){
+            println("$index: $element")
+        }
 
         var myLovelyCats = listOf( // Переменная Мои ненаглядные коты
             // Это неизменяемый список!!!

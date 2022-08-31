@@ -112,6 +112,8 @@ class ClientActivity : AppCompatActivity() {
 
                     val estimate = listOf(
 
+                        // здесь добавить чтение БД таблицы ategoryName и отталкиваясь от кол-ва делать цикл,
+                        // куда записывать все нулевые значения
                         Estimate(0, num, 1, 0, currentDate, currentDate),
                         Estimate(0, idUser._id, 2, 0, currentDate, currentDate),
                         Estimate(0, idUser._id, 3, 0, currentDate, currentDate),

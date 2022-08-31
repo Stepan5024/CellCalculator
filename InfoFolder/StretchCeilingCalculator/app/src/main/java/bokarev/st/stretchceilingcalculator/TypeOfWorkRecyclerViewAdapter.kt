@@ -7,20 +7,21 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import bokarev.st.stretchceilingcalculator.entities.Client
 import bokarev.st.stretchceilingcalculator.entities.relations.ClientAndEstimate
 
 
-class TypeOfWorkRecyclerViewAdapter(val listener: RowClickListener) :
+class TypeOfWorkRecyclerViewAdapter(private val listener: RowClickListener) :
     RecyclerView.Adapter<TypeOfWorkRecyclerViewAdapter.MyViewHolder>() {
 
-    var items = ArrayList<ClientAndEstimate>()
+    private var items : MutableList<ClientAndEstimate> = arrayListOf()
+    //= ArrayList<ClientAndEstimate>()
+    //val mutableList : MutableList<ClientAndEstimate> = arrayListOf()
 
-    fun setListData(data: ArrayList<ClientAndEstimate>) {
+    fun setListData(data: MutableList<ClientAndEstimate>) {
         this.items = data
     }
 
-    fun getListData(): ArrayList<ClientAndEstimate>{
+    fun getListData(): MutableList<ClientAndEstimate>{
         return items
     }
 
@@ -43,27 +44,30 @@ class TypeOfWorkRecyclerViewAdapter(val listener: RowClickListener) :
 
     }
 
-    class MyViewHolder(view: View, val listener: RowClickListener) : RecyclerView.ViewHolder(view) {
+    class MyViewHolder(view: View, private val listener: RowClickListener) : RecyclerView.ViewHolder(view) {
 
-        val nameOfWork = view.findViewById<TextView>(R.id.NameOfWork)
-        val price = view.findViewById<TextView>(R.id.Price)
-        val countOfElement = view.findViewById<TextView>(R.id.CountOfElement)
-        val btnUpCounter = view.findViewById<ImageView>(R.id.btnCounterUp)
-        val btnDownCounter = view.findViewById<ImageView>(R.id.btnCounterDown)
+        private val nameOfWork = view.findViewById<TextView>(R.id.NameOfWork)!!
+        private val price = view.findViewById<TextView>(R.id.Price)!!
+        private val countOfElement = view.findViewById<TextView>(R.id.CountOfElement)
+        private val btnUpCounter = view.findViewById<ImageView>(R.id.btnCounterUp)!!
+        private val btnDownCounter = view.findViewById<ImageView>(R.id.btnCounterDown)!!
 
         fun bind(data: ClientAndEstimate) {
             nameOfWork.text = data.CategoryName
 
             val priseStr = "${data.Price} ₽"
             price.text = priseStr
-            countOfElement.text = "${data.Count} шт"
+            var string = "${data.Count} шт"
+            countOfElement.text = string
 
 
             btnUpCounter.setOnClickListener {
                 val previousCount = countOfElement.text.toString().split(" ")[0].toInt()
                 Log.d("mytag", "previousCount = $previousCount")
                 if (previousCount >= 0) {
-                    countOfElement.text = "${previousCount + 1} шт"
+
+                    string = "${previousCount + 1} шт"
+                    countOfElement.text = string
 
                     listener.onChangeClick(
                         ClientAndEstimate(

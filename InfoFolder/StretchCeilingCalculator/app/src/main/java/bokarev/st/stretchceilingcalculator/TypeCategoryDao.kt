@@ -50,7 +50,7 @@ interface TypeCategoryDao {
     fun getUnionClientAndEstimateAndTypeCategory2(
         clientId: Int,
         typeCategoryId: Int
-    ): List<ClientAndEstimate>
+    ): MutableList<ClientAndEstimate>
 
 
     @Insert

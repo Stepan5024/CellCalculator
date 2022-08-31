@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.widget.CheckBox
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -14,18 +15,19 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import bokarev.st.stretchceilingcalculator.entities.Client
 import bokarev.st.stretchceilingcalculator.entities.relations.ClientAndEstimate
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
 
+@OptIn(DelicateCoroutinesApi::class)
 class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter.RowClickListener {
+
+    var listDataFull: MutableList<ClientAndEstimate> = arrayListOf()
 
 
     private val dao = CategoriesDataBase.getInstance(this).categoriesDao
 
     private lateinit var typeOfWorkRecyclerViewAdapter: TypeOfWorkRecyclerViewAdapter
 
+    @OptIn(DelicateCoroutinesApi::class)
     @SuppressLint("NotifyDataSetChanged")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,7 +38,6 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter.Ro
             val previousActivity = intent.getStringExtra("PreviousActivity").toString()
             val client = getClientFromPreviousActivity()
             idTypeOfWork = intent.getIntExtra("idTypeOfWork", 0)
-
 
             if (previousActivity == "Calculation") {
                 var sum = 0
@@ -64,8 +65,8 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter.Ro
                     //set view
 
                     val tvSum = findViewById<TextView>(R.id.textView2)
-
-                    tvSum.text = "сумма: ${sum} ₽"
+                    val string = "сумма: $sum ₽"
+                    tvSum.text = string
 
                     Log.d("mytag", "Main Thread is Running")
                 }
@@ -78,8 +79,22 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter.Ro
         } catch (exp: RuntimeException) {
 
         }
+        val btnCorrectListOfClients: CheckBox = findViewById(R.id.btnCorrectListOfClients)
+
+
+        btnCorrectListOfClients.setOnCheckedChangeListener{ _, isChecked ->
+            filterList(isChecked)
+        }
+
+
         val btnReturnToHome: ImageView = findViewById(R.id.btnReturnToHome)
         btnReturnToHome.setOnClickListener {
+
+            if(btnCorrectListOfClients.isChecked){
+                btnCorrectListOfClients.isChecked = false
+                filterList(btnCorrectListOfClients.isChecked)
+            }
+
             val someList = typeOfWorkRecyclerViewAdapter.getListData()
             val job = GlobalScope.launch(Dispatchers.Default) {
 
@@ -121,7 +136,10 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter.Ro
                 idTypeOfWork
             )
 
-            typeOfWorkRecyclerViewAdapter.setListData(ArrayList(getClientAndEstimate))
+            for(i in listDataFull){
+                Log.d("mytag", "listDataFull после того как добавили данные ${i.CategoryName}")
+            }
+            typeOfWorkRecyclerViewAdapter.setListData(getClientAndEstimate)
             typeOfWorkRecyclerViewAdapter.notifyDataSetChanged()
 
 
@@ -130,6 +148,54 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter.Ro
 
     }
 
+    private fun filterList(isChecked: Boolean){
+        if (isChecked){
+
+            Log.d("mytag", "Флажок выбран")
+            // в recycler view удалить все строки содержащие нули
+            val items = typeOfWorkRecyclerViewAdapter.getListData()
+            listDataFull.clear()
+            listDataFull.addAll(items)
+
+            for (value in items) {
+
+                Log.d("mytag", "items print = ${value.CategoryName}")
+
+            }
+
+            items.removeAll {it.Count == 0}
+
+            typeOfWorkRecyclerViewAdapter.setListData(items)
+        }else{
+
+            Log.d("mytag", "Флажок не выбран")
+
+            for(i in listDataFull){
+                Log.d("mytag", "listDataFull перед тем как обновлять данные ${i.CategoryName}")
+            }
+            // мб записывать listDataFull в shared Preferense
+            // в recycler view вывести все строк
+            val items = typeOfWorkRecyclerViewAdapter.getListData()
+            for ((counter, i) in listDataFull.withIndex()) {
+                Log.d("mytag", "listDataFull print = ${i.CategoryName}")
+                for (j in items) {
+                    if (j.CategoryName == i.CategoryName) {
+                        // совпали имена, но значения штук могут быть разные
+                        Log.d("mytag", "отработала проверка перезаписи $counter and ${i.CategoryName}")
+
+                        listDataFull[counter] = j
+                    }
+                }
+            }
+            val listDataShort = ArrayList<ClientAndEstimate>()
+            listDataShort.clear()
+            listDataShort.addAll(listDataFull)
+            typeOfWorkRecyclerViewAdapter.setListData(listDataShort)
+        }
+
+        typeOfWorkRecyclerViewAdapter.notifyDataSetChanged()
+
+    }
     // Kotlin
     override fun onBackPressed() {
         val someList = typeOfWorkRecyclerViewAdapter.getListData()
@@ -155,7 +221,7 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter.Ro
 
     }
 
-    fun gettransition() {
+    private fun gettransition() {
         val intent = Intent(this, Calculation::class.java).also {
             it.putExtra("ClientEntity", getClientFromPreviousActivity())
             it.putExtra("PreviousActivity", "TypeOfWorkActivity")
@@ -163,25 +229,14 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter.Ro
         startActivity(intent)
     }
 
-    fun setNullClient(): Client {
-
-        return Client(
-            0, "", "", "", IsNew = false, IsPurchase = false, IsArchive = false,
-            DateOfCreation = "",
-            DateOfEditing = ""
-        )
-
-    }
-
-    private fun getClientFromPreviousActivity(): Client {
-
-        return intent.getSerializableExtra("ClientEntity") as Client
-    }
+    private fun getClientFromPreviousActivity(): Client =
+        intent.getSerializableExtra("ClientEntity") as Client
 
     override fun onDeleteUserClickListener(user: ClientAndEstimate) {
 
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     override fun onChangeClick(
         data: ClientAndEstimate,
         typeChange: String,
@@ -190,14 +245,12 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter.Ro
     ) {
         val tv = findViewById<TextView>(R.id.textView2)
         val oldSum = tv.text.split(" ")[1].toInt()
-        if (typeChange == "down") {
-            val newSum = oldSum - data.Price
-            tv.text = "сумма: ${newSum} ₽"
+        var newSum = oldSum
+        if (typeChange == "down") newSum = oldSum - data.Price
+        else if (typeChange == "up") newSum = oldSum + data.Price
 
-        } else if (typeChange == "up") {
-            val newSum = oldSum + data.Price
-            tv.text = "сумма: ${newSum} ₽"
-        }
+        val string = "сумма: $newSum ₽"
+        tv.text = string
 
         val indexPrevious = typeOfWorkRecyclerViewAdapter.getListData().indexOf(
             ClientAndEstimate(
