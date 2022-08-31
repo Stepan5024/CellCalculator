@@ -121,12 +121,22 @@ class Calculation : AppCompatActivity() {
 
         val btnDemoCalculation: ImageView = findViewById(R.id.btnDemoCalculation)
         btnDemoCalculation.setOnClickListener {
-            val toast = Toast.makeText(
+          /*  val toast = Toast.makeText(
                 applicationContext,
                 "btnDemoCalculation ДЕМО сметы pressed",
                 Toast.LENGTH_SHORT
             )
             toast.show()
+
+            */
+
+            val intent = Intent(this, TypeOfWorkActivity::class.java).also {
+                it.putExtra("ClientEntity", getClientFromPreviousActivity())
+                it.putExtra("PreviousActivity", "Calculation")
+                it.putExtra("idTypeOfWork", 0)
+                it.putExtra("NameTypeOfWork", "Общая смета")
+            }
+            startActivity(intent)
 
         }
 
@@ -155,6 +165,7 @@ class Calculation : AppCompatActivity() {
                 it.putExtra("ClientEntity", getClientFromPreviousActivity())
                 it.putExtra("PreviousActivity", "Calculation")
                 it.putExtra("idTypeOfWork", 1)
+                it.putExtra("NameTypeOfWork", "Система")
             }
             startActivity(intent)
         }
@@ -166,6 +177,7 @@ class Calculation : AppCompatActivity() {
                 it.putExtra("ClientEntity", getClientFromPreviousActivity())
                 it.putExtra("PreviousActivity", "Calculation")
                 it.putExtra("idTypeOfWork", 2)
+                it.putExtra("NameTypeOfWork", "Освещение")
             }
             startActivity(intent)
         }
@@ -177,6 +189,7 @@ class Calculation : AppCompatActivity() {
                 it.putExtra("ClientEntity", getClientFromPreviousActivity())
                 it.putExtra("PreviousActivity", "Calculation")
                 it.putExtra("idTypeOfWork", 3)
+                it.putExtra("NameTypeOfWork", "Доп. работы")
             }
             startActivity(intent)
         }
@@ -188,6 +201,7 @@ class Calculation : AppCompatActivity() {
                 it.putExtra("ClientEntity", getClientFromPreviousActivity())
                 it.putExtra("PreviousActivity", "Calculation")
                 it.putExtra("idTypeOfWork", 4)
+                it.putExtra("NameTypeOfWork", "Материалы")
             }
             startActivity(intent)
         }

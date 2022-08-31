@@ -32,7 +32,7 @@
                 app:srcCompat="@drawable/ic_back_btn" />
 
             <TextView
-                android:id="@+id/textView"
+                android:id="@+id/tvNameOfWork"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentTop="true"
@@ -45,7 +45,7 @@
                 android:id="@+id/textView2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/textView"
+                android:layout_below="@+id/tvNameOfWork"
                 android:layout_centerHorizontal="true"
                 android:text="сумма: 0 ₽"
                 android:textColor="@color/black"

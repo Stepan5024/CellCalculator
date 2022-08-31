@@ -7,6 +7,7 @@ import android.util.Log
 import android.widget.CheckBox
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -32,23 +33,60 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter.Ro
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.type_of_work_activity)
-        var idTypeOfWork = 0
 
+        val tvNameOfWork: TextView = findViewById(R.id.tvNameOfWork)
+
+        var idTypeOfWork = 0
+        val previousActivity: String
         try {
-            val previousActivity = intent.getStringExtra("PreviousActivity").toString()
+            previousActivity = intent.getStringExtra("PreviousActivity").toString()
             val client = getClientFromPreviousActivity()
-            idTypeOfWork = intent.getIntExtra("idTypeOfWork", 0)
+            idTypeOfWork = intent.getIntExtra("idTypeOfWork", -1)
+            // idTypeOfWork == 0 означает вывести все категории работ в смете
+            // idTypeOfWork == -1 означает что пользователь попал на активность не по кнопкам Система, Освещение, Доп. работы, материалы
+            if (idTypeOfWork == -1) {
+
+                val toast = Toast.makeText(
+                    applicationContext,
+                    "Произошла ошибка выбора типа работы. Обратитесь к разработчику",
+                    Toast.LENGTH_SHORT
+                )
+                toast.show()
+
+
+                val intent = Intent(this, MainActivity::class.java).also {
+                    it.putExtra("ClientEntity", getClientFromPreviousActivity())
+                    it.putExtra("PreviousActivity", "TypeOfWorkActivity")
+
+                }
+                startActivity(intent)
+            }
 
             if (previousActivity == "Calculation") {
                 var sum = 0
+
+                tvNameOfWork.text = intent.getStringExtra("NameTypeOfWork").toString()
+
                 val job = GlobalScope.launch(Dispatchers.Default) {
 
                     val dao = CategoriesDataBase.getInstance(this@TypeOfWorkActivity).categoriesDao
-                    val someList =
-                        dao.getUnionClientAndEstimateAndTypeCategory2(
-                            getClientFromPreviousActivity()._id,
-                            idTypeOfWork
+                    val someList: MutableList<ClientAndEstimate>
+
+                    if (idTypeOfWork == 0) {
+
+                        // надо вывести весь список со всеми категориями
+                        someList =
+                            dao.getClientAndEstimate(getClientFromPreviousActivity()._id)
+                        Log.d(
+                            "mytag",
+                            "someList.size = ${someList.size}"
                         )
+                    } else
+                        someList =
+                            dao.getUnionClientAndEstimateAndTypeCategory2(
+                                getClientFromPreviousActivity()._id,
+                                idTypeOfWork
+                            )
 
                     for (i in someList) {
                         sum += i.Price * i.Count
@@ -82,7 +120,7 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter.Ro
         val btnCorrectListOfClients: CheckBox = findViewById(R.id.btnCorrectListOfClients)
 
 
-        btnCorrectListOfClients.setOnCheckedChangeListener{ _, isChecked ->
+        btnCorrectListOfClients.setOnCheckedChangeListener { _, isChecked ->
             filterList(isChecked)
         }
 
@@ -90,7 +128,7 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter.Ro
         val btnReturnToHome: ImageView = findViewById(R.id.btnReturnToHome)
         btnReturnToHome.setOnClickListener {
 
-            if(btnCorrectListOfClients.isChecked){
+            if (btnCorrectListOfClients.isChecked) {
                 btnCorrectListOfClients.isChecked = false
                 filterList(btnCorrectListOfClients.isChecked)
             }
@@ -130,14 +168,25 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter.Ro
 
         //Without ViewModelFactory
         lifecycleScope.launch {
+            val getClientAndEstimate: MutableList<ClientAndEstimate>
 
-            val getClientAndEstimate = dao.getUnionClientAndEstimateAndTypeCategory2(
-                getClientFromPreviousActivity()._id,
-                idTypeOfWork
-            )
+            if (idTypeOfWork == 0) {
+                // надо вывести весь список со всеми категориями
+                getClientAndEstimate =
+                    dao.getClientAndEstimate(getClientFromPreviousActivity()._id)
+                Log.d(
+                    "mytag",
+                    "someList.size = ${getClientAndEstimate.size}"
+                )
+            } else {
+                getClientAndEstimate = dao.getUnionClientAndEstimateAndTypeCategory2(
+                    getClientFromPreviousActivity()._id,
+                    idTypeOfWork
+                )
 
-            for(i in listDataFull){
-                Log.d("mytag", "listDataFull после того как добавили данные ${i.CategoryName}")
+                for (i in listDataFull) {
+                    Log.d("mytag", "listDataFull после того как добавили данные ${i.CategoryName}")
+                }
             }
             typeOfWorkRecyclerViewAdapter.setListData(getClientAndEstimate)
             typeOfWorkRecyclerViewAdapter.notifyDataSetChanged()
@@ -148,8 +197,8 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter.Ro
 
     }
 
-    private fun filterList(isChecked: Boolean){
-        if (isChecked){
+    private fun filterList(isChecked: Boolean) {
+        if (isChecked) {
 
             Log.d("mytag", "Флажок выбран")
             // в recycler view удалить все строки содержащие нули
@@ -163,14 +212,14 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter.Ro
 
             }
 
-            items.removeAll {it.Count == 0}
+            items.removeAll { it.Count == 0 }
 
             typeOfWorkRecyclerViewAdapter.setListData(items)
-        }else{
+        } else {
 
             Log.d("mytag", "Флажок не выбран")
 
-            for(i in listDataFull){
+            for (i in listDataFull) {
                 Log.d("mytag", "listDataFull перед тем как обновлять данные ${i.CategoryName}")
             }
             // мб записывать listDataFull в shared Preferense
@@ -181,7 +230,10 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter.Ro
                 for (j in items) {
                     if (j.CategoryName == i.CategoryName) {
                         // совпали имена, но значения штук могут быть разные
-                        Log.d("mytag", "отработала проверка перезаписи $counter and ${i.CategoryName}")
+                        Log.d(
+                            "mytag",
+                            "отработала проверка перезаписи $counter and ${i.CategoryName}"
+                        )
 
                         listDataFull[counter] = j
                     }
@@ -196,8 +248,16 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter.Ro
         typeOfWorkRecyclerViewAdapter.notifyDataSetChanged()
 
     }
+
     // Kotlin
     override fun onBackPressed() {
+
+        val btnCorrectListOfClients: CheckBox = findViewById(R.id.btnCorrectListOfClients)
+        if (btnCorrectListOfClients.isChecked) {
+            btnCorrectListOfClients.isChecked = false
+            filterList(btnCorrectListOfClients.isChecked)
+        }
+
         val someList = typeOfWorkRecyclerViewAdapter.getListData()
         val job = GlobalScope.launch(Dispatchers.Default) {
 
