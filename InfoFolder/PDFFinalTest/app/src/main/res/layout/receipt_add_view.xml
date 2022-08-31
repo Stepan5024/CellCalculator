@@ -1,0 +1,167 @@
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="6dp"
+    android:elevation="8dp"
+    app:cardCornerRadius="14dp">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/rounded_corner_view"
+            android:padding="16dp">
+
+
+            <Button
+                android:id="@+id/saveBtn"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:backgroundTint="@color/teal_200"
+                android:text="Add"
+                android:textAllCaps="false"
+                android:textColor="@color/white"
+                android:textSize="24sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.497"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/editTextPrice3" />
+
+            <EditText
+                android:id="@+id/editTextQuantity1"
+                android:layout_width="159dp"
+                android:layout_height="52dp"
+                android:layout_marginTop="5dp"
+                android:background="@drawable/rounded_corner"
+                android:backgroundTint="#11000000"
+                android:inputType="number"
+                android:paddingStart="12dp"
+                android:textSize="18sp"
+                app:layout_constraintCircleRadius="10dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textViewP1"
+                tools:text="Quantity" />
+
+
+            <EditText
+                android:id="@+id/editTextPrice1"
+                android:layout_width="159dp"
+                android:layout_height="52dp"
+                android:layout_marginStart="20dp"
+                android:background="@drawable/rounded_corner"
+                android:backgroundTint="#11000000"
+                android:inputType="number"
+                android:paddingStart="12dp"
+                android:textSize="18sp"
+                app:layout_constraintCircleRadius="10dp"
+                app:layout_constraintStart_toEndOf="@+id/editTextQuantity1"
+                app:layout_constraintTop_toTopOf="@+id/editTextQuantity1"
+                tools:text="Price" />
+
+            <TextView
+                android:id="@+id/textViewP1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="5dp"
+                android:text="Product 1"
+                android:textColor="@color/black"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/textViewP2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:padding="5dp"
+                android:text="Product 2"
+                android:textColor="@color/black"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toStartOf="@+id/textViewP1"
+                app:layout_constraintTop_toBottomOf="@+id/editTextQuantity1" />
+
+            <EditText
+                android:id="@+id/editTextQuantity2"
+                android:layout_width="159dp"
+                android:layout_height="52dp"
+                android:background="@drawable/rounded_corner"
+                android:backgroundTint="#11000000"
+                android:inputType="number"
+                android:paddingStart="12dp"
+                android:textSize="18sp"
+                app:layout_constraintCircleRadius="10dp"
+                app:layout_constraintStart_toStartOf="@+id/textViewP2"
+                app:layout_constraintTop_toBottomOf="@+id/textViewP2"
+                tools:text="Quantity" />
+
+            <EditText
+                android:id="@+id/editTextPrice2"
+                android:layout_width="159dp"
+                android:layout_height="52dp"
+                android:layout_marginStart="20dp"
+                android:background="@drawable/rounded_corner"
+                android:backgroundTint="#11000000"
+                android:inputType="number"
+                android:paddingStart="12dp"
+                android:textSize="18sp"
+                app:layout_constraintCircleRadius="10dp"
+                app:layout_constraintStart_toEndOf="@+id/editTextQuantity2"
+                app:layout_constraintTop_toTopOf="@+id/editTextQuantity2"
+                tools:text="Price" />
+
+            <TextView
+                android:id="@+id/textViewP3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:padding="5dp"
+                android:text="Product 3"
+                android:textColor="@color/black"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toStartOf="@+id/textViewP2"
+                app:layout_constraintTop_toBottomOf="@+id/editTextQuantity2" />
+
+            <EditText
+                android:id="@+id/editTextQuantity3"
+                android:layout_width="159dp"
+                android:layout_height="52dp"
+                android:background="@drawable/rounded_corner"
+                android:backgroundTint="#11000000"
+                android:inputType="number"
+                android:paddingStart="12dp"
+                android:textSize="18sp"
+                app:layout_constraintCircleRadius="10dp"
+                app:layout_constraintStart_toStartOf="@+id/textViewP3"
+                app:layout_constraintTop_toBottomOf="@+id/textViewP3"
+                tools:text="Quantity" />
+
+            <EditText
+                android:id="@+id/editTextPrice3"
+                android:layout_width="159dp"
+                android:layout_height="52dp"
+                android:layout_marginStart="20dp"
+                android:background="@drawable/rounded_corner"
+                android:backgroundTint="#11000000"
+                android:inputType="number"
+                android:paddingStart="12dp"
+                android:textSize="18sp"
+                app:layout_constraintCircleRadius="10dp"
+                app:layout_constraintStart_toEndOf="@+id/editTextQuantity3"
+                app:layout_constraintTop_toTopOf="@+id/editTextQuantity3"
+                tools:text="Price" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </ScrollView>
+
+</androidx.cardview.widget.CardView>
