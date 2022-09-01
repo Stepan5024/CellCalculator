@@ -21,7 +21,7 @@ import kotlinx.coroutines.*
 @OptIn(DelicateCoroutinesApi::class)
 class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter.RowClickListener {
 
-    var listDataFull: MutableList<ClientAndEstimate> = arrayListOf()
+    private var listDataFull: MutableList<ClientAndEstimate> = arrayListOf()
 
 
     private val dao = CategoriesDataBase.getInstance(this).categoriesDao
@@ -70,23 +70,16 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter.Ro
                 val job = GlobalScope.launch(Dispatchers.Default) {
 
                     val dao = CategoriesDataBase.getInstance(this@TypeOfWorkActivity).categoriesDao
-                    val someList: MutableList<ClientAndEstimate>
 
-                    if (idTypeOfWork == 0) {
+                    val someList: MutableList<ClientAndEstimate> = if (idTypeOfWork == 0)
 
-                        // надо вывести весь список со всеми категориями
-                        someList =
-                            dao.getClientAndEstimate(getClientFromPreviousActivity()._id)
-                        Log.d(
-                            "mytag",
-                            "someList.size = ${someList.size}"
+                    // надо вывести весь список со всеми категориями
+                        dao.getClientAndEstimate(getClientFromPreviousActivity()._id)
+                    else
+                        dao.getUnionClientAndEstimateAndTypeCategory2(
+                            getClientFromPreviousActivity()._id,
+                            idTypeOfWork
                         )
-                    } else
-                        someList =
-                            dao.getUnionClientAndEstimateAndTypeCategory2(
-                                getClientFromPreviousActivity()._id,
-                                idTypeOfWork
-                            )
 
                     for (i in someList) {
                         sum += i.Price * i.Count

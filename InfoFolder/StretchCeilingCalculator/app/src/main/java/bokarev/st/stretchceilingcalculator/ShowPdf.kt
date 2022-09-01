@@ -19,12 +19,12 @@ class ShowPdf {
         // This is the PdfRenderer we use to render the PDF.
         pdfRenderer =
             PdfRenderer(parcelFileDescriptor)
-        if (pdfRenderer.getPageCount() <= pageIndex) {
+        if (pdfRenderer.pageCount <= pageIndex) {
             return null
         }
         currentPage = pdfRenderer.openPage(pageIndex)
         val bitmap = Bitmap.createBitmap(
-            currentPage.getWidth(), currentPage.getHeight(),
+            currentPage.width, currentPage.height,
             Bitmap.Config.ARGB_8888
         )
         currentPage.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
@@ -43,7 +43,7 @@ class ShowPdf {
     }
 
 
-    public fun findFilePath(file: String): File? {
+    fun findFilePath(file: String): File? {
         val file = File(
             Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
             file

@@ -1,40 +1,24 @@
 package bokarev.st.stretchceilingcalculator
 
 
+import bokarev.st.stretchceilingcalculator.entities.relations.ClientAndEstimate
 import java.io.Serializable
 
 
 data class Receipt(
     var receiptId: Long,
-    var createdDate: String,
-    var priceP1: Double,
-    var quantityP1: Int,
-    var priceP2: Double,
-    var quantityP2: Int,
-    var priceP3: Double,
-    var quantityP3: Int,
-    var filePath: String,
+    var dataList: MutableList<ClientAndEstimate>,
+    val address: String,
+    val tel: String,
+    var FilePath: String,
+
 ) : Serializable {
 
     constructor(
-        createdDate: String,
-        priceP1: Double,
-        quantityP1: Int,
-        priceP2: Double,
-        quantityP2: Int,
-        priceP3: Double,
-        quantityP3: Int,
-        filePath: String
-    ) : this(
-        0,
-        createdDate,
-        priceP1,
-        quantityP1,
-        priceP2,
-        quantityP2,
-        priceP3,
-        quantityP3,
-        filePath
-    )
+        dataList: MutableList<ClientAndEstimate>,
+        address: String,
+        tel: String,
+        filePath: String,
+    ) : this(0, dataList, address, tel, filePath)
 
 }

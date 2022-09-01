@@ -21,11 +21,10 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.content.ContextCompat.startActivity
 import bokarev.st.stretchceilingcalculator.entities.Client
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import bokarev.st.stretchceilingcalculator.entities.relations.ClientAndEstimate
+import kotlinx.coroutines.*
 import java.io.File
 import java.io.FileOutputStream
 import java.lang.Exception
@@ -34,6 +33,7 @@ class Calculation : AppCompatActivity() {
 
     var previousActivity = ""
 
+    @OptIn(DelicateCoroutinesApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.calculation)
@@ -135,14 +135,14 @@ class Calculation : AppCompatActivity() {
 
         val btnDemoCalculation: ImageView = findViewById(R.id.btnDemoCalculation)
         btnDemoCalculation.setOnClickListener {
-          /*  val toast = Toast.makeText(
-                applicationContext,
-                "btnDemoCalculation ДЕМО сметы pressed",
-                Toast.LENGTH_SHORT
-            )
-            toast.show()
+            /*  val toast = Toast.makeText(
+                  applicationContext,
+                  "btnDemoCalculation ДЕМО сметы pressed",
+                  Toast.LENGTH_SHORT
+              )
+              toast.show()
 
-            */
+              */
 
             val intent = Intent(this, TypeOfWorkActivity::class.java).also {
                 it.putExtra("ClientEntity", getClientFromPreviousActivity())
@@ -163,37 +163,67 @@ class Calculation : AppCompatActivity() {
             )
             toast.show()*/
 
-            val receipt = Receipt(
-                "formatterDate.format(LocalDateTime.now())",
-                5.toDouble(),
-                76,
-                45.toDouble(),
-                78.toInt(),
-                72.toDouble(),
-                9.toInt(),
-                ""
-            )
-            //gotShowPdfPage(receipt)
-            if (receipt.filePath.isEmpty() || receipt.filePath.isBlank()) {
-                generatePdf(receipt)
-                displayPdf(receipt)
-            } else {
-                displayPdf(receipt)
+
+            var someList: MutableList<ClientAndEstimate> = arrayListOf()
+
+
+            val job = GlobalScope.launch(Dispatchers.Default) {
+
+                val dao = CategoriesDataBase.getInstance(this@Calculation).categoriesDao
+
+                // надо вывести весь список со всеми категориями
+                someList = dao.getClientAndEstimate(getClientFromPreviousActivity()._id)
+                Log.d(
+                    "mytag",
+                    "someList.size = ${someList.size}"
+                )
+                /* for (i in someList) {
+
+                     sum += i.Price * i.Count
+
+                     Log.d(
+                         "mytag",
+                         "calculation items CategoryName = ${i.CategoryName} Price = ${i.Price} Count = ${i.Count}"
+                     )
+                 }*/
+
+            }
+            runBlocking {
+                // waiting for the coroutine to finish it"s work
+                job.join()
+                //set view
+                var receipt = Receipt(
+                    0,
+                    someList,
+                    getClientFromPreviousActivity().Address,
+                    getClientFromPreviousActivity().Tel,
+                    ""
+                )
+
+                //gotShowPdfPage(receipt)
+                if (receipt.FilePath.isEmpty() || receipt.FilePath.isBlank()) {
+                    generatePdf(receipt)
+                    displayPdf(receipt)
+                } else {
+                    displayPdf(receipt)
+                }
+
+                Log.d("mytag", "Main Thread is Running")
             }
 
 
-          /*
+            /*
 
-            val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
-                addCategory(Intent.CATEGORY_OPENABLE)
-                type = "application/pdf"
-                //type = "text/plain"
-                putExtra(Intent.EXTRA_TITLE, "fileName.pdf")
-               // putExtra(Intent.EXTRA_STREAM, file)
-                putExtra(DocumentsContract.EXTRA_INITIAL_URI, "")
-            }
+              val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+                  addCategory(Intent.CATEGORY_OPENABLE)
+                  type = "application/pdf"
+                  //type = "text/plain"
+                  putExtra(Intent.EXTRA_TITLE, "fileName.pdf")
+                 // putExtra(Intent.EXTRA_STREAM, file)
+                  putExtra(DocumentsContract.EXTRA_INITIAL_URI, "")
+              }
 
-            resultLauncher.launch(intent)*/
+              resultLauncher.launch(intent)*/
 
         }
 
@@ -265,7 +295,6 @@ class Calculation : AppCompatActivity() {
 */
 
 
-
                     val sendIntent: Intent = Intent().apply {
 
 
@@ -303,6 +332,7 @@ class Calculation : AppCompatActivity() {
             write == PackageManager.PERMISSION_GRANTED && read == PackageManager.PERMISSION_GRANTED
         }
     }
+
     private fun requestPermission() {
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.R) {
             try {
@@ -340,6 +370,7 @@ class Calculation : AppCompatActivity() {
                 //bellow 11
             }
         }
+
     private fun generatePdf(receipt: Receipt) {
         val bitmapFactory = BitmapFactory.decodeResource(
             this.resources, R.drawable.pizzahead
@@ -347,14 +378,14 @@ class Calculation : AppCompatActivity() {
         var filePath = GeneratePdf.generate(
             bitmapFactory, receipt
         )
-        receipt.filePath = filePath
+        receipt.FilePath = filePath
 
 
     }
 
     private fun displayPdf(receipt: Receipt) {
 
-        var filePath = ShowPdf().findFilePath(receipt.filePath)
+        var filePath = ShowPdf().findFilePath(receipt.FilePath)
         if (filePath != null) {
 
             SharePdf().sharePdf(this, filePath)

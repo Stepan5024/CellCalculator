@@ -41,7 +41,7 @@ interface TypeCategoryDao {
     fun getAllUserInfo(): List<Client>?
 
     @Transaction
-    @Query("SELECT Client.ClientName, Estimate.Count, Estimate._idTypeCategory, TypeCategory._idTypeOfWork, TypeCategory.Price, TypeCategory.CategoryName FROM Estimate INNER JOIN Client ON Estimate._idClient = Client._id INNER JOIN  TypeCategory ON Estimate._idTypeCategory =  TypeCategory._id where Estimate._idClient = :clientId")
+    @Query("SELECT Client.ClientName, Estimate.Count, Estimate._idTypeCategory, TypeCategory._idTypeOfWork, TypeCategory.Price, TypeCategory.CategoryName FROM Estimate INNER JOIN Client ON Estimate._idClient = Client._id INNER JOIN  TypeCategory ON Estimate._idTypeCategory =  TypeCategory._id where Estimate._idClient = :clientId ORDER BY TypeCategory._idTypeOfWork")
     suspend fun getClientAndEstimate(clientId: Int): MutableList<ClientAndEstimate>
 
 
