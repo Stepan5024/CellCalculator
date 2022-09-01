@@ -1,12 +1,17 @@
 package bokarev.st.stretchceilingcalculator
 
+import android.Manifest
 import android.app.Activity
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.*
 import android.graphics.pdf.PdfDocument
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.provider.DocumentsContract
+import android.provider.Settings
 import android.util.Log
 import android.widget.Button
 import android.widget.ImageView
@@ -14,6 +19,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import bokarev.st.stretchceilingcalculator.entities.Client
 import kotlinx.coroutines.Dispatchers
@@ -157,66 +163,26 @@ class Calculation : AppCompatActivity() {
             )
             toast.show()*/
 
-
-            val pdfDocument: PdfDocument = PdfDocument()
-            val paint: Paint = Paint()
-            val title: Paint = Paint()
-            val myPageInfo: PdfDocument.PageInfo? =
-                PdfDocument.PageInfo.Builder(792, 1120, 1).create()
-
-            val myPage: PdfDocument.Page = pdfDocument.startPage(myPageInfo)
-
-
-            // our text which we will be adding in our PDF file.
-            title.typeface = Typeface.create(Typeface.DEFAULT, Typeface.NORMAL)
-            // which we will be displaying in our PDF file.
-            title.textSize = 15F
-            // of our text inside our PDF file.
-            title.color = ContextCompat.getColor(this@Calculation, R.color.purple_200)
-            val canvas: Canvas = myPage.canvas
-            val scaledbmp: Bitmap
-           // val bmp: Bitmap = BitmapFactory.decodeResource(resources, R.drawable.ic_back_btn)
-           // scaledbmp = Bitmap.createScaledBitmap(bmp, 140, 140, false)
-
-          //  canvas.drawBitmap(scaledbmp, 56F, 40F, paint)
-            // and then we are passing our variable of paint which is title.
-            canvas.drawText("A portal for IT professionals.", 209F, 100F, title)
-            canvas.drawText("Geeks for Geeks", 209F, 80F, title)
-            title.typeface = Typeface.defaultFromStyle(Typeface.NORMAL)
-            title.color = ContextCompat.getColor(this@Calculation, R.color.purple_200)
-            title.textSize = 15F
-// our text to center of PDF.
-            title.textAlign = Paint.Align.CENTER
-            canvas.drawText(
-                "This is sample document which we have created.",
-                396F,
-                560F,
-                title
+            val receipt = Receipt(
+                "formatterDate.format(LocalDateTime.now())",
+                5.toDouble(),
+                76,
+                45.toDouble(),
+                78.toInt(),
+                72.toDouble(),
+                9.toInt(),
+                ""
             )
-
-// PDF file we will be finishing our page.
-            pdfDocument.finishPage(myPage)
-            val file: File = File(Environment.getExternalStorageDirectory(), "fileName.pdf")
-
-            try {
-                // after creating a file name we will
-                // write our PDF file to that location.
-                pdfDocument.writeTo(FileOutputStream(file))
-
-                // on below line we are displaying a toast message as PDF file generated..
-                Toast.makeText(applicationContext, "PDF file generated..", Toast.LENGTH_SHORT).show()
-            } catch (e: Exception) {
-                // below line is used
-                // to handle error
-                e.printStackTrace()
-
-                // on below line we are displaying a toast message as fail to generate PDF
-                Toast.makeText(applicationContext, "Fail to generate PDF file..", Toast.LENGTH_SHORT)
-                    .show()
+            //gotShowPdfPage(receipt)
+            if (receipt.filePath.isEmpty() || receipt.filePath.isBlank()) {
+                generatePdf(receipt)
+                displayPdf(receipt)
+            } else {
+                displayPdf(receipt)
             }
-            // after storing our pdf to that
-            // location we are closing our PDF file.
-            pdfDocument.close()
+
+
+          /*
 
             val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
                 addCategory(Intent.CATEGORY_OPENABLE)
@@ -227,7 +193,7 @@ class Calculation : AppCompatActivity() {
                 putExtra(DocumentsContract.EXTRA_INITIAL_URI, "")
             }
 
-            resultLauncher.launch(intent)
+            resultLauncher.launch(intent)*/
 
         }
 
@@ -322,6 +288,81 @@ class Calculation : AppCompatActivity() {
                 }
             }
         }
+
+    private val STORAGE_REQUEST_CODE = 99;
+
+    private fun checkPermission(): Boolean {
+        return if (Build.VERSION.SDK_INT > Build.VERSION_CODES.R) {
+            Environment.isExternalStorageManager()
+        } else {
+            //bellow 11
+            val write =
+                ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+            val read =
+                ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
+            write == PackageManager.PERMISSION_GRANTED && read == PackageManager.PERMISSION_GRANTED
+        }
+    }
+    private fun requestPermission() {
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.R) {
+            try {
+                val intent = Intent()
+                intent.action = Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION
+                val uri = Uri.fromParts("package", this.packageName, null)
+                intent.data = uri
+                storageActivityLauncher.launch(intent)
+            } catch (e: Exception) {
+                val intent = Intent()
+                intent.action = Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION
+                storageActivityLauncher.launch(intent)
+            }
+        } else {
+            ActivityCompat.requestPermissions(
+                this, arrayOf(
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                    Manifest.permission.READ_EXTERNAL_STORAGE
+                ), STORAGE_REQUEST_CODE
+            )
+        }
+    }
+
+    private val storageActivityLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.R) {
+                if (Environment.isExternalStorageManager()) {
+                    //Todo call Save
+                    Toast.makeText(this, "Storage Permission Granted", Toast.LENGTH_SHORT).show()
+
+                } else {
+                    Toast.makeText(this, "Storage Permission Denied", Toast.LENGTH_SHORT).show()
+                }
+            } else {
+                //bellow 11
+            }
+        }
+    private fun generatePdf(receipt: Receipt) {
+        val bitmapFactory = BitmapFactory.decodeResource(
+            this.resources, R.drawable.pizzahead
+        )
+        var filePath = GeneratePdf.generate(
+            bitmapFactory, receipt
+        )
+        receipt.filePath = filePath
+
+
+    }
+
+    private fun displayPdf(receipt: Receipt) {
+
+        var filePath = ShowPdf().findFilePath(receipt.filePath)
+        if (filePath != null) {
+
+            SharePdf().sharePdf(this, filePath)
+
+        } else {
+            generatePdf(receipt)
+        }
+    }
 
     // Kotlin
     override fun onBackPressed() {

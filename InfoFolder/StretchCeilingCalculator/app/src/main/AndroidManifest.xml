@@ -27,7 +27,16 @@
         <activity android:name=".Calculation" />
         <activity android:name=".ClientActivity" />
         <activity android:name=".TypeOfWorkActivity" />
-        <activity android:name=".ClientsViewModel" />
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="bokarev.st.stretchceilingcalculator.provider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/provider_paths" />
+        </provider>
+
     </application>
 
 </manifest>
