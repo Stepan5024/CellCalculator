@@ -4,13 +4,11 @@ import android.Manifest
 import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.*
-import android.graphics.pdf.PdfDocument
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
-import android.provider.DocumentsContract
 import android.provider.Settings
 import android.util.Log
 import android.widget.Button
@@ -21,13 +19,10 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.core.content.ContextCompat.startActivity
 import bokarev.st.stretchceilingcalculator.entities.Client
 import bokarev.st.stretchceilingcalculator.entities.relations.ClientAndEstimate
+import bokarev.st.stretchceilingcalculator.models.ClientAndEstimateMidifation
 import kotlinx.coroutines.*
-import java.io.File
-import java.io.FileOutputStream
-import java.lang.Exception
 
 class Calculation : AppCompatActivity() {
 
@@ -148,6 +143,8 @@ class Calculation : AppCompatActivity() {
                 it.putExtra("ClientEntity", getClientFromPreviousActivity())
                 it.putExtra("PreviousActivity", "Calculation")
                 it.putExtra("idTypeOfWork", 0)
+                val l = arrayListOf<Int>()
+                it.putExtra("idTypeOfWorkList", l)
                 it.putExtra("NameTypeOfWork", "Общая смета")
             }
             startActivity(intent)
@@ -163,7 +160,7 @@ class Calculation : AppCompatActivity() {
             )
             toast.show()*/
 
-
+            var finishList: MutableList<ClientAndEstimateMidifation> = arrayListOf()
             var someList: MutableList<ClientAndEstimate> = arrayListOf()
 
 
@@ -177,6 +174,11 @@ class Calculation : AppCompatActivity() {
                     "mytag",
                     "someList.size = ${someList.size}"
                 )
+                for(i in someList){
+                    val nameTypeOfWork = dao.getTypeOfWorkNameByTypeCategory(i._idTypeOfWork)
+                    val suk = ClientAndEstimateMidifation(i.ClientName, i.Count, i._idTypeCategory, i._idTypeOfWork, i.Price, i.CategoryName, nameTypeOfWork, 1)
+                    finishList.add(suk)
+                }
                 /* for (i in someList) {
 
                      sum += i.Price * i.Count
@@ -237,6 +239,7 @@ class Calculation : AppCompatActivity() {
                 it.putExtra("ClientEntity", getClientFromPreviousActivity())
                 it.putExtra("PreviousActivity", "Calculation")
                 it.putExtra("idTypeOfWork", 1)
+                it.putExtra("idTypeOfWorkList", arrayListOf(1, 2, 3, 4, 5, 6, 7, 8))
                 it.putExtra("NameTypeOfWork", "Система")
             }
             startActivity(intent)
@@ -248,7 +251,8 @@ class Calculation : AppCompatActivity() {
             val intent = Intent(this, TypeOfWorkActivity::class.java).also {
                 it.putExtra("ClientEntity", getClientFromPreviousActivity())
                 it.putExtra("PreviousActivity", "Calculation")
-                it.putExtra("idTypeOfWork", 2)
+                it.putExtra("idTypeOfWork", 9)
+                it.putExtra("idTypeOfWorkList", arrayListOf(9))
                 it.putExtra("NameTypeOfWork", "Освещение")
             }
             startActivity(intent)
@@ -260,7 +264,8 @@ class Calculation : AppCompatActivity() {
             val intent = Intent(this, TypeOfWorkActivity::class.java).also {
                 it.putExtra("ClientEntity", getClientFromPreviousActivity())
                 it.putExtra("PreviousActivity", "Calculation")
-                it.putExtra("idTypeOfWork", 3)
+                it.putExtra("idTypeOfWork", 10)
+                it.putExtra("idTypeOfWorkList", arrayListOf(10))
                 it.putExtra("NameTypeOfWork", "Доп. работы")
             }
             startActivity(intent)
@@ -272,7 +277,8 @@ class Calculation : AppCompatActivity() {
             val intent = Intent(this, TypeOfWorkActivity::class.java).also {
                 it.putExtra("ClientEntity", getClientFromPreviousActivity())
                 it.putExtra("PreviousActivity", "Calculation")
-                it.putExtra("idTypeOfWork", 4)
+                it.putExtra("idTypeOfWork", 11)
+                it.putExtra("idTypeOfWorkList", arrayListOf(11, 12, 13, 14, 15, 16, 17, 18, 19, 20))
                 it.putExtra("NameTypeOfWork", "Материалы")
             }
             startActivity(intent)

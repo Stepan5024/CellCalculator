@@ -1,100 +1,143 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:baselineAligned="false">
+    android:orientation="vertical">
 
-    <LinearLayout
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:layout_weight="5"
-        android:background="@drawable/stroke_black_line"
-        android:orientation="horizontal">
 
-        <TextView
-            android:id="@+id/NameOfWork"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_marginStart="10dp"
-            android:text="@string/d_100"
-            android:textColor="@color/black"
-            android:textSize="19sp"
-            android:lines="6"
-            android:minLines="3"
-            android:singleLine="false"
-            android:gravity="center_vertical|start"
-            android:layout_marginEnd="5dp"/>
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:layout_weight="3"
-        android:background="@drawable/stroke_black_line"
-        android:orientation="horizontal">
-
-        <TextView
-            android:id="@+id/Price"
+        <LinearLayout
+            android:id="@+id/layoutType0"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginStart="10dp"
-            android:gravity="center"
-            android:text="550 ₽"
-            android:textAlignment="center"
-            android:textColor="@color/black"
-            android:textSize="19sp" />
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@color/white"
+            >
 
-    </LinearLayout>
+            <TextView
+                android:id="@+id/textTypeOfWorkTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+
+                android:textColor="@color/black"
+                android:textSize="12sp"
+                android:text="My Text"
+                android:textStyle="bold">
+            </TextView>
+            <!--  <TextView
+                  android:id="@+id/textNews"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:gravity="center"
+                  android:textColor="@color/black"
+                  android:textSize="19dp"
+                  android:text="My text"
+                  android:textStyle="italic">
+
+              </TextView> -->
+        </LinearLayout>
+
 
     <LinearLayout
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:layout_weight="5"
-        android:background="@drawable/stroke_black_line"
-        android:orientation="horizontal">
-
-        <TextView
-            android:id="@+id/CountOfElement"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_marginStart="10dp"
-            android:layout_weight="2"
-            android:gravity="center"
-            android:text="0 шт"
-            android:textAlignment="center"
-            android:textColor="@color/black"
-            android:textSize="19sp"
-            tools:ignore="NestedWeights" />
+        android:id="@+id/layoutType1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:baselineAligned="false">
 
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="2"
-            android:orientation="vertical">
+            android:layout_weight="5"
+            android:background="@drawable/stroke_black_line"
+            android:orientation="horizontal">
 
-            <ImageView
-                android:id="@+id/btnCounterUp"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_gravity="center"
-                android:layout_weight="1"
-                android:layout_marginTop="5dp"
-                android:layout_marginEnd="5dp"
-                app:srcCompat="@drawable/ic_btn_up_counter" />
-            <ImageView
-                android:id="@+id/btnCounterDown"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_gravity="center"
-                android:layout_weight="1"
-                android:layout_marginBottom="5dp"
-                android:layout_marginEnd="5dp"
-                app:srcCompat="@drawable/ic_btn_down_counter" />
+            <TextView
+                android:id="@+id/NameOfWork"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginStart="10dp"
+                android:text="@string/d_100"
+                android:textColor="@color/black"
+                android:textSize="19sp"
+                android:lines="6"
+                android:minLines="3"
+                android:singleLine="false"
+                android:gravity="center_vertical|start"
+                android:layout_marginEnd="5dp"/>
         </LinearLayout>
 
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="3"
+            android:background="@drawable/stroke_black_line"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/Price"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginStart="10dp"
+                android:gravity="center"
+                android:text="550 ₽"
+                android:textAlignment="center"
+                android:textColor="@color/black"
+                android:textSize="19sp" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="5"
+            android:background="@drawable/stroke_black_line"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/CountOfElement"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginStart="10dp"
+                android:layout_weight="2"
+                android:gravity="center"
+                android:text="0 шт"
+                android:textAlignment="center"
+                android:textColor="@color/black"
+                android:textSize="19sp"
+                tools:ignore="NestedWeights" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="2"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:id="@+id/btnCounterUp"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_gravity="center"
+                    android:layout_weight="1"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginEnd="5dp"
+                    app:srcCompat="@drawable/ic_btn_up_counter" />
+                <ImageView
+                    android:id="@+id/btnCounterDown"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_gravity="center"
+                    android:layout_weight="1"
+                    android:layout_marginBottom="5dp"
+                    android:layout_marginEnd="5dp"
+                    app:srcCompat="@drawable/ic_btn_down_counter" />
+            </LinearLayout>
+
+        </LinearLayout>
     </LinearLayout>
 </LinearLayout>
+
 

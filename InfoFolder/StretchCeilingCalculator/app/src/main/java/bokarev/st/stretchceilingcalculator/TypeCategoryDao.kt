@@ -25,8 +25,16 @@ interface TypeCategoryDao {
     suspend fun getTypeOfWorkWithTypeCategory(typeOfWorkId: Int): List<TypeOfWorkWithTypeCategory>
 
     @Transaction
+    @Query("SELECT TypeOfWorkName FROM TypeOfWork WHERE _id = :typeOfWorkId")
+    suspend fun getTypeOfWorkNameByTypeCategory(typeOfWorkId: Int): String
+
+    @Transaction
     @Query("SELECT * FROM TypeCategory WHERE _id = :typeCategoryId")
     suspend fun getTypeCategoryInEstimate(typeCategoryId: Int): List<TypeCategoryInEstimate>
+
+    @Transaction
+    @Query("SELECT * FROM TypeCategory ORDER BY _id")
+    suspend fun getTypeCategory(): List<TypeCategory>
 
     @Transaction
     @Query("SELECT * FROM Client WHERE _id = :clientId")
@@ -46,12 +54,18 @@ interface TypeCategoryDao {
 
 
     @Transaction
-    @Query("SELECT Client.ClientName, Estimate.Count, Estimate._idTypeCategory, TypeCategory._idTypeOfWork, TypeCategory.Price, TypeCategory.CategoryName FROM Estimate INNER JOIN Client ON Estimate._idClient = Client._id INNER JOIN  TypeCategory ON Estimate._idTypeCategory =  TypeCategory._id where Estimate._idClient = :clientId  AND TypeCategory._idTypeOfWork = :typeCategoryId")
+    @Query("SELECT Client.ClientName, Estimate.Count, Estimate._idTypeCategory, TypeCategory._idTypeOfWork, TypeCategory.Price, TypeCategory.CategoryName FROM Estimate INNER JOIN Client ON Estimate._idClient = Client._id INNER JOIN  TypeCategory ON Estimate._idTypeCategory =  TypeCategory._id where Estimate._idClient = :clientId  AND TypeCategory._idTypeOfWork = :typeCategoryId ORDER BY TypeCategory._idTypeOfWork")
     fun getUnionClientAndEstimateAndTypeCategory2(
         clientId: Int,
         typeCategoryId: Int
     ): MutableList<ClientAndEstimate>
 
+    @Transaction
+    @Query("SELECT Client.ClientName, Estimate.Count, Estimate._idTypeCategory, TypeCategory._idTypeOfWork, TypeCategory.Price, TypeCategory.CategoryName FROM Estimate INNER JOIN Client ON Estimate._idClient = Client._id INNER JOIN  TypeCategory ON Estimate._idTypeCategory =  TypeCategory._id where Estimate._idClient = :clientId  AND TypeCategory._idTypeOfWork IN (:typeCategoryIdList)")
+    fun getUnionClientAndEstimateAndTypeCategoryInLists(
+        clientId: Int,
+        typeCategoryIdList: List<Int>
+    ): MutableList<ClientAndEstimate>
 
     @Insert
     fun insertUser(user: Client?)

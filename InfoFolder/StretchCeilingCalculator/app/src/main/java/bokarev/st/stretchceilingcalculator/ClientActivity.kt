@@ -22,6 +22,7 @@ class ClientActivity : AppCompatActivity() {
     private lateinit var viewModel: ClientsViewModel
 
 
+    @OptIn(DelicateCoroutinesApi::class)
     @SuppressLint("SimpleDateFormat")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -77,13 +78,12 @@ class ClientActivity : AppCompatActivity() {
             val sdf = SimpleDateFormat("dd.MM.yyyy HH:mm:ss")
             val currentDate = sdf.format(Date())
             Log.d("mytag", "currentDate = ${currentDate}")
-            var flagGo: Boolean = false
+
             var idUser = setNullClient()
 
             if (tvState.text.equals("Продолжить")) {
 
 
-                Log.d("mytag", "flagGo = ${flagGo}")
                 val user = Client(
                     0, name, address, phone,
                     IsNew = true,
@@ -92,8 +92,7 @@ class ClientActivity : AppCompatActivity() {
                     DateOfCreation = currentDate,
                     DateOfEditing = currentDate
                 )
-                flagGo = true
-                Log.d("mytag", "flagGo = ${flagGo}}")
+
                 // костыль
                 //Without ViewModelFactory
                 lifecycleScope.launch {
@@ -104,48 +103,37 @@ class ClientActivity : AppCompatActivity() {
                 viewModel.insertUserInfo(user) // вставка нового клиента
 
 
-                var num = 0
+
                 val job = GlobalScope.launch(Dispatchers.Default) {
                     //кастыль чтобы найти Id только что вставленного клиента
                     idUser = viewModel.getAllUsersForStepan(name, currentDate)
-                    num = idUser._id
 
-                    val estimate = listOf(
 
-                        // здесь добавить чтение БД таблицы ategoryName и отталкиваясь от кол-ва делать цикл,
+                    val dao = CategoriesDataBase.getInstance(this@ClientActivity).categoriesDao
+                    val typesCategory = dao.getTypeCategory()
+                    val estimate: MutableList<Estimate> = arrayListOf()
+
+
+                    var index = 1
+                    for (element in typesCategory) {
+                        Log.d("mytag", "element in typesCategory = ${element._id}")
+                        estimate.add(Estimate(0, idUser._id, element._id, 0, currentDate, currentDate))
+                        index++
+                    }
+
+
+                        // здесь добавить чтение БД таблицы CategoryName и отталкиваясь от кол-ва делать цикл,
                         // куда записывать все нулевые значения
-                        Estimate(0, num, 1, 0, currentDate, currentDate),
-                        Estimate(0, idUser._id, 2, 0, currentDate, currentDate),
-                        Estimate(0, idUser._id, 3, 0, currentDate, currentDate),
-                        Estimate(0, idUser._id, 4, 0, currentDate, currentDate),
-                        Estimate(0, idUser._id, 5, 0, currentDate, currentDate),
-                        Estimate(0, idUser._id, 6, 0, currentDate, currentDate),
 
-                        )
 
                     estimate.forEach { dao.insertEstimate(it) }
 
 
                     Log.d("mytag", "new client id = ${idUser._id}")
 
-                   /* repeat(5)
-                    {
-                        Log.d("mytag", "Coroutines is still working")
-                        // delay the coroutine by 1sec
-                        delay(1000)
-                    }*/
-                    // update views
-                    // добавить прогресс бар
-                    // https://material.io/components/progress-indicators/android#using-progress-indicators
-
-                }
-
-             /*  val job = lifecycleScope.launch {
-                    flagGo = true
 
 
                 }
-                flagGo = true*/
 
 
                 runBlocking {

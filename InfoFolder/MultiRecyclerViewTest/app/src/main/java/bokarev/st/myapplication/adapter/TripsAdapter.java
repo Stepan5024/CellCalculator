@@ -1,5 +1,6 @@
 package bokarev.st.myapplication.adapter;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -102,6 +103,13 @@ public class TripsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
             textTripTitle = itemView.findViewById(R.id.textTripTitle);
             textTrip  = itemView.findViewById(R.id.textTrip);
 
+            textTripTitle.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Log.d("mytag", "previousCount");
+                }
+            });
+
 
         }
 
@@ -129,7 +137,7 @@ public class TripsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
 
         void setAdsData(Ads ads){
 
-            textAdsTitle.setText(ads.getAdsTitle());
+            textAdsTitle.setText(ads.getTypeOfWorkTitle());
             textAds.setText(ads.getAds());
 
         }

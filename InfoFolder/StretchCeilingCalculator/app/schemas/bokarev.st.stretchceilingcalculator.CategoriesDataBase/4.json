@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 4,
-    "identityHash": "b35263b2bbdf79052d7cd38ed9cb7bba",
+    "identityHash": "8ebc0e23e935c004a4a230b6ee9ff89d",
     "entities": [
       {
         "tableName": "TypeOfWork",
@@ -32,7 +32,7 @@
       },
       {
         "tableName": "TypeCategory",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `CategoryName` TEXT NOT NULL, `Price` INTEGER NOT NULL, `_idTypeOfWork` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `CategoryName` TEXT NOT NULL, `UnitsOfMeasurement` TEXT NOT NULL, `Price` INTEGER NOT NULL, `_idTypeOfWork` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "_id",
@@ -43,6 +43,12 @@
           {
             "fieldPath": "CategoryName",
             "columnName": "CategoryName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "UnitsOfMeasurement",
+            "columnName": "UnitsOfMeasurement",
             "affinity": "TEXT",
             "notNull": true
           },
@@ -190,7 +196,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'b35263b2bbdf79052d7cd38ed9cb7bba')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '8ebc0e23e935c004a4a230b6ee9ff89d')"
     ]
   }
 }

@@ -4,12 +4,14 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
 import bokarev.st.myapplication.adapter.TripsAdapter
+import bokarev.st.myapplication.adapter.TypeOfWorkAdapter
+import bokarev.st.myapplication.adapter.TypeOfWorkRecyclerViewAdapter2
 import bokarev.st.myapplication.models.Ads
 import bokarev.st.myapplication.models.Item
 import bokarev.st.myapplication.models.News
 import bokarev.st.myapplication.models.Trip
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter2.RowClickListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -22,7 +24,11 @@ class MainActivity : AppCompatActivity() {
         val trip1 = Trip(R.drawable.crovatia, "Croatia", "Summer 20 days")
         items.add(Item(0, trip1))
 
-        val ads = Ads("Christmas holiday", "Winter 20 days")
+        val ads =
+            Ads(
+                "Christmas holiday",
+                "Winter 20 days"
+            )
         items.add(Item(1, ads))
 
 
@@ -33,7 +39,11 @@ class MainActivity : AppCompatActivity() {
         val trip2 = Trip(R.drawable.bali, "Bali", "Summer 20 days")
         items.add(Item(0, trip2))
 
-        val ads2 = Ads("Christmas holiday", "Winter 20 days")
+        val ads2 =
+            Ads(
+                "Christmas holiday",
+                "Winter 20 days"
+            )
         items.add(Item(1, ads2))
 
         val trip3 = Trip(R.drawable.bora_bora, "bora-bora", "Summer 20 days")
@@ -42,6 +52,18 @@ class MainActivity : AppCompatActivity() {
         val news2 = News("Russia", "Summer 20 days")
         items.add(Item(2, news2))
 
-        recyclerView.adapter = TripsAdapter(items)
+        recyclerView.adapter = TypeOfWorkAdapter(items)
     }
+
+    override fun onItemClickListener(user: Item) {
+
+
+        /*nameInput.setText(user.name)
+        emailInput.setText(user.email)
+        phoneInput.setText(user.phone)
+        nameInput.setTag(nameInput.id, user.id)
+        saveButton.setText("Update")*/
+
+    }
+
 }

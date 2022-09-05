@@ -2,19 +2,19 @@ package bokarev.st.myapplication.models;
 
 public class Ads {
 
-    private String adsTitle, ads;
+    private String typeOfWorkTitle, ads;
 
-    public Ads(String adsTitle, String ads) {
-        this.adsTitle = adsTitle;
+    public Ads(String typeOfWorkTitle, String ads) {
+        this.typeOfWorkTitle = typeOfWorkTitle;
         this.ads = ads;
     }
 
-    public String getAdsTitle() {
-        return adsTitle;
+    public String getTypeOfWorkTitle() {
+        return typeOfWorkTitle;
     }
 
-    public void setAdsTitle(String adsTitle) {
-        this.adsTitle = adsTitle;
+    public void setTypeOfWorkTitle(String adsTitle) {
+        this.typeOfWorkTitle = typeOfWorkTitle;
     }
 
     public String getAds() {

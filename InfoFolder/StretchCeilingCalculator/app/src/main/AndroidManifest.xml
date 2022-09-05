@@ -27,6 +27,7 @@
         <activity android:name=".Calculation" />
         <activity android:name=".ClientActivity" />
         <activity android:name=".TypeOfWorkActivity" />
+        <activity android:name=".TypeOfWorkActivity2" />
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="bokarev.st.stretchceilingcalculator.provider"
