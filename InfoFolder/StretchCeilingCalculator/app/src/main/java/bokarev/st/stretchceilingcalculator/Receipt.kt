@@ -8,7 +8,7 @@ import java.io.Serializable
 
 data class Receipt(
     var receiptId: Long,
-    var dataList: MutableList<ClientAndEstimate>,
+    var dataList: MutableList<ClientAndEstimateMidifation>,
     val address: String,
     val tel: String,
     var FilePath: String,
@@ -16,7 +16,7 @@ data class Receipt(
 ) : Serializable {
 
     constructor(
-        dataList: MutableList<ClientAndEstimate>,
+        dataList: MutableList<ClientAndEstimateMidifation>,
         address: String,
         tel: String,
         filePath: String,

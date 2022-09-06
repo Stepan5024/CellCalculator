@@ -196,7 +196,7 @@ class Calculation : AppCompatActivity() {
                 //set view
                 var receipt = Receipt(
                     0,
-                    someList,
+                    finishList,
                     getClientFromPreviousActivity().Address,
                     getClientFromPreviousActivity().Tel,
                     ""
@@ -391,7 +391,7 @@ class Calculation : AppCompatActivity() {
 
     private fun displayPdf(receipt: Receipt) {
 
-        var filePath = ShowPdf().findFilePath(receipt.FilePath)
+        val filePath = ShowPdf().findFilePath(receipt.FilePath)
         if (filePath != null) {
 
             SharePdf().sharePdf(this, filePath)
