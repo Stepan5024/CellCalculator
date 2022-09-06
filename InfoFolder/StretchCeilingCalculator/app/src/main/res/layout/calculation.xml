@@ -162,8 +162,8 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
                 android:layout_centerHorizontal="true"
-                android:paddingTop="10dp"
-                android:paddingBottom="50dp"
+
+                android:paddingBottom="40dp"
                 android:text="0 ₽"
                 android:textColor="@color/black"
                 android:textSize="26sp" />

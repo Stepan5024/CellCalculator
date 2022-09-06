@@ -4,6 +4,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
@@ -15,7 +16,7 @@ class TypeOfWorkRecyclerViewAdapter(private val listener: RowClickListener) :
     RecyclerView.Adapter<TypeOfWorkRecyclerViewAdapter.MyViewHolder>() {
 
     private var items : MutableList<ClientAndEstimate> = arrayListOf()
-    //= ArrayList<ClientAndEstimate>()
+    //= ArrayList<ClientAndEstаimate>()
     //val mutableList : MutableList<ClientAndEstimate> = arrayListOf()
 
     fun setListData(data: MutableList<ClientAndEstimate>) {
@@ -50,7 +51,7 @@ class TypeOfWorkRecyclerViewAdapter(private val listener: RowClickListener) :
 
         private val nameOfWork = view.findViewById<TextView>(R.id.NameOfWork)!!
         private val price = view.findViewById<TextView>(R.id.Price)!!
-        private val countOfElement = view.findViewById<TextView>(R.id.CountOfElement)
+        private val countOfElement = view.findViewById<EditText>(R.id.CountOfElement)
         private val btnUpCounter = view.findViewById<ImageView>(R.id.btnCounterUp)!!
         private val btnDownCounter = view.findViewById<ImageView>(R.id.btnCounterDown)!!
 
