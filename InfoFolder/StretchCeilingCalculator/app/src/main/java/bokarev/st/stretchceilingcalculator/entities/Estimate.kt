@@ -10,7 +10,7 @@ data class Estimate(
     val _id: Int,
     val _idClient: Int,
     val _idTypeCategory: Int,
-    val Count: Int,
+    val Count: Double,
     val DateOfCreation: String,
     val DateOfEditing: String,
 )

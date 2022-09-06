@@ -1,9 +1,11 @@
 package bokarev.st.stretchceilingcalculator.adapters
 
 import android.util.Log
+import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -54,9 +56,10 @@ class TypeOfWorkRecyclerViewAdapter3(private val listener: RowClickListener) :
         RecyclerView.ViewHolder(view) {
 
         private val nameOfWork = view.findViewById<TextView>(R.id.NameOfWork)!!
+        private val nameOfMensure = view.findViewById<TextView>(R.id.tvMensure)!!
         private val titleOfWork = view.findViewById<TextView>(R.id.textTypeOfWorkTitle)!!
         private val price = view.findViewById<TextView>(R.id.Price)!!
-        private val countOfElement = view.findViewById<TextView>(R.id.CountOfElement)
+        private val countOfElement = view.findViewById<EditText>(R.id.CountOfElement)
         private val btnUpCounter = view.findViewById<ImageView>(R.id.btnCounterUp)!!
         private val btnDownCounter = view.findViewById<ImageView>(R.id.btnCounterDown)!!
         private val layoutType0 = view.findViewById<LinearLayout>(R.id.layoutType0)!!
@@ -64,69 +67,118 @@ class TypeOfWorkRecyclerViewAdapter3(private val listener: RowClickListener) :
 
         fun bind(data: ClientAndEstimateMidifation) {
 
-           // if (data.TypeLayout == 1) {
-               // layoutType0.isInvisible = true
-                /*val params: ViewGroup.LayoutParams = layoutType0.layoutParams
-                params.width = ViewGroup.LayoutParams.MATCH_PARENT
-                params.height = 0
-                layoutType0.layoutParams = params*/
+            // if (data.TypeLayout == 1) {
+            // layoutType0.isInvisible = true
+            /*val params: ViewGroup.LayoutParams = layoutType0.layoutParams
+            params.width = ViewGroup.LayoutParams.MATCH_PARENT
+            params.height = 0
+            layoutType0.layoutParams = params*/
 
-               // layoutType0.layoutParams.height = 0
+            // layoutType0.layoutParams.height = 0
 
-                titleOfWork.text = data.NameTypeOfWork
+            titleOfWork.text = data.NameTypeOfWork
 
-                nameOfWork.text = data.CategoryName
+            nameOfWork.text = data.CategoryName
+            nameOfMensure.text = data.UnitsOfMeasurement
 
-                val priseStr = "${data.Price} ₽"
-                price.text = priseStr
-                var string = "${data.Count} шт"
-                countOfElement.text = string
+            val priseStr = "${data.Price} ₽"
+            price.text = priseStr
+            var string = "${data.Count}"
+            countOfElement.setText(string)
+            var previousNumber = 0F;
+
+            // edit text enter key listener
+            countOfElement.setOnKeyListener(object : View.OnKeyListener {
+                override fun onKey(v: View?, keyCode: Int, event: KeyEvent): Boolean {
+                    // if the event is a key down event on the enter button
+                    if (event.action == KeyEvent.ACTION_DOWN &&
+                        keyCode == KeyEvent.KEYCODE_ENTER
+                    ) {
 
 
-                btnUpCounter.setOnClickListener {
-                    val previousCount = countOfElement.text.toString().split(" ")[0].toInt()
-                    Log.d("mytag", "previousCount = $previousCount")
-                    if (previousCount >= 0) {
+                        val previousCount = countOfElement.text.toString().split(" ")[0].toFloat()
 
-                        string = "${previousCount + 1} шт"
-                        countOfElement.text = string
+                        Log.d("mytag", "previousCount = $previousCount")
+                        if (previousCount >= 0) {
 
-                        listener.onChangeClick(
-                            ClientAndEstimateMidifation(
-                                data.ClientName,
-                                previousCount + 1,
-                                data._idTypeCategory,
-                                data._idTypeOfWork,
-                                price.text.toString().split(" ")[0].toInt(),
-                                nameOfWork.text.toString(),
-                                data.NameTypeOfWork,
-                                1,
-                            ), "up", data.Price, data.Count
-                        )
+                            string = "${previousCount}"
+                            countOfElement.setText(string)
+
+                            listener.onChangeClick(
+                                ClientAndEstimateMidifation(
+                                    data.ClientName,
+                                    previousCount,
+                                    data._idTypeCategory,
+                                    data._idTypeOfWork,
+                                    price.text.toString().split(" ")[0].toInt(),
+                                    nameOfWork.text.toString(),
+                                    data.NameTypeOfWork,
+                                    1,
+                                    data.UnitsOfMeasurement,
+                                ), "set", data.Price, data.Count, previousCount - previousNumber
+                            )
+
+                            previousNumber = previousCount
+
+                        }else {
+
+                        }
+
+                        // clear focus and hide cursor from edit text
+                        countOfElement.clearFocus()
+                        countOfElement.isCursorVisible = false
+
+                        return true
                     }
+                    return false
                 }
+            })
 
-                btnDownCounter.setOnClickListener {
-                    val previousCount = countOfElement.text.toString().split(" ")[0].toInt()
+            btnUpCounter.setOnClickListener {
+                val previousCount = countOfElement.text.toString().split(" ")[0].toFloat()
+                Log.d("mytag", "previousCount = $previousCount")
+                if (previousCount >= 0) {
 
-                    if (previousCount > 0) {
-                        countOfElement.text = "${previousCount - 1} шт"
+                    string = "${previousCount + 1}"
+                    countOfElement.setText(string)
 
-                        listener.onChangeClick(
-                            ClientAndEstimateMidifation(
-                                data.ClientName,
-                                previousCount - 1,
-                                data._idTypeCategory,
-                                data._idTypeOfWork,
-                                price.text.toString().split(" ")[0].toInt(),
-                                nameOfWork.text.toString(),
-                                data.NameTypeOfWork,
-                                1,
-
-                            ), "down", data.Price, data.Count
-                        )
-                    }
+                    listener.onChangeClick(
+                        ClientAndEstimateMidifation(
+                            data.ClientName,
+                            previousCount + 1,
+                            data._idTypeCategory,
+                            data._idTypeOfWork,
+                            price.text.toString().split(" ")[0].toInt(),
+                            nameOfWork.text.toString(),
+                            data.NameTypeOfWork,
+                            1,
+                            data.UnitsOfMeasurement,
+                        ), "up", data.Price, data.Count, 0F,
+                    )
                 }
+            }
+
+            btnDownCounter.setOnClickListener {
+                val previousCount = countOfElement.text.toString().split(" ")[0].toFloat()
+
+                if (previousCount > 0) {
+                    countOfElement.setText("${previousCount - 1}")
+
+                    listener.onChangeClick(
+                        ClientAndEstimateMidifation(
+                            data.ClientName,
+                            previousCount - 1,
+                            data._idTypeCategory,
+                            data._idTypeOfWork,
+                            price.text.toString().split(" ")[0].toInt(),
+                            nameOfWork.text.toString(),
+                            data.NameTypeOfWork,
+                            1,
+                            data.UnitsOfMeasurement,
+                        ), "down", data.Price, data.Count, 0F,
+                    )
+                }
+            }
             /* }else if (data.TypeLayout == 0){
                   //layoutType1.isInvisible = true
 
@@ -147,7 +199,8 @@ class TypeOfWorkRecyclerViewAdapter3(private val listener: RowClickListener) :
             data: ClientAndEstimateMidifation,
             typeChange: String,
             priceOld: Int,
-            countOld: Int
+            countOld: Float,
+            deltaEdit: Float,
         )
 
         fun onItemClickListener(user: ClientAndEstimateMidifation)

@@ -60,17 +60,18 @@ class TypeOfWorkRecyclerViewAdapter(private val listener: RowClickListener) :
 
             val priseStr = "${data.Price} ₽"
             price.text = priseStr
-            var string = "${data.Count} шт"
-            countOfElement.text = string
+            var string = "${data.Count}"
+            // добавить единицы измерения
+            countOfElement.setText(string)
 
 
             btnUpCounter.setOnClickListener {
-                val previousCount = countOfElement.text.toString().split(" ")[0].toInt()
+                val previousCount = countOfElement.text.toString().split(" ")[0].toFloat()
                 Log.d("mytag", "previousCount = $previousCount")
                 if (previousCount >= 0) {
 
                     string = "${previousCount + 1} шт"
-                    countOfElement.text = string
+                    countOfElement.setText(string)
 
                     listener.onChangeClick(
                         ClientAndEstimate(
@@ -79,16 +80,18 @@ class TypeOfWorkRecyclerViewAdapter(private val listener: RowClickListener) :
                             data._idTypeCategory,
                             data._idTypeOfWork,
                             price.text.toString().split(" ")[0].toInt(),
-                            nameOfWork.text.toString()
+                            nameOfWork.text.toString(),
+                            data.UnitsOfMeasurement,
+
                         ), "up", data.Price, data.Count
                     )
                 }
             }
             btnDownCounter.setOnClickListener {
-                val previousCount = countOfElement.text.toString().split(" ")[0].toInt()
+                val previousCount = countOfElement.text.toString().split(" ")[0].toFloat()
 
                 if (previousCount > 0) {
-                    countOfElement.text = "${previousCount - 1} шт"
+                    countOfElement.setText("${previousCount - 1}") // добавить единицы измерения
 
                     listener.onChangeClick(
                         ClientAndEstimate(
@@ -97,7 +100,9 @@ class TypeOfWorkRecyclerViewAdapter(private val listener: RowClickListener) :
                             data._idTypeCategory,
                             data._idTypeOfWork,
                             price.text.toString().split(" ")[0].toInt(),
-                            nameOfWork.text.toString()
+                            nameOfWork.text.toString(),
+                            data.UnitsOfMeasurement,
+
                         ), "down", data.Price, data.Count
                     )
                 }
@@ -107,7 +112,7 @@ class TypeOfWorkRecyclerViewAdapter(private val listener: RowClickListener) :
 
     interface RowClickListener {
         fun onDeleteUserClickListener(user: ClientAndEstimate)
-        fun onChangeClick(data: ClientAndEstimate, typeChange: String, priceOld:Int, countOld:Int)
+        fun onChangeClick(data: ClientAndEstimate, typeChange: String, priceOld:Int, countOld:Float)
         fun onItemClickListener(user: ClientAndEstimate)
     }
 }

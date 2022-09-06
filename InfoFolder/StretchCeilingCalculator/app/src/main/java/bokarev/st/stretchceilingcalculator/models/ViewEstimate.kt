@@ -1,17 +1,11 @@
-package bokarev.st.stretchceilingcalculator.entities.relations
+package bokarev.st.stretchceilingcalculator.models
 
-
-
-data class ClientAndEstimate(
-
-    val ClientName: String,
-    val Count: Float,
+data class ViewEstimate(
     val _idTypeCategory: Int,
     val _idTypeOfWork: Int,
     val Price: Int,
     val CategoryName: String,
     val UnitsOfMeasurement: String,
-
 
 
 

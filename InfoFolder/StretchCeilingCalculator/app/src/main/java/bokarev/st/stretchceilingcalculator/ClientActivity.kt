@@ -6,14 +6,12 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat.startActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.whenStarted
 import bokarev.st.stretchceilingcalculator.entities.Client
 import bokarev.st.stretchceilingcalculator.entities.Estimate
+import kotlinx.android.synthetic.main.client.*
 import kotlinx.coroutines.*
-import java.lang.Thread.sleep
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -29,7 +27,7 @@ class ClientActivity : AppCompatActivity() {
         setContentView(R.layout.client)
 
 
-        val editTextNameClient: EditText = findViewById(R.id.editTextNameClient)
+        val editTextNameClientVal: EditText = findViewById(R.id.editTextNameClient)
         val editTextAddress: EditText = findViewById(R.id.editTextAddress)
         val editTextPhone: EditText = findViewById(R.id.editTextPhone)
         val tvState: TextView = findViewById(R.id.tvState)
@@ -39,7 +37,7 @@ class ClientActivity : AppCompatActivity() {
             val previousActivity = intent.getStringExtra("PreviousActivity")
             val client = getClientFromPreviousActivity()
 
-            editTextNameClient.setText(client.ClientName)
+            editTextNameClientVal.setText(client.ClientName)
             editTextAddress.setText(client.Address)
             editTextPhone.setText(client.Tel)
 
@@ -71,7 +69,7 @@ class ClientActivity : AppCompatActivity() {
         addNewClient.setOnClickListener {
 
 
-            val name = editTextNameClient.text.toString()
+            val name = editTextNameClientVal.text.toString()
             val address = editTextAddress.text.toString()
             val phone = editTextPhone.text.toString()
 
@@ -103,7 +101,6 @@ class ClientActivity : AppCompatActivity() {
                 viewModel.insertUserInfo(user) // вставка нового клиента
 
 
-
                 val job = GlobalScope.launch(Dispatchers.Default) {
                     //кастыль чтобы найти Id только что вставленного клиента
                     idUser = viewModel.getAllUsersForStepan(name, currentDate)
@@ -117,24 +114,28 @@ class ClientActivity : AppCompatActivity() {
                     var index = 1
                     for (element in typesCategory) {
                         Log.d("mytag", "element in typesCategory = ${element._id}")
-                        estimate.add(Estimate(0, idUser._id, element._id, 0, currentDate, currentDate))
+                        estimate.add(
+                            Estimate(
+                                0,
+                                idUser._id,
+                                element._id,
+                                0.0,
+                                currentDate,
+                                currentDate
+                            )
+                        )
                         index++
                     }
 
-
-                        // здесь добавить чтение БД таблицы CategoryName и отталкиваясь от кол-ва делать цикл,
-                        // куда записывать все нулевые значения
+                    // здесь добавить чтение БД таблицы CategoryName и отталкиваясь от кол-ва делать цикл,
+                    // куда записывать все нулевые значения
 
 
                     estimate.forEach { dao.insertEstimate(it) }
 
-
                     Log.d("mytag", "new client id = ${idUser._id}")
 
-
-
                 }
-
 
                 runBlocking {
                     // waiting for the coroutine to finish it"s work
@@ -143,44 +144,38 @@ class ClientActivity : AppCompatActivity() {
                     Log.d("mytag", "Main Thread is Running")
                 }
 
-
             } else {
                 // Обновление данных пока заглушка!!!
                 //Надо добавить поиск сущеествующего пользователя и чтение предыдущих значений с его полей
                 // и вместо булевых пеерменных записывать то что было
-
+                val id = getClientFromPreviousActivity()._id
                 val user = Client(
-                    editTextNameClient.getTag(editTextNameClient.id).toString().toInt(),
-                    name,
-                    address,
-                    phone,
-                    IsNew = true,
+                    id, name, address, phone, IsNew = true,
                     IsPurchase = false,
                     IsArchive = false,
                     DateOfCreation = currentDate,
                     DateOfEditing = currentDate
                 )
-                viewModel.updateUserInfo(user)
+
+                val dao = CategoriesDataBase.getInstance(this@ClientActivity).categoriesDao
+                dao.updateUser(user)
+
                 tvState.text = "Продолжить"
-                val toast = Toast.makeText(
-                    applicationContext,
-                    "Кнопка перезаписать не работает",
-                    Toast.LENGTH_SHORT
-                )
-                toast.show()
-                /*val intent = Intent(this, Clients::class.java).also {
+                val intent = Intent(this, Clients::class.java).also {
 
                     it.putExtra("PreviousActivity", "ClientActivity")
                     it.putExtra("ClientEntity", user)
                 }
-                startActivity(intent)*/
+                startActivity(intent)
             }
-            //nameInput.setText("")
-            //emailInput.setText("")
+            editTextNameClientVal.setText("")
+            editTextAddress.setText("")
+            editTextPhone.setText("")
         }
 
     }
-    fun gettransition(client: Client){
+
+    fun gettransition(client: Client) {
         // Сейчас надо нажать второй раз чтобы перейти на активность Сметы
         // переход на активность смета
         val intent = Intent(this, Calculation::class.java).also {
@@ -190,6 +185,7 @@ class ClientActivity : AppCompatActivity() {
         }
         startActivity(intent)
     }
+
     // Kotlin
     override fun onBackPressed() {
         val intent = Intent(this, Clients::class.java).also {

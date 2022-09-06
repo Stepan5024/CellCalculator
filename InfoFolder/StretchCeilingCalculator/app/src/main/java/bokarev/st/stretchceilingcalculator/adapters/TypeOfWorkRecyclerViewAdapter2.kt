@@ -135,7 +135,7 @@ class TypeOfWorkRecyclerViewAdapter2(
 
 
             btnUpCounter.setOnClickListener {
-                val previousCount = countOfElement.text.toString().split(" ")[0].toInt()
+                val previousCount = countOfElement.text.toString().split(" ")[0].toFloat()
                 Log.d("mytag", "previousCount = $previousCount")
                 if (previousCount >= 0) {
 
@@ -149,7 +149,9 @@ class TypeOfWorkRecyclerViewAdapter2(
                             data._idTypeCategory,
                             data._idTypeOfWork,
                             price.text.toString().split(" ")[0].toInt(),
-                            nameOfWork.text.toString()
+                            nameOfWork.text.toString(),
+                            data.UnitsOfMeasurement,
+
                         ), "up", data.Price, data.Count, tv, items, clientName, btnCorrectListOfClients
                     )
 
@@ -157,7 +159,7 @@ class TypeOfWorkRecyclerViewAdapter2(
                 }
             }
             btnDownCounter.setOnClickListener {
-                val previousCount = countOfElement.text.toString().split(" ")[0].toInt()
+                val previousCount = countOfElement.text.toString().split(" ")[0].toFloat()
 
                 if (previousCount > 0) {
                     countOfElement.text = "${previousCount - 1} шт"
@@ -169,7 +171,9 @@ class TypeOfWorkRecyclerViewAdapter2(
                             data._idTypeCategory,
                             data._idTypeOfWork,
                             price.text.toString().split(" ")[0].toInt(),
-                            nameOfWork.text.toString()
+                            nameOfWork.text.toString(),
+                            data.UnitsOfMeasurement,
+
                         ), "down", data.Price, data.Count, tv, items, clientName, btnCorrectListOfClients
                     )
                 }
@@ -190,7 +194,7 @@ class TypeOfWorkRecyclerViewAdapter2(
             data: ClientAndEstimate,
             typeChange: String,
             priceOld: Int,
-            countOld: Int,
+            countOld: Float,
             tv: TextView,
             items: MutableList<Item>,
             clientId: Int,
@@ -224,14 +228,14 @@ class TypeOfWorkRecyclerViewAdapter2(
                         clientsList.add(
                             ClientAndEstimate(
                                 obj.ClientName, obj.Count, obj._idTypeCategory,
-                                obj._idTypeOfWork, obj.Price, obj.CategoryName
+                                obj._idTypeOfWork, obj.Price, obj.CategoryName, obj.UnitsOfMeasurement,
                             )
                         )
                         itemsCopy.add(
                             Item(
                                 1, ClientAndEstimate(
                                     obj.ClientName, obj.Count, obj._idTypeCategory,
-                                    obj._idTypeOfWork, obj.Price, obj.CategoryName
+                                    obj._idTypeOfWork, obj.Price, obj.CategoryName, obj.UnitsOfMeasurement,
                                 )
                             )
                         )
@@ -255,7 +259,9 @@ class TypeOfWorkRecyclerViewAdapter2(
                     data._idTypeCategory,
                     data._idTypeOfWork,
                     priceOld,
-                    data.CategoryName
+                    data.CategoryName,
+                    data.UnitsOfMeasurement,
+
                 )
             )
 

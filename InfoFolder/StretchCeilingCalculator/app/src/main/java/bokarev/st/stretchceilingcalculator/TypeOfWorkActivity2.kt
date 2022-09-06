@@ -78,7 +78,7 @@ class TypeOfWorkActivity2 : AppCompatActivity() {
             }
 
             if (previousActivity == "Calculation") {
-                var sum = 0
+                var sum = 0.0
 
                 tvNameOfWork.text = intent.getStringExtra("NameTypeOfWork").toString()
 
@@ -295,8 +295,8 @@ class TypeOfWorkActivity2 : AppCompatActivity() {
                         )
                         val nameCategory = dao.getTypeOfWorkNameByTypeCategory(idTypeOfWork)
 
-                        for (i in getClientAndEstimate) {
-                            Log.d("mytag", "size = ${getClientAndEstimate.size} , ${i.Count}")
+                        for (j in getClientAndEstimate) {
+                            Log.d("mytag", "size = ${getClientAndEstimate.size} , ${j.Count}")
                         }
                         val news2 = News(
                             nameCategory,
@@ -304,17 +304,18 @@ class TypeOfWorkActivity2 : AppCompatActivity() {
                             )
                         items.add(Item(2, news2))
 
-                        for (i in getClientAndEstimate) {
+                        for (j in getClientAndEstimate) {
 
                             // Вывести привычный ресуклер
                             val clientAndEstimate =
                                 ClientAndEstimate(
-                                    i.CategoryName,
-                                    i.Count,
-                                    i._idTypeCategory,
-                                    i._idTypeOfWork,
-                                    i.Price,
-                                    i.CategoryName,
+                                    j.CategoryName,
+                                    j.Count,
+                                    j._idTypeCategory,
+                                    j._idTypeOfWork,
+                                    j.Price,
+                                    j.CategoryName,
+                                    j.UnitsOfMeasurement,
                                 )
                             items.add(Item(1, clientAndEstimate))
 

@@ -3,6 +3,7 @@ package bokarev.st.stretchceilingcalculator
 import androidx.room.*
 import bokarev.st.stretchceilingcalculator.entities.*
 import bokarev.st.stretchceilingcalculator.entities.relations.*
+import bokarev.st.stretchceilingcalculator.models.ViewEstimate
 
 @Dao
 interface TypeCategoryDao {
@@ -49,19 +50,26 @@ interface TypeCategoryDao {
     fun getAllUserInfo(): List<Client>?
 
     @Transaction
-    @Query("SELECT Client.ClientName, Estimate.Count, Estimate._idTypeCategory, TypeCategory._idTypeOfWork, TypeCategory.Price, TypeCategory.CategoryName FROM Estimate INNER JOIN Client ON Estimate._idClient = Client._id INNER JOIN  TypeCategory ON Estimate._idTypeCategory =  TypeCategory._id where Estimate._idClient = :clientId ORDER BY TypeCategory._idTypeOfWork")
+    @Query("SELECT Client.ClientName, Estimate.Count, Estimate._idTypeCategory, TypeCategory._idTypeOfWork, TypeCategory.Price, TypeCategory.CategoryName, TypeCategory.UnitsOfMeasurement FROM Estimate INNER JOIN Client ON Estimate._idClient = Client._id INNER JOIN  TypeCategory ON Estimate._idTypeCategory =  TypeCategory._id where Estimate._idClient = :clientId ORDER BY TypeCategory._idTypeOfWork")
     suspend fun getClientAndEstimate(clientId: Int): MutableList<ClientAndEstimate>
 
+    @Transaction
+    @Query("SELECT  Estimate._idTypeCategory, TypeCategory._idTypeOfWork, TypeCategory.Price, TypeCategory.CategoryName, TypeCategory.UnitsOfMeasurement FROM Estimate INNER JOIN  TypeCategory ON Estimate._idTypeCategory =  TypeCategory._id ORDER BY TypeCategory._idTypeOfWork")
+    suspend fun getEstimate(): MutableList<ViewEstimate>
 
     @Transaction
-    @Query("SELECT Client.ClientName, Estimate.Count, Estimate._idTypeCategory, TypeCategory._idTypeOfWork, TypeCategory.Price, TypeCategory.CategoryName FROM Estimate INNER JOIN Client ON Estimate._idClient = Client._id INNER JOIN  TypeCategory ON Estimate._idTypeCategory =  TypeCategory._id where Estimate._idClient = :clientId  AND TypeCategory._idTypeOfWork = :typeCategoryId ORDER BY TypeCategory._idTypeOfWork")
+    @Query("SELECT  Estimate._idTypeCategory, TypeCategory._idTypeOfWork, TypeCategory.Price, TypeCategory.CategoryName, TypeCategory.UnitsOfMeasurement FROM Estimate INNER JOIN  TypeCategory ON Estimate._idTypeCategory =  TypeCategory._id WHERE TypeCategory._idTypeOfWork IN (:typeCategoryIdList) ORDER BY TypeCategory._idTypeOfWork")
+    suspend fun getEstimateByList(typeCategoryIdList: List<Int>): MutableList<ViewEstimate>
+
+    @Transaction
+    @Query("SELECT Client.ClientName, Estimate.Count, Estimate._idTypeCategory, TypeCategory._idTypeOfWork, TypeCategory.Price, TypeCategory.CategoryName, TypeCategory.UnitsOfMeasurement FROM Estimate INNER JOIN Client ON Estimate._idClient = Client._id INNER JOIN  TypeCategory ON Estimate._idTypeCategory =  TypeCategory._id where Estimate._idClient = :clientId  AND TypeCategory._idTypeOfWork = :typeCategoryId ORDER BY TypeCategory._idTypeOfWork")
     fun getUnionClientAndEstimateAndTypeCategory2(
         clientId: Int,
         typeCategoryId: Int
     ): MutableList<ClientAndEstimate>
 
     @Transaction
-    @Query("SELECT Client.ClientName, Estimate.Count, Estimate._idTypeCategory, TypeCategory._idTypeOfWork, TypeCategory.Price, TypeCategory.CategoryName FROM Estimate INNER JOIN Client ON Estimate._idClient = Client._id INNER JOIN  TypeCategory ON Estimate._idTypeCategory =  TypeCategory._id where Estimate._idClient = :clientId  AND TypeCategory._idTypeOfWork IN (:typeCategoryIdList)")
+    @Query("SELECT Client.ClientName, Estimate.Count, Estimate._idTypeCategory, TypeCategory._idTypeOfWork, TypeCategory.Price, TypeCategory.CategoryName, TypeCategory.UnitsOfMeasurement FROM Estimate INNER JOIN Client ON Estimate._idClient = Client._id INNER JOIN  TypeCategory ON Estimate._idTypeCategory =  TypeCategory._id where Estimate._idClient = :clientId  AND TypeCategory._idTypeOfWork IN (:typeCategoryIdList)")
     fun getUnionClientAndEstimateAndTypeCategoryInLists(
         clientId: Int,
         typeCategoryIdList: List<Int>
@@ -74,7 +82,7 @@ interface TypeCategoryDao {
     fun deleteUser(user: Client?)
 
     @Transaction
-    @Query("SELECT Client.ClientName, Estimate.Count, Estimate._idTypeCategory, TypeCategory._idTypeOfWork, TypeCategory.Price, TypeCategory.CategoryName FROM Estimate INNER JOIN Client ON Estimate._idClient = Client._id INNER JOIN  TypeCategory ON Estimate._idTypeCategory =  TypeCategory._id where Estimate._idClient = :clientId")
+    @Query("SELECT Client.ClientName, Estimate.Count, Estimate._idTypeCategory, TypeCategory._idTypeOfWork, TypeCategory.Price, TypeCategory.CategoryName, TypeCategory.UnitsOfMeasurement FROM Estimate INNER JOIN Client ON Estimate._idClient = Client._id INNER JOIN  TypeCategory ON Estimate._idTypeCategory =  TypeCategory._id where Estimate._idClient = :clientId")
     fun selectStrokesEstimateByClient(clientId: Int): List<ClientAndEstimate>
 
     @Transaction
@@ -86,7 +94,7 @@ interface TypeCategoryDao {
     suspend fun updateCountStrokesEstimateByClient(
         clientId: Int,
         idTypeCategory: Int,
-        newCount: Int
+        newCount: Float
     )
 
     @Update

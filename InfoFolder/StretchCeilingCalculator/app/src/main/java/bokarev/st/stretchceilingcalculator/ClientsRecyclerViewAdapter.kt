@@ -1,13 +1,18 @@
 package bokarev.st.stretchceilingcalculator
 
+import android.R.attr.label
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
+import androidx.core.content.ContextCompat.getSystemService
 import androidx.recyclerview.widget.RecyclerView
 import bokarev.st.stretchceilingcalculator.entities.Client
-
 
 
 class ClientsRecyclerViewAdapter(val listener: RowClickListener): RecyclerView.Adapter<ClientsRecyclerViewAdapter.MyViewHolder>() {
@@ -50,6 +55,20 @@ class ClientsRecyclerViewAdapter(val listener: RowClickListener): RecyclerView.A
 
 
             tvPhone.text = data.Tel
+
+            tvPhone.setOnClickListener{
+
+                val clipboard =
+                    itemView.context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager?
+                val clip = ClipData.newPlainText("text", tvPhone.text)
+                clipboard!!.setPrimaryClip(clip)
+                val toast = Toast.makeText(
+                    itemView.context,
+                    "номер телефона скопирован",
+                    Toast.LENGTH_LONG
+                )
+                toast.show()
+            }
 
             deleteUserID.setOnClickListener {
                 listener.onDeleteUserClickListener(data)

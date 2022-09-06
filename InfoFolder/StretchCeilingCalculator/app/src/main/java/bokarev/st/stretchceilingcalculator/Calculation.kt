@@ -48,7 +48,7 @@ class Calculation : AppCompatActivity() {
 
             if ((previousActivity == "ClientActivity") or (previousActivity == "Clients") or (previousActivity == "TypeOfWorkActivity")) {
                 tvNameOfClient.text = client.ClientName
-                var sum = 0
+                var sum = 0.0F
                 val job = GlobalScope.launch(Dispatchers.Default) {
 
                     val dao = CategoriesDataBase.getInstance(this@Calculation).categoriesDao
@@ -76,8 +76,14 @@ class Calculation : AppCompatActivity() {
                     Log.d("mytag", "Main Thread is Running")
                 }
 
-            } else {
-                tvNameOfClient.text = ""
+            }
+            else if (previousActivity == "StartActivity") {
+                tvNameOfClient.text = "Выберите категорию \nдля редактирования"
+                tvNameOfClient.textSize = 12f
+
+            }
+            else {
+                tvNameOfClient.text = "Что-то незнакомое"
             }
 
 
@@ -160,7 +166,7 @@ class Calculation : AppCompatActivity() {
             )
             toast.show()*/
 
-            var finishList: MutableList<ClientAndEstimateMidifation> = arrayListOf()
+            val finishList: MutableList<ClientAndEstimateMidifation> = arrayListOf()
             var someList: MutableList<ClientAndEstimate> = arrayListOf()
 
 
@@ -176,7 +182,7 @@ class Calculation : AppCompatActivity() {
                 )
                 for(i in someList){
                     val nameTypeOfWork = dao.getTypeOfWorkNameByTypeCategory(i._idTypeOfWork)
-                    val suk = ClientAndEstimateMidifation(i.ClientName, i.Count, i._idTypeCategory, i._idTypeOfWork, i.Price, i.CategoryName, nameTypeOfWork, 1)
+                    val suk = ClientAndEstimateMidifation(i.ClientName, i.Count, i._idTypeCategory, i._idTypeOfWork, i.Price, i.CategoryName, nameTypeOfWork, 1, i.UnitsOfMeasurement)
                     finishList.add(suk)
                 }
                 /* for (i in someList) {
@@ -194,7 +200,7 @@ class Calculation : AppCompatActivity() {
                 // waiting for the coroutine to finish it"s work
                 job.join()
                 //set view
-                var receipt = Receipt(
+                val receipt = Receipt(
                     0,
                     finishList,
                     getClientFromPreviousActivity().Address,
@@ -241,6 +247,14 @@ class Calculation : AppCompatActivity() {
                 it.putExtra("idTypeOfWork", 1)
                 it.putExtra("idTypeOfWorkList", arrayListOf(1, 2, 3, 4, 5, 6, 7, 8))
                 it.putExtra("NameTypeOfWork", "Система")
+                if(previousActivity == "StartActivity") {
+                    // хотим менять цены
+                    it.putExtra("WantChange", true)
+                }else {
+                    // не хотим менять цены
+                    it.putExtra("WantChange", false)
+                }
+
             }
             startActivity(intent)
         }
@@ -381,7 +395,7 @@ class Calculation : AppCompatActivity() {
         val bitmapFactory = BitmapFactory.decodeResource(
             this.resources, R.drawable.pizzahead
         )
-        var filePath = GeneratePdf.generate(
+        val filePath = GeneratePdf.generate(
             bitmapFactory, receipt
         )
         receipt.FilePath = filePath
@@ -434,7 +448,7 @@ class Calculation : AppCompatActivity() {
         startActivity(intent)
     }
 
-    fun setNullClient(): Client = Client(
+    private fun setNullClient(): Client = Client(
         0, "", "", "", IsNew = false, IsPurchase = false, IsArchive = false,
         DateOfCreation = "",
         DateOfEditing = ""

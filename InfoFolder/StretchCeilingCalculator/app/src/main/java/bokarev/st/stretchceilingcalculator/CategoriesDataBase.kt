@@ -16,7 +16,7 @@ import bokarev.st.stretchceilingcalculator.entities.TypeOfWork
         Estimate::class,
         Client::class,
     ],
-    version = 5
+    version = 6
 )
 abstract class CategoriesDataBase : RoomDatabase() {
 
