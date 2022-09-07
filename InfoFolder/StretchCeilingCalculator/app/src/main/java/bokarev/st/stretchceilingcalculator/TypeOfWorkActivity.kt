@@ -94,8 +94,6 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
                     recycledViewPool.setMaxRecycledViews(0, 300)
                 }
 
-                val toast = Toast.makeText(applicationContext, "меняем цены", Toast.LENGTH_SHORT)
-                toast.show()
 
                 val dao = CategoriesDataBase.getInstance(this@TypeOfWorkActivity).categoriesDao
                 val job = GlobalScope.launch(Dispatchers.Default) {
@@ -391,7 +389,7 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
         }
         val btnCorrectListOfClients: CheckBox = findViewById(R.id.btnCorrectListOfClients)
 
-
+        if(!wantChange)
         btnCorrectListOfClients.setOnCheckedChangeListener { _, isChecked ->
             filterList(isChecked)
         }
@@ -412,10 +410,9 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
 
                     val dao = CategoriesDataBase.getInstance(this@TypeOfWorkActivity).categoriesDao
                     for (i in someList) {
-                        dao.updateCountStrokesEstimateByClient(
-                            getClientFromPreviousActivity()._id,
+                        dao.updatePriceByTypeCategory(
                             i._idTypeCategory,
-                            0F
+                            i.Price,
                         )
                         Log.d("mytag", "items back print = ${i.CategoryName}")
                     }
@@ -524,10 +521,9 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
 
                 val dao = CategoriesDataBase.getInstance(this@TypeOfWorkActivity).categoriesDao
                 for (i in someList) {
-                    dao.updateCountStrokesEstimateByClient(
-                        getClientFromPreviousActivity()._id,
+                    dao.updatePriceByTypeCategory(
                         i._idTypeCategory,
-                        0F
+                        i.Price,
                     )
                     Log.d("mytag", "items back print = ${i.CategoryName}")
                 }
@@ -674,7 +670,7 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
     }
 
     override fun onItemClickListener(user: ViewEstimate) {
-        TODO("Not yet implemented")
+
     }
 }
 

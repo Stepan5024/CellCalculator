@@ -90,7 +90,7 @@ class TypeOfWorkRecyclerViewAdapter4(private val listener: RowClickListener) :
             val priseStr = "${data.Price}"
             price.setText(priseStr)
 
-            var previousNumber =price.text.toString().toInt()
+            val previousNumber =price.text.toString().toInt()
 
             // edit text enter key listener
             price.setOnKeyListener(object : View.OnKeyListener {
