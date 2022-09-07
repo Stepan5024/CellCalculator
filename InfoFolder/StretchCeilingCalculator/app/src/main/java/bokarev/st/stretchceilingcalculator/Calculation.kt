@@ -247,7 +247,7 @@ class Calculation : AppCompatActivity() {
                 it.putExtra("idTypeOfWork", 1)
                 it.putExtra("idTypeOfWorkList", arrayListOf(1, 2, 3, 4, 5, 6, 7, 8))
                 it.putExtra("NameTypeOfWork", "Система")
-                if(previousActivity == "StartActivity") {
+                if(previousActivity == "StartActivity" || (previousActivity == "TypeOfWorkActivity") &&  getClientFromPreviousActivity().ClientName == "") {
                     // хотим менять цены
                     it.putExtra("WantChange", true)
                 }else {

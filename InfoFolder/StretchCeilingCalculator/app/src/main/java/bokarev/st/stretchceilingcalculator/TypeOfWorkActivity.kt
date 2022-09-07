@@ -31,6 +31,7 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
 
 
     private val dao = CategoriesDataBase.getInstance(this).categoriesDao
+    var wantChange = false
 
     private lateinit var typeOfWorkRecyclerViewAdapter: TypeOfWorkRecyclerViewAdapter3
     private lateinit var typeOfWorkRecyclerViewAdapter4: TypeOfWorkRecyclerViewAdapter4
@@ -55,7 +56,7 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
             previousActivity = intent.getStringExtra("PreviousActivity").toString()
             val client = getClientFromPreviousActivity()
             idTypeOfWork = intent.getIntExtra("idTypeOfWork", -1)
-            val wantChange = intent.getBooleanExtra("WantChange", false)
+            wantChange = intent.getBooleanExtra("WantChange", false)
             idTypesOfWorkList =
                 intent.getIntegerArrayListExtra("idTypeOfWorkList") as ArrayList<Int>
             // idTypeOfWork == 0 означает вывести все категории работ в смете
@@ -404,28 +405,53 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
                 filterList(btnCorrectListOfClients.isChecked)
             }
 
+            if(wantChange){
+                // тут надо сделать проверку признак wantChange если да, то с одним или с другим
+                val someList = typeOfWorkRecyclerViewAdapter4.getListData()
+                val job = GlobalScope.launch(Dispatchers.Default) {
 
-            // тут надо сделать проверку признак wantChange если да, то с одним или с другим
-            val someList = typeOfWorkRecyclerViewAdapter.getListData()
-            val job = GlobalScope.launch(Dispatchers.Default) {
+                    val dao = CategoriesDataBase.getInstance(this@TypeOfWorkActivity).categoriesDao
+                    for (i in someList) {
+                        dao.updateCountStrokesEstimateByClient(
+                            getClientFromPreviousActivity()._id,
+                            i._idTypeCategory,
+                            0F
+                        )
+                        Log.d("mytag", "items back print = ${i.CategoryName}")
+                    }
+                }
 
-                val dao = CategoriesDataBase.getInstance(this@TypeOfWorkActivity).categoriesDao
-                for (i in someList) {
-                    dao.updateCountStrokesEstimateByClient(
-                        getClientFromPreviousActivity()._id,
-                        i._idTypeCategory,
-                        i.Count
-                    )
-                    Log.d("mytag", "items back print = ${i.CategoryName}")
+                runBlocking {
+                    // waiting for the coroutine to finish it"s work
+                    job.join()
+                    gettransition()
+                    Log.d("mytag", "Main Thread is Running")
+                }
+            }else {
+                // тут надо сделать проверку признак wantChange если да, то с одним или с другим
+                val someList = typeOfWorkRecyclerViewAdapter.getListData()
+                val job = GlobalScope.launch(Dispatchers.Default) {
+
+                    val dao = CategoriesDataBase.getInstance(this@TypeOfWorkActivity).categoriesDao
+                    for (i in someList) {
+                        dao.updateCountStrokesEstimateByClient(
+                            getClientFromPreviousActivity()._id,
+                            i._idTypeCategory,
+                            i.Count
+                        )
+                        Log.d("mytag", "items back print = ${i.CategoryName}")
+                    }
+                }
+
+                runBlocking {
+                    // waiting for the coroutine to finish it"s work
+                    job.join()
+                    gettransition()
+                    Log.d("mytag", "Main Thread is Running")
                 }
             }
 
-            runBlocking {
-                // waiting for the coroutine to finish it"s work
-                job.join()
-                gettransition()
-                Log.d("mytag", "Main Thread is Running")
-            }
+
         }
 
 
@@ -492,27 +518,51 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
             btnCorrectListOfClients.isChecked = false
             filterList(btnCorrectListOfClients.isChecked)
         }
+        if(wantChange){
+            val someList = typeOfWorkRecyclerViewAdapter4.getListData()
+            val job = GlobalScope.launch(Dispatchers.Default) {
 
-        val someList = typeOfWorkRecyclerViewAdapter.getListData()
-        val job = GlobalScope.launch(Dispatchers.Default) {
+                val dao = CategoriesDataBase.getInstance(this@TypeOfWorkActivity).categoriesDao
+                for (i in someList) {
+                    dao.updateCountStrokesEstimateByClient(
+                        getClientFromPreviousActivity()._id,
+                        i._idTypeCategory,
+                        0F
+                    )
+                    Log.d("mytag", "items back print = ${i.CategoryName}")
+                }
+            }
 
-            val dao = CategoriesDataBase.getInstance(this@TypeOfWorkActivity).categoriesDao
-            for (i in someList) {
-                dao.updateCountStrokesEstimateByClient(
-                    getClientFromPreviousActivity()._id,
-                    i._idTypeCategory,
-                    i.Count
-                )
-                Log.d("mytag", "items back print = ${i.CategoryName}")
+            runBlocking {
+                // waiting for the coroutine to finish it"s work
+                job.join()
+                gettransition()
+                Log.d("mytag", "Main Thread is Running")
+            }
+        }
+        else {
+            val someList = typeOfWorkRecyclerViewAdapter.getListData()
+            val job = GlobalScope.launch(Dispatchers.Default) {
+
+                val dao = CategoriesDataBase.getInstance(this@TypeOfWorkActivity).categoriesDao
+                for (i in someList) {
+                    dao.updateCountStrokesEstimateByClient(
+                        getClientFromPreviousActivity()._id,
+                        i._idTypeCategory,
+                        i.Count
+                    )
+                    Log.d("mytag", "items back print = ${i.CategoryName}")
+                }
+            }
+
+            runBlocking {
+                // waiting for the coroutine to finish it"s work
+                job.join()
+                gettransition()
+                Log.d("mytag", "Main Thread is Running")
             }
         }
 
-        runBlocking {
-            // waiting for the coroutine to finish it"s work
-            job.join()
-            gettransition()
-            Log.d("mytag", "Main Thread is Running")
-        }
 
     }
 
