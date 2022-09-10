@@ -259,6 +259,13 @@ class Calculation : AppCompatActivity() {
                 it.putExtra("idTypeOfWork", 9)
                 it.putExtra("idTypeOfWorkList", arrayListOf(9))
                 it.putExtra("NameTypeOfWork", "Освещение")
+                if(previousActivity == "StartActivity" || (previousActivity == "TypeOfWorkActivity") &&  getClientFromPreviousActivity().ClientName == "") {
+                    // хотим менять цены
+                    it.putExtra("WantChange", true)
+                }else {
+                    // не хотим менять цены
+                    it.putExtra("WantChange", false)
+                }
             }
             startActivity(intent)
         }
@@ -272,6 +279,13 @@ class Calculation : AppCompatActivity() {
                 it.putExtra("idTypeOfWork", 10)
                 it.putExtra("idTypeOfWorkList", arrayListOf(10))
                 it.putExtra("NameTypeOfWork", "Доп. работы")
+                if(previousActivity == "StartActivity" || (previousActivity == "TypeOfWorkActivity") &&  getClientFromPreviousActivity().ClientName == "") {
+                    // хотим менять цены
+                    it.putExtra("WantChange", true)
+                }else {
+                    // не хотим менять цены
+                    it.putExtra("WantChange", false)
+                }
             }
             startActivity(intent)
         }
@@ -285,6 +299,13 @@ class Calculation : AppCompatActivity() {
                 it.putExtra("idTypeOfWork", 11)
                 it.putExtra("idTypeOfWorkList", arrayListOf(11, 12, 13, 14, 15, 16, 17, 18, 19, 20))
                 it.putExtra("NameTypeOfWork", "Материалы")
+                if(previousActivity == "StartActivity" || (previousActivity == "TypeOfWorkActivity") &&  getClientFromPreviousActivity().ClientName == "") {
+                    // хотим менять цены
+                    it.putExtra("WantChange", true)
+                }else {
+                    // не хотим менять цены
+                    it.putExtra("WantChange", false)
+                }
             }
             startActivity(intent)
         }

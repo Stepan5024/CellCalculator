@@ -37,6 +37,7 @@ interface TypeCategoryDao {
     @Query("SELECT * FROM TypeCategory ORDER BY _id")
     suspend fun getTypeCategory(): List<TypeCategory>
 
+
     @Transaction
     @Query("SELECT * FROM Client WHERE _id = :clientId")
     suspend fun getClientWithEstimate(clientId: Int): List<ClientWithEstimate>
@@ -95,6 +96,13 @@ interface TypeCategoryDao {
         clientId: Int,
         idTypeCategory: Int,
         newCount: Float
+    )
+
+    @Transaction
+    @Query("UPDATE TypeCategory SET Price = :newPrice  where _id = :typeCategoryId")
+    suspend fun updatePriceByTypeCategory(
+        typeCategoryId: Int,
+        newPrice: Int,
     )
 
     @Update
