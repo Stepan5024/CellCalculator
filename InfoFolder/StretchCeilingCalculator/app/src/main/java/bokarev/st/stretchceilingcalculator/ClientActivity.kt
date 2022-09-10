@@ -4,13 +4,15 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import android.widget.*
+import android.widget.EditText
+import android.widget.ImageView
+import android.widget.RelativeLayout
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import bokarev.st.stretchceilingcalculator.entities.Client
 import bokarev.st.stretchceilingcalculator.entities.Estimate
-import kotlinx.android.synthetic.main.client.*
 import kotlinx.coroutines.*
 import java.text.SimpleDateFormat
 import java.util.*
@@ -75,7 +77,7 @@ class ClientActivity : AppCompatActivity() {
 
             val sdf = SimpleDateFormat("dd.MM.yyyy HH:mm:ss")
             val currentDate = sdf.format(Date())
-            Log.d("mytag", "currentDate = ${currentDate}")
+            Log.d("mytag", "currentDate = $currentDate")
 
             var idUser = setNullClient()
 
@@ -97,7 +99,7 @@ class ClientActivity : AppCompatActivity() {
                     viewModel =
                         ViewModelProvider(this@ClientActivity)[ClientsViewModel::class.java]
                 }
-                val dao = CategoriesDataBase.getInstance(this).categoriesDao
+
                 viewModel.insertUserInfo(user) // вставка нового клиента
 
 
@@ -140,7 +142,7 @@ class ClientActivity : AppCompatActivity() {
                 runBlocking {
                     // waiting for the coroutine to finish it"s work
                     job.join()
-                    gettransition(idUser)
+                    getTransition(idUser)
                     Log.d("mytag", "Main Thread is Running")
                 }
 
@@ -175,7 +177,7 @@ class ClientActivity : AppCompatActivity() {
 
     }
 
-    fun gettransition(client: Client) {
+    private fun getTransition(client: Client) {
         // Сейчас надо нажать второй раз чтобы перейти на активность Сметы
         // переход на активность смета
         val intent = Intent(this, Calculation::class.java).also {

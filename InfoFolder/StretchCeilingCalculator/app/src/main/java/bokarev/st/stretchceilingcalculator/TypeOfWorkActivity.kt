@@ -9,7 +9,6 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat.startActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -31,7 +30,7 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
 
 
     private val dao = CategoriesDataBase.getInstance(this).categoriesDao
-    var wantChange = false
+    private var wantChange = false
 
     private lateinit var typeOfWorkRecyclerViewAdapter: TypeOfWorkRecyclerViewAdapter3
     private lateinit var typeOfWorkRecyclerViewAdapter4: TypeOfWorkRecyclerViewAdapter4
@@ -44,9 +43,9 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
 
         val tvNameOfWork: TextView = findViewById(R.id.tvNameOfWork)
 
-        var idTypesOfWorkList: ArrayList<Int> = arrayListOf()
+        val idTypesOfWorkList: ArrayList<Int>
 
-        var idTypeOfWork = 0
+        var idTypeOfWork: Int
         val previousActivity: String
 
         val recyclerView: RecyclerView = findViewById(R.id.TypeOfWorkRecyclerView)

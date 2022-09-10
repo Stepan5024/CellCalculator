@@ -1,6 +1,5 @@
 package bokarev.st.stretchceilingcalculator
 
-import android.R.attr.label
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -10,14 +9,13 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.recyclerview.widget.RecyclerView
 import bokarev.st.stretchceilingcalculator.entities.Client
 
 
-class ClientsRecyclerViewAdapter(val listener: RowClickListener): RecyclerView.Adapter<ClientsRecyclerViewAdapter.MyViewHolder>() {
+class ClientsRecyclerViewAdapter(private val listener: RowClickListener): RecyclerView.Adapter<ClientsRecyclerViewAdapter.MyViewHolder>() {
 
-    var items  = ArrayList<Client>()
+    private var items  = ArrayList<Client>()
 
     fun setListData(data: ArrayList<Client>) {
         this.items = data
@@ -41,12 +39,12 @@ class ClientsRecyclerViewAdapter(val listener: RowClickListener): RecyclerView.A
 
     }
 
-    class MyViewHolder(view: View, val listener: RowClickListener): RecyclerView.ViewHolder(view) {
+    class MyViewHolder(view: View, private val listener: RowClickListener): RecyclerView.ViewHolder(view) {
 
-        val tvName = view.findViewById<TextView>(R.id.tvName)
-        val tvEmail = view.findViewById<TextView>(R.id.tvEmail)
-        val tvPhone = view.findViewById<TextView>(R.id.tvPhone)
-        val deleteUserID = view.findViewById<ImageView>(R.id.deleteUserID)
+        private val tvName = view.findViewById<TextView>(R.id.tvName)
+        private val tvEmail = view.findViewById<TextView>(R.id.tvEmail)
+        private val tvPhone = view.findViewById<TextView>(R.id.tvPhone)
+        private val deleteUserID = view.findViewById<ImageView>(R.id.deleteUserID)
 
         fun bind(data: Client) {
             tvName.text = data.ClientName

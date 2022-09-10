@@ -6,17 +6,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
-import android.widget.ImageView
-import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.cardview.widget.CardView
-import androidx.core.view.isInvisible
 import androidx.recyclerview.widget.RecyclerView
 import bokarev.st.stretchceilingcalculator.CategoriesDataBase
 import bokarev.st.stretchceilingcalculator.R
-import bokarev.st.stretchceilingcalculator.entities.relations.ClientAndEstimate
-import bokarev.st.stretchceilingcalculator.models.ClientAndEstimateMidifation
 import bokarev.st.stretchceilingcalculator.models.ViewEstimate
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -66,6 +61,7 @@ class TypeOfWorkRecyclerViewAdapter4(private val listener: RowClickListener) :
         private val price = view.findViewById<EditText>(R.id.Price)!!
 
 
+        @OptIn(DelicateCoroutinesApi::class)
         fun bind(data: ViewEstimate) {
 
 
@@ -79,7 +75,7 @@ class TypeOfWorkRecyclerViewAdapter4(private val listener: RowClickListener) :
             // layoutType0.layoutParams.height = 0
 
 
-            val job = GlobalScope.launch(Dispatchers.Default) {
+            GlobalScope.launch(Dispatchers.Default) {
                 val dao = CategoriesDataBase.getInstance(itemView.context).categoriesDao
 
                 titleOfWork.text =  dao.getTypeOfWorkNameByTypeCategory(data._idTypeOfWork)
@@ -90,7 +86,7 @@ class TypeOfWorkRecyclerViewAdapter4(private val listener: RowClickListener) :
             val priseStr = "${data.Price}"
             price.setText(priseStr)
 
-            var previousNumber =price.text.toString().toInt()
+            val previousNumber =price.text.toString().toInt()
 
             // edit text enter key listener
             price.setOnKeyListener(object : View.OnKeyListener {
@@ -106,7 +102,7 @@ class TypeOfWorkRecyclerViewAdapter4(private val listener: RowClickListener) :
                         Log.d("mytag", "previousCount = $previousCount")
                         if (previousCount >= 0) {
 
-                           val string = "${previousCount}"
+                           val string = "$previousCount"
                             price.setText(string)
 
                             listener.onChangeClick(
@@ -123,10 +119,7 @@ class TypeOfWorkRecyclerViewAdapter4(private val listener: RowClickListener) :
 
 
 
-                        }else {
-
                         }
-
                         // clear focus and hide cursor from edit text
                         price.clearFocus()
                         price.isCursorVisible = false

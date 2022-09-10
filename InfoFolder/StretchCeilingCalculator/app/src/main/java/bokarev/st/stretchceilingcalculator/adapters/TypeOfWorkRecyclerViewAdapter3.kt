@@ -7,13 +7,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.ImageView
-import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.cardview.widget.CardView
-import androidx.core.view.isInvisible
 import androidx.recyclerview.widget.RecyclerView
 import bokarev.st.stretchceilingcalculator.R
-import bokarev.st.stretchceilingcalculator.entities.relations.ClientAndEstimate
 import bokarev.st.stretchceilingcalculator.models.ClientAndEstimateMidifation
 
 
@@ -62,8 +58,7 @@ class TypeOfWorkRecyclerViewAdapter3(private val listener: RowClickListener) :
         private val countOfElement = view.findViewById<EditText>(R.id.CountOfElement)
         private val btnUpCounter = view.findViewById<ImageView>(R.id.btnCounterUp)!!
         private val btnDownCounter = view.findViewById<ImageView>(R.id.btnCounterDown)!!
-        private val layoutType0 = view.findViewById<LinearLayout>(R.id.layoutType0)!!
-        private val layoutType1 = view.findViewById<LinearLayout>(R.id.layoutType1)!!
+
 
         fun bind(data: ClientAndEstimateMidifation) {
 
@@ -85,7 +80,7 @@ class TypeOfWorkRecyclerViewAdapter3(private val listener: RowClickListener) :
             price.text = priseStr
             var string = "${data.Count}"
             countOfElement.setText(string)
-            var previousNumber = 0F;
+            var previousNumber = 0F
 
             // edit text enter key listener
             countOfElement.setOnKeyListener(object : View.OnKeyListener {
@@ -101,7 +96,7 @@ class TypeOfWorkRecyclerViewAdapter3(private val listener: RowClickListener) :
                         Log.d("mytag", "previousCount = $previousCount")
                         if (previousCount >= 0) {
 
-                            string = "${previousCount}"
+                            string = "$previousCount"
                             countOfElement.setText(string)
 
                             listener.onChangeClick(
@@ -119,8 +114,6 @@ class TypeOfWorkRecyclerViewAdapter3(private val listener: RowClickListener) :
                             )
 
                             previousNumber = previousCount
-
-                        }else {
 
                         }
 

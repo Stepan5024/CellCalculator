@@ -78,26 +78,26 @@ object GeneratePdf {
         val part5: MutableList<ClientAndEstimateMidifation> = arrayListOf()
 
         var ind = 0
-        for ((index, _) in (0 until receipt.dataList.size / 5).withIndex()) {
+        for (i in (0 until receipt.dataList.size / 5)) {
             part1.add(receipt.dataList[ind])
             ind++
         }
 
 
-        for ((index, _) in (receipt.dataList.size / 5 until receipt.dataList.size * 2 / 5).withIndex()) {
+        for (i in (receipt.dataList.size / 5 until receipt.dataList.size * 2 / 5).withIndex()) {
             part2.add(receipt.dataList[ind])
             ind++
         }
-        for ((index, _) in (receipt.dataList.size * 2 / 5 until receipt.dataList.size * 3 / 5).withIndex()) {
+        for (i in (receipt.dataList.size * 2 / 5 until receipt.dataList.size * 3 / 5).withIndex()) {
             part3.add(receipt.dataList[ind])
             ind++
         }
-        for ((index, _) in (receipt.dataList.size * 3 / 5 until receipt.dataList.size*4/5).withIndex()) {
+        for (i in (receipt.dataList.size * 3 / 5 until receipt.dataList.size*4/5).withIndex()) {
             part4.add(receipt.dataList[ind])
             ind++
         }
 
-        for ((index, _) in (receipt.dataList.size * 4 / 5 until receipt.dataList.size).withIndex()) {
+        for (i in (receipt.dataList.size * 4 / 5 until receipt.dataList.size).withIndex()) {
             part5.add(receipt.dataList[ind])
             ind++
         }

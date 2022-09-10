@@ -1,5 +1,6 @@
 package bokarev.st.stretchceilingcalculator
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -10,6 +11,7 @@ import java.io.File
 
 class SharePdf {
 
+    @SuppressLint("QueryPermissionsNeeded")
     fun sharePdf(context: Context, file: File) {
 
         val contentUri = getUriForFile(

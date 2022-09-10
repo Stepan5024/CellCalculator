@@ -1,6 +1,6 @@
 package bokarev.st.stretchceilingcalculator.adapters
 
-import android.text.TextUtils.indexOf
+import android.annotation.SuppressLint
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -11,23 +11,19 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import bokarev.st.stretchceilingcalculator.CategoriesDataBase
 import bokarev.st.stretchceilingcalculator.R
-import bokarev.st.stretchceilingcalculator.entities.Estimate
 import bokarev.st.stretchceilingcalculator.entities.relations.ClientAndEstimate
 import bokarev.st.stretchceilingcalculator.models.Item
 import bokarev.st.stretchceilingcalculator.models.News
 import bokarev.st.stretchceilingcalculator.models.Trip
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
 
 
 class TypeOfWorkRecyclerViewAdapter2(
     private var items: MutableList<Item>,
     private val recycler: RecyclerView.Adapter<RecyclerView.ViewHolder>?,
-    val tv: TextView,
+    private val tv: TextView,
     val clientName: Int,
-    val btnCorrectListOfClients: CheckBox,
+    private val btnCorrectListOfClients: CheckBox,
 ) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
@@ -35,36 +31,37 @@ class TypeOfWorkRecyclerViewAdapter2(
         return items
     }
 
-    fun setListData(data: MutableList<Item>) {
-        this.items = data
-    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         // 0 - trip, 1 - count, 2 - news
-        if (viewType == 0) {
-            return TripViewHolder(
-                LayoutInflater.from(parent.context).inflate(
-                    R.layout.item_container_trip,
-                    parent,
-                    false
+        when (viewType) {
+            0 -> {
+                return TripViewHolder(
+                    LayoutInflater.from(parent.context).inflate(
+                        R.layout.item_container_trip,
+                        parent,
+                        false
+                    )
                 )
-            )
-        } else if (viewType == 1) {
-            return TypeOfCategoryViewHolder(
-                LayoutInflater.from(parent.context).inflate(
-                    R.layout.type_of_work_recyclerview_row,
-                    parent,
-                    false
-                ), recycler, tv, items, clientName, btnCorrectListOfClients
-            )
-        } else {
-            return NewsViewHolder(
-                LayoutInflater.from(parent.context).inflate(
-                    R.layout.item_container_news,
-                    parent,
-                    false
+            }
+            1 -> {
+                return TypeOfCategoryViewHolder(
+                    LayoutInflater.from(parent.context).inflate(
+                        R.layout.type_of_work_recyclerview_row,
+                        parent,
+                        false
+                    ), recycler, tv, items, clientName, btnCorrectListOfClients
                 )
-            )
+            }
+            else -> {
+                return NewsViewHolder(
+                    LayoutInflater.from(parent.context).inflate(
+                        R.layout.item_container_news,
+                        parent,
+                        false
+                    )
+                )
+            }
         }
 
     }
@@ -112,11 +109,11 @@ class TypeOfWorkRecyclerViewAdapter2(
         itemView: View,
         private var recycler: RecyclerView.Adapter<RecyclerView.ViewHolder>?,
         private val tv: TextView,
-        var items: MutableList<Item>,
+        private var items: MutableList<Item>,
         val clientName: Int,
-        val btnCorrectListOfClients: CheckBox,
+        private val btnCorrectListOfClients: CheckBox,
 
-    ) : RecyclerView.ViewHolder(itemView) {
+        ) : RecyclerView.ViewHolder(itemView) {
 
         private val nameOfWork: TextView
         private val price: TextView
@@ -125,6 +122,7 @@ class TypeOfWorkRecyclerViewAdapter2(
         private val btnDownCounter: ImageView
 
 
+        @SuppressLint("SetTextI18n")
         fun setTypeOfCategoryData(data: ClientAndEstimate) {
             nameOfWork.text = data.CategoryName
 
@@ -190,6 +188,7 @@ class TypeOfWorkRecyclerViewAdapter2(
 
         }
 
+        @OptIn(DelicateCoroutinesApi::class)
         private fun onChangeClick(
             data: ClientAndEstimate,
             typeChange: String,
@@ -209,9 +208,9 @@ class TypeOfWorkRecyclerViewAdapter2(
             val string = "сумма: $newSum ₽"
             tv.text = string
 
-            var clientsList: MutableList<ClientAndEstimate> = arrayListOf()
+            val clientsList: MutableList<ClientAndEstimate> = arrayListOf()
 
-            var itemsCopy: MutableList<Item> = arrayListOf()
+            val itemsCopy: MutableList<Item> = arrayListOf()
             itemsCopy.clear()
             // фильтрация
             for (i in items) {
@@ -252,42 +251,7 @@ class TypeOfWorkRecyclerViewAdapter2(
             items.clear()
             items.addAll(itemsCopy)
 
-            var indexPrevious = clientsList.indexOf(
-                ClientAndEstimate(
-                    data.ClientName,
-                    countOld,
-                    data._idTypeCategory,
-                    data._idTypeOfWork,
-                    priceOld,
-                    data.CategoryName,
-                    data.UnitsOfMeasurement,
-
-                )
-            )
-
-           /* if (indexPrevious == -1) {
-
-                var index = 0
-                for (i in clientsList) {
-                    if (i.CategoryName == data.CategoryName && i._idTypeOfWork == data._idTypeOfWork && i.ClientName == data.ClientName
-                        && i.Count == countOld && i.Price == priceOld
-                    ) {
-                        Log.d("mytag", "важно !!! зашли в дубль")
-                        indexPrevious = index
-                    }
-                    index++
-                }
-            }*/
-
-            //items[indexPrevious] = Item(1, data)
-           // items.removeAt(indexPrevious + 1)
             recycler = TypeOfWorkRecyclerViewAdapter2(itemsCopy, recycler, tv, clientName, btnCorrectListOfClients)
-
-            if (btnCorrectListOfClients.isChecked) {
-                btnCorrectListOfClients.isChecked = false
-                filterList(btnCorrectListOfClients.isChecked)
-            }
-
 
 
             val job = GlobalScope.launch(Dispatchers.Default) {
@@ -319,60 +283,7 @@ class TypeOfWorkRecyclerViewAdapter2(
             }
 
         }
-        private fun filterList(isChecked: Boolean) {
-            /*  if (isChecked) {
 
-                  Log.d("mytag", "Флажок выбран")
-                  // в recycler view удалить все строки содержащие нули
-                  val items = typeOfWorkRecyclerViewAdapter.getListData()
-                  listDataFull.clear()
-                  listDataFull.addAll(items)
-
-                  for (value in items) {
-
-                      //Log.d("mytag", "items print = ${value.CategoryName}")
-                      //Log.d("mytag", "items print = ${value.CategoryName}")
-
-                  }
-
-                  items.removeAll { it.Count == 0 }
-
-                  typeOfWorkRecyclerViewAdapter.setListData(items)
-              } else {
-
-                  Log.d("mytag", "Флажок не выбран")
-
-                  for (i in listDataFull) {
-                      Log.d("mytag", "listDataFull перед тем как обновлять данные ${i.CategoryName}")
-                  }
-                  // мб записывать listDataFull в shared Preferense
-                  // в recycler view вывести все строк
-                  val items = typeOfWorkRecyclerViewAdapter.getListData()
-                  for ((counter, i) in listDataFull.withIndex()) {
-                      Log.d("mytag", "listDataFull print = ${i.CategoryName}")
-                      for (j in items) {
-                          if (j.CategoryName == i.CategoryName) {
-                              // совпали имена, но значения штук могут быть разные
-                              Log.d(
-                                  "mytag",
-                                  "отработала проверка перезаписи $counter and ${i.CategoryName}"
-                              )
-
-                              listDataFull[counter] = j
-                          }
-                      }
-                  }
-                  val listDataShort = ArrayList<ClientAndEstimate>()
-                  listDataShort.clear()
-                  listDataShort.addAll(listDataFull)
-                  typeOfWorkRecyclerViewAdapter.setListData(listDataShort)
-              }
-
-              typeOfWorkRecyclerViewAdapter.notifyDataSetChanged()
-
-
-             */
-        }
 
     }
 

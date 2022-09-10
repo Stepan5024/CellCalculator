@@ -9,16 +9,13 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat.startActivity
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
-import bokarev.st.stretchceilingcalculator.adapters.TypeOfWorkRecyclerViewAdapter
 import bokarev.st.stretchceilingcalculator.adapters.TypeOfWorkRecyclerViewAdapter2
 import bokarev.st.stretchceilingcalculator.entities.Client
 import bokarev.st.stretchceilingcalculator.entities.relations.ClientAndEstimate
-import bokarev.st.stretchceilingcalculator.models.TypeOfWorkForRecyclerView
 import bokarev.st.stretchceilingcalculator.models.Item
 import bokarev.st.stretchceilingcalculator.models.News
 import kotlinx.coroutines.*
@@ -26,11 +23,11 @@ import kotlinx.coroutines.*
 @OptIn(DelicateCoroutinesApi::class)
 class TypeOfWorkActivity2 : AppCompatActivity() {
 
-    var items: MutableList<Item> = arrayListOf()
+    private var items: MutableList<Item> = arrayListOf()
 
 
     //private var listDataFull: MutableList<ClientAndEstimate> = arrayListOf()
-    private var listDataFull: MutableList<Item> = arrayListOf()
+
 
     private val dao = CategoriesDataBase.getInstance(this@TypeOfWorkActivity2).categoriesDao
 
@@ -131,20 +128,8 @@ class TypeOfWorkActivity2 : AppCompatActivity() {
         }
         val btnCorrectListOfClients: CheckBox = findViewById(R.id.btnCorrectListOfClients)
 
-
-        btnCorrectListOfClients.setOnCheckedChangeListener { _, isChecked ->
-            filterList(isChecked)
-        }
-
-
         val btnReturnToHome: ImageView = findViewById(R.id.btnReturnToHome)
         btnReturnToHome.setOnClickListener {
-
-            if (btnCorrectListOfClients.isChecked) {
-                btnCorrectListOfClients.isChecked = false
-                filterList(btnCorrectListOfClients.isChecked)
-            }
-
 
 
             val job = GlobalScope.launch(Dispatchers.Default) {
@@ -368,60 +353,6 @@ class TypeOfWorkActivity2 : AppCompatActivity() {
     }
 
 
-    private fun filterList(isChecked: Boolean) {
-        /*  if (isChecked) {
-
-              Log.d("mytag", "Флажок выбран")
-              // в recycler view удалить все строки содержащие нули
-              val items = typeOfWorkRecyclerViewAdapter.getListData()
-              listDataFull.clear()
-              listDataFull.addAll(items)
-
-              for (value in items) {
-
-                  //Log.d("mytag", "items print = ${value.CategoryName}")
-                  //Log.d("mytag", "items print = ${value.CategoryName}")
-
-              }
-
-              items.removeAll { it.Count == 0 }
-
-              typeOfWorkRecyclerViewAdapter.setListData(items)
-          } else {
-
-              Log.d("mytag", "Флажок не выбран")
-
-              for (i in listDataFull) {
-                  Log.d("mytag", "listDataFull перед тем как обновлять данные ${i.CategoryName}")
-              }
-              // мб записывать listDataFull в shared Preferense
-              // в recycler view вывести все строк
-              val items = typeOfWorkRecyclerViewAdapter.getListData()
-              for ((counter, i) in listDataFull.withIndex()) {
-                  Log.d("mytag", "listDataFull print = ${i.CategoryName}")
-                  for (j in items) {
-                      if (j.CategoryName == i.CategoryName) {
-                          // совпали имена, но значения штук могут быть разные
-                          Log.d(
-                              "mytag",
-                              "отработала проверка перезаписи $counter and ${i.CategoryName}"
-                          )
-
-                          listDataFull[counter] = j
-                      }
-                  }
-              }
-              val listDataShort = ArrayList<ClientAndEstimate>()
-              listDataShort.clear()
-              listDataShort.addAll(listDataFull)
-              typeOfWorkRecyclerViewAdapter.setListData(listDataShort)
-          }
-
-          typeOfWorkRecyclerViewAdapter.notifyDataSetChanged()
-
-
-         */
-    }
 
     // Kotlin
     override fun onBackPressed() {
@@ -457,7 +388,7 @@ class TypeOfWorkActivity2 : AppCompatActivity() {
  */
     }
 
-    fun gettransition() {
+    private fun gettransition() {
         val intent = Intent(this, Calculation::class.java).also {
             it.putExtra("ClientEntity", getClientFromPreviousActivity())
             it.putExtra("PreviousActivity", "TypeOfWorkActivity")
@@ -465,7 +396,7 @@ class TypeOfWorkActivity2 : AppCompatActivity() {
         startActivity(intent)
     }
 
-    fun getClientFromPreviousActivity(): Client =
+    private fun getClientFromPreviousActivity(): Client =
         intent.getSerializableExtra("ClientEntity") as Client
 
 

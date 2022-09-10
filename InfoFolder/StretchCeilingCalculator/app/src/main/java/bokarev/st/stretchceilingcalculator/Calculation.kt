@@ -1,24 +1,14 @@
 package bokarev.st.stretchceilingcalculator
 
-import android.Manifest
-import android.app.Activity
+import android.annotation.SuppressLint
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
-import android.net.Uri
-import android.os.Build
 import android.os.Bundle
-import android.os.Environment
-import android.provider.Settings
 import android.util.Log
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import bokarev.st.stretchceilingcalculator.entities.Client
 import bokarev.st.stretchceilingcalculator.entities.relations.ClientAndEstimate
 import bokarev.st.stretchceilingcalculator.models.ClientAndEstimateMidifation
@@ -26,8 +16,9 @@ import kotlinx.coroutines.*
 
 class Calculation : AppCompatActivity() {
 
-    var previousActivity = ""
+    private var previousActivity = ""
 
+    @SuppressLint("SetTextI18n")
     @OptIn(DelicateCoroutinesApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -167,7 +158,7 @@ class Calculation : AppCompatActivity() {
             toast.show()*/
 
             val finishList: MutableList<ClientAndEstimateMidifation> = arrayListOf()
-            var someList: MutableList<ClientAndEstimate> = arrayListOf()
+            var someList: MutableList<ClientAndEstimate>
 
 
             val job = GlobalScope.launch(Dispatchers.Default) {
@@ -300,96 +291,6 @@ class Calculation : AppCompatActivity() {
 
     }
 
-    var resultLauncher =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == Activity.RESULT_OK) {
-                // There are no request codes
-                val data: Intent? = result.data
-                val uri = data!!.data
-                try {
-                    //запись файла
-                    /*val outPutStream = this.contentResolver.openOutputStream(uri!!)
-                    outPutStream?.write("CodeLIb file save Demo".toByteArray())
-                    outPutStream?.close()
-                    Toast.makeText(this, "File saved", Toast.LENGTH_LONG).show()
-*/
-
-
-                    val sendIntent: Intent = Intent().apply {
-
-
-                        action = Intent.ACTION_SEND
-                        putExtra(
-                            Intent.EXTRA_TEXT, "This is my text to send.\n" +
-                                    "This is my text to send.\n" +
-                                    "This is my text to send.\n" +
-                                    "This is my text to send.\n"
-                        )
-                        putExtra(Intent.EXTRA_STREAM, uri)
-                        type = "text/plain"
-
-                    }
-                    val shareIntent = Intent.createChooser(sendIntent, null)
-                    startActivity(shareIntent)
-                } catch (e: Exception) {
-                    print(e.localizedMessage)
-                    Toast.makeText(this, "Файл не отправлен", Toast.LENGTH_LONG).show()
-                }
-            }
-        }
-
-    private val STORAGE_REQUEST_CODE = 99;
-
-    private fun checkPermission(): Boolean {
-        return if (Build.VERSION.SDK_INT > Build.VERSION_CODES.R) {
-            Environment.isExternalStorageManager()
-        } else {
-            //bellow 11
-            val write =
-                ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-            val read =
-                ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
-            write == PackageManager.PERMISSION_GRANTED && read == PackageManager.PERMISSION_GRANTED
-        }
-    }
-
-    private fun requestPermission() {
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.R) {
-            try {
-                val intent = Intent()
-                intent.action = Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION
-                val uri = Uri.fromParts("package", this.packageName, null)
-                intent.data = uri
-                storageActivityLauncher.launch(intent)
-            } catch (e: Exception) {
-                val intent = Intent()
-                intent.action = Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION
-                storageActivityLauncher.launch(intent)
-            }
-        } else {
-            ActivityCompat.requestPermissions(
-                this, arrayOf(
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                    Manifest.permission.READ_EXTERNAL_STORAGE
-                ), STORAGE_REQUEST_CODE
-            )
-        }
-    }
-
-    private val storageActivityLauncher =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.R) {
-                if (Environment.isExternalStorageManager()) {
-                    //Todo call Save
-                    Toast.makeText(this, "Storage Permission Granted", Toast.LENGTH_SHORT).show()
-
-                } else {
-                    Toast.makeText(this, "Storage Permission Denied", Toast.LENGTH_SHORT).show()
-                }
-            } else {
-                //bellow 11
-            }
-        }
 
     private fun generatePdf(receipt: Receipt) {
         val bitmapFactory = BitmapFactory.decodeResource(

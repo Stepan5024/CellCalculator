@@ -111,7 +111,6 @@ class Clients : AppCompatActivity(), ClientsRecyclerViewAdapter.RowClickListener
     override fun onItemClickListener(user: Client) {
         //обработка нажатия в recyclerView
 
-
         if (flagOfEditing) {
             // открываем активность Клиента и заполняем поля
             val intent = Intent(this, ClientActivity::class.java).also {
