@@ -20,7 +20,9 @@ class ClientsRecyclerViewAdapter(private val listener: RowClickListener): Recycl
     fun setListData(data: ArrayList<Client>) {
         this.items = data
     }
-
+    fun getListData(): ArrayList<Client> {
+        return items
+    }
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyViewHolder {
        val inflater = LayoutInflater.from(parent.context).inflate(R.layout.clients_recyclerview_row, parent, false)
         return MyViewHolder(inflater, listener)

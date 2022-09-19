@@ -122,7 +122,8 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
                     //set view
                     Log.d("mytag", "Main Thread is Running")
                 }
-            } else {
+            }
+            else {
 
                 recyclerView.apply {
                     layoutManager = LinearLayoutManager(this@TypeOfWorkActivity)
@@ -427,7 +428,7 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
                 runBlocking {
                     // waiting for the coroutine to finish it"s work
                     job.join()
-                    gettransition()
+                    getTransition()
                     Log.d("mytag", "Main Thread is Running")
                 }
             }else {
@@ -449,7 +450,7 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
                 runBlocking {
                     // waiting for the coroutine to finish it"s work
                     job.join()
-                    gettransition()
+                    getTransition()
                     Log.d("mytag", "Main Thread is Running")
                 }
             }
@@ -492,7 +493,7 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
             for ((counter, i) in listDataFull.withIndex()) {
                 Log.d("mytag", "listDataFull print = ${i.CategoryName}")
                 for (j in items) {
-                    if (j.CategoryName == i.CategoryName) {
+                    if (j.CategoryName == i.CategoryName && j._idTypeOfWork == i._idTypeOfWork && j._idTypeCategory == i._idTypeCategory) {
                         // совпали имена, но значения штук могут быть разные
                         Log.d(
                             "mytag",
@@ -500,6 +501,7 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
                         )
 
                         listDataFull[counter] = j
+
                     }
                 }
             }
@@ -538,7 +540,7 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
             runBlocking {
                 // waiting for the coroutine to finish it"s work
                 job.join()
-                gettransition()
+                getTransition()
                 Log.d("mytag", "Main Thread is Running")
             }
         }
@@ -560,7 +562,7 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
             runBlocking {
                 // waiting for the coroutine to finish it"s work
                 job.join()
-                gettransition()
+                getTransition()
                 Log.d("mytag", "Main Thread is Running")
             }
         }
@@ -568,7 +570,7 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
 
     }
 
-    private fun gettransition() {
+    private fun getTransition() {
         val intent = Intent(this, Calculation::class.java).also {
             it.putExtra("ClientEntity", getClientFromPreviousActivity())
             it.putExtra("PreviousActivity", "TypeOfWorkActivity")

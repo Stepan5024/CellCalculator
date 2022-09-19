@@ -4,10 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import android.widget.EditText
-import android.widget.ImageView
-import android.widget.RelativeLayout
-import android.widget.TextView
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -79,100 +76,110 @@ class ClientActivity : AppCompatActivity() {
             val currentDate = sdf.format(Date())
             Log.d("mytag", "currentDate = $currentDate")
 
-            var idUser = setNullClient()
-
-            if (tvState.text.equals("Продолжить")) {
-
-
-                val user = Client(
-                    0, name, address, phone,
-                    IsNew = true,
-                    IsPurchase = false,
-                    IsArchive = false,
-                    DateOfCreation = currentDate,
-                    DateOfEditing = currentDate
+            if(name == "" || address == "" || phone == "") {
+                val toast = Toast.makeText(
+                    applicationContext,
+                    "Заполните имя, адрес и телефон Клиента",
+                    Toast.LENGTH_LONG
                 )
-
-                // костыль
-                //Without ViewModelFactory
-                lifecycleScope.launch {
-                    viewModel =
-                        ViewModelProvider(this@ClientActivity)[ClientsViewModel::class.java]
-                }
-
-                viewModel.insertUserInfo(user) // вставка нового клиента
-
-
-                val job = GlobalScope.launch(Dispatchers.Default) {
-                    //кастыль чтобы найти Id только что вставленного клиента
-                    idUser = viewModel.getAllUsersForStepan(name, currentDate)
-
-
-                    val dao = CategoriesDataBase.getInstance(this@ClientActivity).categoriesDao
-                    val typesCategory = dao.getTypeCategory()
-                    val estimate: MutableList<Estimate> = arrayListOf()
-
-
-                    var index = 1
-                    for (element in typesCategory) {
-                        Log.d("mytag", "element in typesCategory = ${element._id}")
-                        estimate.add(
-                            Estimate(
-                                0,
-                                idUser._id,
-                                element._id,
-                                0.0,
-                                currentDate,
-                                currentDate
-                            )
-                        )
-                        index++
-                    }
-
-                    // здесь добавить чтение БД таблицы CategoryName и отталкиваясь от кол-ва делать цикл,
-                    // куда записывать все нулевые значения
-
-
-                    estimate.forEach { dao.insertEstimate(it) }
-
-                    Log.d("mytag", "new client id = ${idUser._id}")
-
-                }
-
-                runBlocking {
-                    // waiting for the coroutine to finish it"s work
-                    job.join()
-                    getTransition(idUser)
-                    Log.d("mytag", "Main Thread is Running")
-                }
+                toast.show()
 
             } else {
-                // Обновление данных пока заглушка!!!
-                //Надо добавить поиск сущеествующего пользователя и чтение предыдущих значений с его полей
-                // и вместо булевых пеерменных записывать то что было
-                val id = getClientFromPreviousActivity()._id
-                val user = Client(
-                    id, name, address, phone, IsNew = true,
-                    IsPurchase = false,
-                    IsArchive = false,
-                    DateOfCreation = currentDate,
-                    DateOfEditing = currentDate
-                )
+                var idUser = setNullClient()
 
-                val dao = CategoriesDataBase.getInstance(this@ClientActivity).categoriesDao
-                dao.updateUser(user)
+                if (tvState.text.equals("Продолжить")) {
 
-                tvState.text = "Продолжить"
-                val intent = Intent(this, Clients::class.java).also {
 
-                    it.putExtra("PreviousActivity", "ClientActivity")
-                    it.putExtra("ClientEntity", user)
+                    val user = Client(
+                        0, name, address, phone,
+                        IsNew = true,
+                        IsPurchase = false,
+                        IsArchive = false,
+                        DateOfCreation = currentDate,
+                        DateOfEditing = currentDate
+                    )
+
+                    // костыль
+                    //Without ViewModelFactory
+                    lifecycleScope.launch {
+                        viewModel =
+                            ViewModelProvider(this@ClientActivity)[ClientsViewModel::class.java]
+                    }
+
+                    viewModel.insertUserInfo(user) // вставка нового клиента
+
+
+                    val job = GlobalScope.launch(Dispatchers.Default) {
+                        //кастыль чтобы найти Id только что вставленного клиента
+                        idUser = viewModel.getAllUsersForStepan(name, currentDate)
+
+
+                        val dao = CategoriesDataBase.getInstance(this@ClientActivity).categoriesDao
+                        val typesCategory = dao.getTypeCategory()
+                        val estimate: MutableList<Estimate> = arrayListOf()
+
+
+                        var index = 1
+                        for (element in typesCategory) {
+                            Log.d("mytag", "element in typesCategory = ${element._id}")
+                            estimate.add(
+                                Estimate(
+                                    0,
+                                    idUser._id,
+                                    element._id,
+                                    0.0,
+                                    currentDate,
+                                    currentDate
+                                )
+                            )
+                            index++
+                        }
+
+                        // здесь добавить чтение БД таблицы CategoryName и отталкиваясь от кол-ва делать цикл,
+                        // куда записывать все нулевые значения
+
+
+                        estimate.forEach { dao.insertEstimate(it) }
+
+                        Log.d("mytag", "new client id = ${idUser._id}")
+
+                    }
+
+                    runBlocking {
+                        // waiting for the coroutine to finish it"s work
+                        job.join()
+                        getTransition(idUser)
+                        Log.d("mytag", "Main Thread is Running")
+                    }
+
+                } else {
+                    // Обновление данных пока заглушка!!!
+                    //Надо добавить поиск сущеествующего пользователя и чтение предыдущих значений с его полей
+                    // и вместо булевых пеерменных записывать то что было
+                    val id = getClientFromPreviousActivity()._id
+                    val user = Client(
+                        id, name, address, phone, IsNew = true,
+                        IsPurchase = false,
+                        IsArchive = false,
+                        DateOfCreation = currentDate,
+                        DateOfEditing = currentDate
+                    )
+
+                    val dao = CategoriesDataBase.getInstance(this@ClientActivity).categoriesDao
+                    dao.updateUser(user)
+
+                    tvState.text = "Продолжить"
+                    val intent = Intent(this, Clients::class.java).also {
+
+                        it.putExtra("PreviousActivity", "ClientActivity")
+                        it.putExtra("ClientEntity", user)
+                    }
+                    startActivity(intent)
                 }
-                startActivity(intent)
+                editTextNameClientVal.setText("")
+                editTextAddress.setText("")
+                editTextPhone.setText("")
             }
-            editTextNameClientVal.setText("")
-            editTextAddress.setText("")
-            editTextPhone.setText("")
         }
 
     }

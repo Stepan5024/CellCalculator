@@ -8,6 +8,7 @@ import android.util.Log
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import bokarev.st.stretchceilingcalculator.entities.Client
 import bokarev.st.stretchceilingcalculator.entities.relations.ClientAndEstimate
@@ -73,13 +74,11 @@ class Calculation : AppCompatActivity() {
                     Log.d("mytag", "Main Thread is Running")
                 }
 
-            }
-            else if (previousActivity == "StartActivity" || previousActivity == "TypeOfWorkActivity") {
+            } else if (previousActivity == "StartActivity" || previousActivity == "TypeOfWorkActivity") {
                 tvNameOfClient.text = "Выберите категорию \nдля редактирования"
                 tvNameOfClient.textSize = 12f
 
-            }
-            else {
+            } else {
                 tvNameOfClient.text = "Что-то незнакомое"
             }
 
@@ -177,10 +176,23 @@ class Calculation : AppCompatActivity() {
                     "mytag",
                     "someList.size = ${someList.size}"
                 )
-                for(i in someList){
+                for (i in someList) {
                     val nameTypeOfWork = dao.getTypeOfWorkNameByTypeCategory(i._idTypeOfWork)
-                    val suk = ClientAndEstimateMidifation(i.ClientName, i.Count, i._idTypeCategory, i._idTypeOfWork, i.Price, i.CategoryName, nameTypeOfWork, 1, i.UnitsOfMeasurement)
-                    finishList.add(suk)
+                    val suk = ClientAndEstimateMidifation(
+                        i.ClientName,
+                        i.Count,
+                        i._idTypeCategory,
+                        i._idTypeOfWork,
+                        i.Price,
+                        i.CategoryName,
+                        nameTypeOfWork,
+                        1,
+                        i.UnitsOfMeasurement
+                    )
+                    if (suk.Count != 0f) {
+                        finishList.add(suk)
+                    }
+
                 }
                 /* for (i in someList) {
 
@@ -197,22 +209,30 @@ class Calculation : AppCompatActivity() {
                 // waiting for the coroutine to finish it"s work
                 job.join()
                 //set view
-                val receipt = Receipt(
-                    0,
-                    finishList,
-                    getClientFromPreviousActivity().Address,
-                    getClientFromPreviousActivity().Tel,
-                    ""
-                )
+                if (finishList.isNotEmpty()) {
+                    val receipt = Receipt(
+                        0,
+                        finishList,
+                        getClientFromPreviousActivity().Address,
+                        getClientFromPreviousActivity().Tel,
+                        ""
+                    )
 
-                //gotShowPdfPage(receipt)
-                if (receipt.FilePath.isEmpty() || receipt.FilePath.isBlank()) {
-                    generatePdf(receipt)
-                    displayPdf(receipt)
+                    //gotShowPdfPage(receipt)
+                    if (receipt.FilePath.isEmpty() || receipt.FilePath.isBlank()) {
+                        generatePdf(receipt)
+                        displayPdf(receipt)
+                    } else {
+                        displayPdf(receipt)
+                    }
                 } else {
-                    displayPdf(receipt)
+                    val toast = Toast.makeText(
+                        applicationContext,
+                        "В смете нет хотя бы одной позиции!\nНельзя экспортировать пустую смету",
+                        Toast.LENGTH_LONG
+                    )
+                    toast.show()
                 }
-
                 Log.d("mytag", "Main Thread is Running")
             }
 
@@ -244,10 +264,10 @@ class Calculation : AppCompatActivity() {
                 it.putExtra("idTypeOfWork", 1)
                 it.putExtra("idTypeOfWorkList", arrayListOf(1, 2, 3, 4, 5, 6, 7, 8))
                 it.putExtra("NameTypeOfWork", "Система")
-                if(previousActivity == "StartActivity" || (previousActivity == "TypeOfWorkActivity") &&  getClientFromPreviousActivity().ClientName == "") {
+                if (previousActivity == "StartActivity" || (previousActivity == "TypeOfWorkActivity") && getClientFromPreviousActivity().ClientName == "") {
                     // хотим менять цены
                     it.putExtra("WantChange", true)
-                }else {
+                } else {
                     // не хотим менять цены
                     it.putExtra("WantChange", false)
                 }
@@ -265,10 +285,10 @@ class Calculation : AppCompatActivity() {
                 it.putExtra("idTypeOfWork", 9)
                 it.putExtra("idTypeOfWorkList", arrayListOf(9))
                 it.putExtra("NameTypeOfWork", "Освещение")
-                if(previousActivity == "StartActivity" || (previousActivity == "TypeOfWorkActivity") &&  getClientFromPreviousActivity().ClientName == "") {
+                if (previousActivity == "StartActivity" || (previousActivity == "TypeOfWorkActivity") && getClientFromPreviousActivity().ClientName == "") {
                     // хотим менять цены
                     it.putExtra("WantChange", true)
-                }else {
+                } else {
                     // не хотим менять цены
                     it.putExtra("WantChange", false)
                 }
@@ -285,10 +305,10 @@ class Calculation : AppCompatActivity() {
                 it.putExtra("idTypeOfWork", 10)
                 it.putExtra("idTypeOfWorkList", arrayListOf(10))
                 it.putExtra("NameTypeOfWork", "Доп. работы")
-                if(previousActivity == "StartActivity" || (previousActivity == "TypeOfWorkActivity") &&  getClientFromPreviousActivity().ClientName == "") {
+                if (previousActivity == "StartActivity" || (previousActivity == "TypeOfWorkActivity") && getClientFromPreviousActivity().ClientName == "") {
                     // хотим менять цены
                     it.putExtra("WantChange", true)
-                }else {
+                } else {
                     // не хотим менять цены
                     it.putExtra("WantChange", false)
                 }
@@ -305,10 +325,10 @@ class Calculation : AppCompatActivity() {
                 it.putExtra("idTypeOfWork", 11)
                 it.putExtra("idTypeOfWorkList", arrayListOf(11, 12, 13, 14, 15, 16, 17, 18, 19, 20))
                 it.putExtra("NameTypeOfWork", "Материалы")
-                if(previousActivity == "StartActivity" || (previousActivity == "TypeOfWorkActivity") &&  getClientFromPreviousActivity().ClientName == "") {
+                if (previousActivity == "StartActivity" || (previousActivity == "TypeOfWorkActivity") && getClientFromPreviousActivity().ClientName == "") {
                     // хотим менять цены
                     it.putExtra("WantChange", true)
-                }else {
+                } else {
                     // не хотим менять цены
                     it.putExtra("WantChange", false)
                 }
@@ -367,9 +387,16 @@ class Calculation : AppCompatActivity() {
                 }
             }
             "TypeOfWorkActivity" -> {
-                intent = Intent(this, Clients::class.java).also {
-                    it.putExtra("ClientEntity", setNullClient())
-                    it.putExtra("PreviousActivity", "Calculation")
+                intent = if (getClientFromPreviousActivity().ClientName == "") {
+                    Intent(this, MainActivity::class.java).also {
+                        it.putExtra("ClientEntity", setNullClient())
+                        it.putExtra("PreviousActivity", "Calculation")
+                    }
+                } else {
+                    Intent(this, Clients::class.java).also {
+                        it.putExtra("ClientEntity", setNullClient())
+                        it.putExtra("PreviousActivity", "Calculation")
+                    }
                 }
             }
         }

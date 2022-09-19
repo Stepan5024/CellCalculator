@@ -48,13 +48,24 @@ class Clients : AppCompatActivity(), ClientsRecyclerViewAdapter.RowClickListener
 
         val btnCorrectListOfClients: ImageView = findViewById(R.id.btnCorrectListOfClients)
         btnCorrectListOfClients.setOnClickListener {
-            val toast = Toast.makeText(
-                applicationContext,
-                "Теперь нажмите на любую запись для редактирования",
-                Toast.LENGTH_LONG
-            )
-            toast.show()
-            flagOfEditing = !flagOfEditing
+            if(clientsRecyclerViewAdapter.getListData().isNotEmpty()){
+                val toast = Toast.makeText(
+                    applicationContext,
+                    "Теперь нажмите на любую запись для редактирования",
+                    Toast.LENGTH_LONG
+                )
+                toast.show()
+                flagOfEditing = !flagOfEditing
+
+            } else {
+                val toast = Toast.makeText(
+                    applicationContext,
+                    "Добавьте первого клиента!",
+                    Toast.LENGTH_LONG
+                )
+                toast.show()
+            }
+
         }
         val addNewClient: RelativeLayout = findViewById(R.id.addNewClient)
         addNewClient.setOnClickListener {

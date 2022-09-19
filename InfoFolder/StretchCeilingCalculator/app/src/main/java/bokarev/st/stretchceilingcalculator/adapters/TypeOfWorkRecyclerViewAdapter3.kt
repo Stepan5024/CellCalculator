@@ -11,14 +11,13 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import bokarev.st.stretchceilingcalculator.R
 import bokarev.st.stretchceilingcalculator.models.ClientAndEstimateMidifation
+import kotlin.math.truncate
 
 
 class TypeOfWorkRecyclerViewAdapter3(private val listener: RowClickListener) :
     RecyclerView.Adapter<TypeOfWorkRecyclerViewAdapter3.MyViewHolder>() {
 
     private var items: MutableList<ClientAndEstimateMidifation> = arrayListOf()
-    //= ArrayList<ClientAndEstimate>()
-    //val mutableList : MutableList<ClientAndEstimate> = arrayListOf()
 
     fun setListData(data: MutableList<ClientAndEstimateMidifation>) {
         this.items = data
@@ -52,7 +51,7 @@ class TypeOfWorkRecyclerViewAdapter3(private val listener: RowClickListener) :
         RecyclerView.ViewHolder(view) {
 
         private val nameOfWork = view.findViewById<TextView>(R.id.NameOfWork)!!
-        private val nameOfMensure = view.findViewById<TextView>(R.id.tvMensure)!!
+        private val nameOfMeasure = view.findViewById<TextView>(R.id.tvMensure)!!
         private val titleOfWork = view.findViewById<TextView>(R.id.textTypeOfWorkTitle)!!
         private val price = view.findViewById<TextView>(R.id.Price)!!
         private val countOfElement = view.findViewById<EditText>(R.id.CountOfElement)
@@ -74,13 +73,13 @@ class TypeOfWorkRecyclerViewAdapter3(private val listener: RowClickListener) :
             titleOfWork.text = data.NameTypeOfWork
 
             nameOfWork.text = data.CategoryName
-            nameOfMensure.text = data.UnitsOfMeasurement
+            nameOfMeasure.text = data.UnitsOfMeasurement
 
             val priseStr = "${data.Price} ₽"
             price.text = priseStr
             var string = "${data.Count}"
             countOfElement.setText(string)
-            var previousNumber = 0F
+            var previousNumber = data.Count
 
             // edit text enter key listener
             countOfElement.setOnKeyListener(object : View.OnKeyListener {
@@ -91,10 +90,15 @@ class TypeOfWorkRecyclerViewAdapter3(private val listener: RowClickListener) :
                     ) {
 
 
-                        val previousCount = countOfElement.text.toString().split(" ")[0].toFloat()
+                        var previousCount = countOfElement.text.toString().split(" ")[0].toFloat()
 
                         Log.d("mytag", "previousCount = $previousCount")
-                        if (previousCount >= 0) {
+                        if (previousCount >= 0f) {
+
+                            if(data.UnitsOfMeasurement == "шт." || data.UnitsOfMeasurement == "у.е."){
+                                //previousCount = previousCount.toInt().toFloat()
+                                previousCount = truncate(previousCount)
+                            }
 
                             string = "$previousCount"
                             countOfElement.setText(string)
@@ -117,9 +121,9 @@ class TypeOfWorkRecyclerViewAdapter3(private val listener: RowClickListener) :
 
                         }
 
-                        // clear focus and hide cursor from edit text
+                        // clear focus from edit text
                         countOfElement.clearFocus()
-                        countOfElement.isCursorVisible = false
+
 
                         return true
                     }
