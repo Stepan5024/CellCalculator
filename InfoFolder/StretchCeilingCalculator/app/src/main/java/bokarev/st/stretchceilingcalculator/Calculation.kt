@@ -38,7 +38,13 @@ class Calculation : AppCompatActivity() {
             )
 
             if ((previousActivity == "ClientActivity") or (previousActivity == "Clients") or (previousActivity == "TypeOfWorkActivity")) {
-                tvNameOfClient.text = client.ClientName
+
+                if (client.ClientName == "") {
+                    tvNameOfClient.text = "Выберите категорию \nдля редактирования"
+                    tvNameOfClient.textSize = 12f
+                } else {
+                    tvNameOfClient.text = client.ClientName
+                }
                 var sum = 0.0F
                 val job = GlobalScope.launch(Dispatchers.Default) {
 
@@ -68,7 +74,7 @@ class Calculation : AppCompatActivity() {
                 }
 
             }
-            else if (previousActivity == "StartActivity") {
+            else if (previousActivity == "StartActivity" || previousActivity == "TypeOfWorkActivity") {
                 tvNameOfClient.text = "Выберите категорию \nдля редактирования"
                 tvNameOfClient.textSize = 12f
 

@@ -107,7 +107,7 @@ class TypeOfWorkRecyclerViewAdapter4(private val listener: RowClickListener) :
 
                             listener.onChangeClick(
                                 ViewEstimate(
-                                    data._idTypeCategory,
+                                    data._id,
                                     data._idTypeOfWork,
                                     price.text.toString().toInt(),
                                     data.CategoryName,

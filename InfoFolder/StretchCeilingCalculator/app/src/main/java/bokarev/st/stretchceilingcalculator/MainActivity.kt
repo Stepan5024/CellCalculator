@@ -9,12 +9,10 @@ import androidx.lifecycle.lifecycleScope
 import bokarev.st.stretchceilingcalculator.entities.Client
 import bokarev.st.stretchceilingcalculator.entities.TypeCategory
 import bokarev.st.stretchceilingcalculator.entities.TypeOfWork
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
 
 class MainActivity : AppCompatActivity() {
+    @OptIn(DelicateCoroutinesApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -59,11 +57,13 @@ class MainActivity : AppCompatActivity() {
         val job = GlobalScope.launch(Dispatchers.Default) {
             listOfTypeCategory = dao.getTypeCategory()
         }
-
+        Log.d("mytag", "listOfTypeCategory 1 is size = ${listOfTypeCategory.size}")
         runBlocking {
             // waiting for the coroutine to finish it"s work
             job.join()
-            if(listOfTypeCategory.size<=1)  {
+            Log.d("mytag", "listOfTypeCategory  2 is size = ${listOfTypeCategory.size}")
+
+            if(listOfTypeCategory.size <= 1)  {
                 val typeOfWork = listOf(
                     TypeOfWork(1, "Классическая система"),
                     TypeOfWork(2, "Система Kraab"),

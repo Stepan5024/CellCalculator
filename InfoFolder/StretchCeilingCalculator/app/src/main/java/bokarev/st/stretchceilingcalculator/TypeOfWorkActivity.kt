@@ -77,6 +77,8 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
                 }
                 startActivity(intent)
             }
+            Log.d("mytag", "WantChange Value = ${wantChange}")
+
             if (wantChange) {
 
                 recyclerView.apply {
@@ -96,6 +98,9 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
 
                 val dao = CategoriesDataBase.getInstance(this@TypeOfWorkActivity).categoriesDao
                 val job = GlobalScope.launch(Dispatchers.Default) {
+
+                    Log.d("mytag", "idTypesOfWorkList data size = ${idTypesOfWorkList.size}" )
+                    Log.d("mytag", "idTypeOfWork data size = ${idTypeOfWork}" )
                     val someList: MutableList<ViewEstimate> = if (idTypeOfWork == 0)
 
                     // надо вывести весь список со всеми категориями
@@ -105,6 +110,8 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
                         dao.getEstimateByList(
                             idTypesOfWorkList
                         )
+
+                    Log.d("mytag", "someList data size = ${someList.size}" )
                     typeOfWorkRecyclerViewAdapter4.setListData(someList)
                     typeOfWorkRecyclerViewAdapter4.notifyDataSetChanged()
 
@@ -410,7 +417,7 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
                     val dao = CategoriesDataBase.getInstance(this@TypeOfWorkActivity).categoriesDao
                     for (i in someList) {
                         dao.updatePriceByTypeCategory(
-                            i._idTypeCategory,
+                            i._id,
                             i.Price,
                         )
                         Log.d("mytag", "items back print = ${i.CategoryName}")
@@ -521,7 +528,7 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
                 val dao = CategoriesDataBase.getInstance(this@TypeOfWorkActivity).categoriesDao
                 for (i in someList) {
                     dao.updatePriceByTypeCategory(
-                        i._idTypeCategory,
+                        i._id,
                         i.Price,
                     )
                     Log.d("mytag", "items back print = ${i.CategoryName}")
@@ -648,7 +655,7 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
 
             val indexPrevious = typeOfWorkRecyclerViewAdapter4.getListData().indexOf(
                 ViewEstimate(
-                    data._idTypeCategory,
+                    data._id,
                     data._idTypeOfWork,
                     oldPrice,
                     data.CategoryName,

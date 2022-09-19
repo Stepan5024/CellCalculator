@@ -55,12 +55,16 @@ interface TypeCategoryDao {
     suspend fun getClientAndEstimate(clientId: Int): MutableList<ClientAndEstimate>
 
     @Transaction
-    @Query("SELECT  Estimate._idTypeCategory, TypeCategory._idTypeOfWork, TypeCategory.Price, TypeCategory.CategoryName, TypeCategory.UnitsOfMeasurement FROM Estimate INNER JOIN  TypeCategory ON Estimate._idTypeCategory =  TypeCategory._id ORDER BY TypeCategory._idTypeOfWork")
+    @Query("SELECT  TypeCategory._id, TypeCategory._idTypeOfWork, TypeCategory.Price, TypeCategory.CategoryName, TypeCategory.UnitsOfMeasurement FROM Estimate INNER JOIN  TypeCategory ON Estimate._idTypeCategory =  TypeCategory._id ORDER BY TypeCategory._idTypeOfWork")
     suspend fun getEstimate(): MutableList<ViewEstimate>
 
     @Transaction
-    @Query("SELECT  Estimate._idTypeCategory, TypeCategory._idTypeOfWork, TypeCategory.Price, TypeCategory.CategoryName, TypeCategory.UnitsOfMeasurement FROM Estimate INNER JOIN  TypeCategory ON Estimate._idTypeCategory =  TypeCategory._id WHERE TypeCategory._idTypeOfWork IN (:typeCategoryIdList) ORDER BY TypeCategory._idTypeOfWork")
+    @Query("SELECT  _id, TypeCategory._idTypeOfWork, TypeCategory.Price, TypeCategory.CategoryName, TypeCategory.UnitsOfMeasurement FROM  TypeCategory  WHERE TypeCategory._idTypeOfWork IN (:typeCategoryIdList) ORDER BY TypeCategory._idTypeOfWork")
     suspend fun getEstimateByList(typeCategoryIdList: List<Int>): MutableList<ViewEstimate>
+
+    @Transaction
+    @Query("SELECT  TypeCategory._id, TypeCategory._idTypeOfWork, TypeCategory.Price, TypeCategory.CategoryName, TypeCategory.UnitsOfMeasurement FROM Estimate INNER JOIN  TypeCategory ON Estimate._idTypeCategory =  TypeCategory._id WHERE TypeCategory._idTypeOfWork IN (:typeCategoryIdList) ORDER BY TypeCategory._idTypeOfWork")
+    suspend fun getEstimateByListWithEstimate2(typeCategoryIdList: List<Int>): MutableList<ViewEstimate>
 
     @Transaction
     @Query("SELECT Client.ClientName, Estimate.Count, Estimate._idTypeCategory, TypeCategory._idTypeOfWork, TypeCategory.Price, TypeCategory.CategoryName, TypeCategory.UnitsOfMeasurement FROM Estimate INNER JOIN Client ON Estimate._idClient = Client._id INNER JOIN  TypeCategory ON Estimate._idTypeCategory =  TypeCategory._id where Estimate._idClient = :clientId  AND TypeCategory._idTypeOfWork = :typeCategoryId ORDER BY TypeCategory._idTypeOfWork")
