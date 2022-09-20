@@ -21,6 +21,7 @@ import bokarev.st.stretchceilingcalculator.entities.relations.ClientAndEstimate
 import bokarev.st.stretchceilingcalculator.models.ClientAndEstimateMidifation
 import bokarev.st.stretchceilingcalculator.models.ViewEstimate
 import kotlinx.coroutines.*
+import kotlin.math.roundToInt
 
 @OptIn(DelicateCoroutinesApi::class)
 class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.RowClickListener,
@@ -42,6 +43,7 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
         setContentView(R.layout.type_of_work_activity)
 
         val tvNameOfWork: TextView = findViewById(R.id.tvNameOfWork)
+        val btnCorrectListOfClients: CheckBox = findViewById(R.id.btnCorrectListOfClients)
 
         val idTypesOfWorkList: ArrayList<Int>
 
@@ -206,6 +208,8 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
 
                         }
 
+
+
                     } else {
                         if (idTypesOfWorkList.size > 0) {
 
@@ -333,6 +337,7 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
                     typeOfWorkRecyclerViewAdapter.setListData(finalList)
                     typeOfWorkRecyclerViewAdapter.notifyDataSetChanged()
 
+                    // фильтрация нужна или нет?
 
                 }
 
@@ -341,7 +346,7 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
 
 
             if (previousActivity == "Calculation" || idTypeOfWork == 0) {
-                var sum = 0.0
+                var sum = 0f
 
 
                 tvNameOfWork.text = intent.getStringExtra("NameTypeOfWork").toString()
@@ -380,7 +385,7 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
                     //set view
 
                     val tvSum = findViewById<TextView>(R.id.textView2)
-                    val string = "сумма: $sum ₽"
+                    val string = "сумма: ${(sum * 100f).roundToInt() / 100f} ₽"
                     tvSum.text = string
 
                     Log.d("mytag", "Main Thread is Running")
@@ -394,7 +399,7 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
         } catch (exp: RuntimeException) {
 
         }
-        val btnCorrectListOfClients: CheckBox = findViewById(R.id.btnCorrectListOfClients)
+
 
         if(!wantChange)
         btnCorrectListOfClients.setOnCheckedChangeListener { _, isChecked ->
@@ -472,12 +477,10 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
             listDataFull.addAll(items)
 
             for (value in items) {
-
                 Log.d("mytag", "items print = ${value.CategoryName}")
-
             }
 
-            items.removeAll { it.Count.toInt() == 0 }
+            items.removeAll { it.Count == 0F }
 
             typeOfWorkRecyclerViewAdapter.setListData(items)
         } else {

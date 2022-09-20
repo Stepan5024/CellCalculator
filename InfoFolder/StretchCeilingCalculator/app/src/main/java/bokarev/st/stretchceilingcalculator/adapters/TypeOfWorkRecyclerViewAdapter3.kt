@@ -11,6 +11,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import bokarev.st.stretchceilingcalculator.R
 import bokarev.st.stretchceilingcalculator.models.ClientAndEstimateMidifation
+import kotlin.math.roundToInt
 import kotlin.math.truncate
 
 
@@ -158,13 +159,15 @@ class TypeOfWorkRecyclerViewAdapter3(private val listener: RowClickListener) :
             btnDownCounter.setOnClickListener {
                 val previousCount = countOfElement.text.toString().split(" ")[0].toFloat()
 
-                if (previousCount > 0) {
+                if (previousCount > 0F && (previousCount - 1F >=0)) {
                     countOfElement.setText("${previousCount - 1}")
+
+
 
                     listener.onChangeClick(
                         ClientAndEstimateMidifation(
                             data.ClientName,
-                            previousCount - 1,
+                            ((previousCount - 1) * 100f).roundToInt() / 100f,
                             data._idTypeCategory,
                             data._idTypeOfWork,
                             price.text.toString().split(" ")[0].toInt(),
