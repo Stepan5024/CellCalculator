@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import bokarev.st.stretchceilingcalculator.entities.Client
 import bokarev.st.stretchceilingcalculator.entities.Estimate
+import kotlinx.android.synthetic.main.client.*
 import kotlinx.coroutines.*
 import java.text.SimpleDateFormat
 import java.util.*
@@ -100,25 +101,19 @@ class ClientActivity : AppCompatActivity() {
                     // Обновление данных клиента
                     //Надо добавить поиск сущеествующего пользователя и чтение предыдущих значений с его полей
                     // и вместо булевых пеерменных записывать то что было
+
+
                     val id = getClientFromPreviousActivity()._id
                     val user = Client(
                         id, name, address, phone, IsNew = true,
                         IsPurchase = false,
                         IsArchive = false,
-                        DateOfCreation = currentDate,
+                        DateOfCreation = getClientFromPreviousActivity().DateOfCreation,
                         DateOfEditing = currentDate
                     )
 
-                    val dao = CategoriesDataBase.getInstance(this@ClientActivity).categoriesDao
-                    dao.updateUser(user)
+                    updateInfoClient(user)
 
-                    tvState.text = "Продолжить"
-                    val intent = Intent(this, Clients::class.java).also {
-
-                        it.putExtra("PreviousActivity", "ClientActivity")
-                        it.putExtra("ClientEntity", user)
-                    }
-                    startActivity(intent)
                 }
                 editTextNameClientVal.setText("")
                 editTextAddress.setText("")
@@ -128,17 +123,27 @@ class ClientActivity : AppCompatActivity() {
 
     }
 
-    private fun insertNewClientInDataBase(user: Client) {
+    private fun updateInfoClient(client: Client) {
+        val dao = CategoriesDataBase.getInstance(this@ClientActivity).categoriesDao
+        dao.updateUser(client)
+
+        tvState.text = "Продолжить"
+        val intent = Intent(this, Clients::class.java).also {
+
+            it.putExtra("PreviousActivity", "ClientActivity")
+            it.putExtra("ClientEntity", client)
+        }
+        startActivity(intent)
+    }
+
+    private fun insertNewClientInDataBase(client: Client) {
 
         viewModel =
             ViewModelProvider(this@ClientActivity)[ClientsViewModel::class.java]
 
-        viewModel.insertUserInfo(user) // вставка нового клиента
+        viewModel.insertUserInfo(client) // вставка нового клиента
 
-
-
-
-        createBlankCalculationToNewClient(user)
+        createBlankCalculationToNewClient(client)
     }
 
     @OptIn(DelicateCoroutinesApi::class)

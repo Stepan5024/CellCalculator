@@ -4,10 +4,8 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import android.widget.CheckBox
-import android.widget.ImageView
-import android.widget.TextView
-import android.widget.Toast
+import android.view.View
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -17,20 +15,19 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import bokarev.st.stretchceilingcalculator.adapters.TypeOfWorkRecyclerViewAdapter3
 import bokarev.st.stretchceilingcalculator.adapters.TypeOfWorkRecyclerViewAdapter4
 import bokarev.st.stretchceilingcalculator.entities.Client
-import bokarev.st.stretchceilingcalculator.entities.relations.ClientAndEstimate
 import bokarev.st.stretchceilingcalculator.entities.ClientAndEstimateModification
 import bokarev.st.stretchceilingcalculator.entities.ViewEstimate
+import bokarev.st.stretchceilingcalculator.entities.relations.ClientAndEstimate
+import kotlinx.android.synthetic.main.type_of_work_activity.*
 import kotlinx.coroutines.*
 import kotlin.math.roundToInt
+
 
 @OptIn(DelicateCoroutinesApi::class)
 class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.RowClickListener,
     TypeOfWorkRecyclerViewAdapter4.RowClickListener {
 
     private var listDataFull: MutableList<ClientAndEstimateModification> = arrayListOf()
-
-
-    private val dao = CategoriesDataBase.getInstance(this).categoriesDao
     private var wantChange = false
 
     private lateinit var typeOfWorkRecyclerViewAdapter: TypeOfWorkRecyclerViewAdapter3
@@ -42,15 +39,15 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
         super.onCreate(savedInstanceState)
         setContentView(R.layout.type_of_work_activity)
 
+        val recyclerView:RecyclerView = findViewById(R.id.TypeOfWorkRecyclerView)
         val tvNameOfWork: TextView = findViewById(R.id.tvNameOfWork)
         val btnCorrectListOfClients: CheckBox = findViewById(R.id.btnCorrectListOfClients)
+        val dao = CategoriesDataBase.getInstance(this).categoriesDao
 
         val idTypesOfWorkList: ArrayList<Int>
 
         var idTypeOfWork: Int
         val previousActivity: String
-
-        val recyclerView: RecyclerView = findViewById(R.id.TypeOfWorkRecyclerView)
 
 
         try {
@@ -62,58 +59,41 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
                 intent.getIntegerArrayListExtra("idTypeOfWorkList") as ArrayList<Int>
             // idTypeOfWork == 0 означает вывести все категории работ в смете
             // idTypeOfWork == -1 означает что пользователь попал на активность не по кнопкам Система, Освещение, Доп. работы, материалы
-            if (idTypeOfWork == -1) {
+            if (idTypeOfWork == -1) exceptionReturn()
 
-                val toast = Toast.makeText(
-                    applicationContext,
-                    "Произошла ошибка выбора типа работы. Обратитесь к разработчику",
-                    Toast.LENGTH_SHORT
-                )
-                toast.show()
-
-
-                val intent = Intent(this, MainActivity::class.java).also {
-                    it.putExtra("ClientEntity", getClientFromPreviousActivity())
-                    it.putExtra("PreviousActivity", "TypeOfWorkActivity")
-
-                }
-                startActivity(intent)
-            }
-            Log.d("mytag", "WantChange Value = ${wantChange}")
+            Log.d("mytag", "WantChange Value = $wantChange")
 
             if (wantChange) {
 
-                recyclerView.apply {
-                    layoutManager = LinearLayoutManager(this@TypeOfWorkActivity)
-                    typeOfWorkRecyclerViewAdapter4 =
-                        TypeOfWorkRecyclerViewAdapter4(this@TypeOfWorkActivity)
-                    adapter = typeOfWorkRecyclerViewAdapter4
-                    val divider =
-                        DividerItemDecoration(
-                            applicationContext,
-                            StaggeredGridLayoutManager.VERTICAL
-                        )
-                    addItemDecoration(divider)
-                    recycledViewPool.setMaxRecycledViews(0, 300)
-                }
 
+                createRecyclerViewAboutPrice(recyclerView)
 
                 val dao = CategoriesDataBase.getInstance(this@TypeOfWorkActivity).categoriesDao
                 val job = GlobalScope.launch(Dispatchers.Default) {
 
-                    Log.d("mytag", "idTypesOfWorkList data size = ${idTypesOfWorkList.size}" )
-                    Log.d("mytag", "idTypeOfWork data size = ${idTypeOfWork}" )
+                    Log.d("mytag", "idTypesOfWorkList data size = ${idTypesOfWorkList.size}")
+                    Log.d("mytag", "idTypeOfWork data size = $idTypeOfWork")
                     val someList: MutableList<ViewEstimate> = if (idTypeOfWork == 0)
 
                     // надо вывести весь список со всеми категориями
-                        dao.getEstimate()
+                        dao.getTypesCategory()
+
                     else
                     // выводим список выбранных категорий
                         dao.getEstimateByList(
                             idTypesOfWorkList
                         )
 
-                    Log.d("mytag", "someList data size = ${someList.size}" )
+                    Log.d("mytag", "someList data size = ${someList.size}")
+
+                    /*if (hasDuplicates(someList)) {
+                        Log.d("mytag", "Repeated id elements found = ${someList.size}")
+                        println("Repeated id elements found")
+                    } else {
+                        println("No repeated elements found")
+                        Log.d("mytag", "No repeated elements found = ${someList.size}")
+                    }*/
+
                     typeOfWorkRecyclerViewAdapter4.setListData(someList)
                     typeOfWorkRecyclerViewAdapter4.notifyDataSetChanged()
 
@@ -124,25 +104,12 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
                     //set view
                     Log.d("mytag", "Main Thread is Running")
                 }
-            }
-            else {
+            } else {
 
-                recyclerView.apply {
-                    layoutManager = LinearLayoutManager(this@TypeOfWorkActivity)
-                    typeOfWorkRecyclerViewAdapter =
-                        TypeOfWorkRecyclerViewAdapter3(this@TypeOfWorkActivity)
-                    adapter = typeOfWorkRecyclerViewAdapter
-                    val divider =
-                        DividerItemDecoration(
-                            applicationContext,
-                            StaggeredGridLayoutManager.VERTICAL
-                        )
-                    addItemDecoration(divider)
-                    recycledViewPool.setMaxRecycledViews(0, 300)
-                }
+                createRecyclerViewAboutEstimate(recyclerView)
 
-                val finalList: MutableList<ClientAndEstimateModification> = arrayListOf()
-                //Without ViewModelFactory
+                var finalList: MutableList<ClientAndEstimateModification> = arrayListOf()
+
                 lifecycleScope.launch {
                     var getClientAndEstimate: MutableList<ClientAndEstimate>
 
@@ -156,58 +123,23 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
 
                         )
 
-                        var prev = 0
+                        var previousIdTypeOfWork = 0
+                        // здесь сделать разный тип лайаута для ресуклер вью. Например разные категории разделять фоновым цветом или записью
                         for (i in getClientAndEstimate) {
-                            if (i._idTypeOfWork == prev) {
-                                val nameCategory = dao.getTypeOfWorkNameByTypeCategory(prev)
-                                val clientAndEstimateModification =
-                                    ClientAndEstimateModification(
-                                        i.CategoryName,
-                                        i.Count,
-                                        i._idTypeCategory,
-                                        i._idTypeOfWork,
-                                        i.Price,
-                                        i.CategoryName,
-                                        nameCategory,
-                                        1,
-                                        i.UnitsOfMeasurement,
-                                    )
-                                finalList.add(clientAndEstimateModification)
+                            if (i._idTypeOfWork == previousIdTypeOfWork) {
+                                val nameCategory = dao.getTypeOfWorkNameByTypeCategory(previousIdTypeOfWork)
+
+                                finalList.add(createClientAndEstimateModificationRow(i, 1, nameCategory))
 
                             } else {
-                                prev++
-                                val nameCategory = dao.getTypeOfWorkNameByTypeCategory(prev)
-                                /* val clientAndEstimateMidifation1 =
-                                     ClientAndEstimateModification(
-                                         "NewList",
-                                         0,
-                                         i._idTypeCategory,
-                                         prev,
-                                         0,
-                                         nameCategory,
-                                         nameCategory,
-                                         0
-                                     )*/
+                                previousIdTypeOfWork++
+                                val nameCategory = dao.getTypeOfWorkNameByTypeCategory(previousIdTypeOfWork)
 
-                                val clientAndEstimateModification2 =
-                                    ClientAndEstimateModification(
-                                        i.CategoryName,
-                                        i.Count,
-                                        i._idTypeCategory,
-                                        i._idTypeOfWork,
-                                        i.Price,
-                                        i.CategoryName,
-                                        nameCategory,
-                                        1,
-                                        i.UnitsOfMeasurement,
-                                    )
-                                //finalList.add(clientAndEstimateMidifation1)
-                                finalList.add(clientAndEstimateModification2)
+                                finalList.add(createClientAndEstimateModificationRow(i, 0, nameCategory))
                             }
 
 
                         }
-
 
 
                     } else {
@@ -345,6 +277,7 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
             }
 
 
+            // вывести значение суммы по категори
             if (previousActivity == "Calculation" || idTypeOfWork == 0) {
                 var sum = 0f
 
@@ -383,11 +316,16 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
                     // waiting for the coroutine to finish it"s work
                     job.join()
                     //set view
-
                     val tvSum = findViewById<TextView>(R.id.textView2)
-                    val string = "сумма: ${(sum * 100f).roundToInt() / 100f} ₽"
-                    tvSum.text = string
+                    if(!wantChange) {
 
+                        val string = "сумма: ${(sum * 100f).roundToInt() / 100f} ₽"
+                        tvSum.text = string
+                    }else {
+                        tvSum.text = ""
+                        showHide(btnCorrectListOfClients)
+
+                    }
                     Log.d("mytag", "Main Thread is Running")
                 }
             }
@@ -396,15 +334,17 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
                 "mytag",
                 "previousActivity = $previousActivity nameOfClient = ${client.ClientName} idClient = ${client._id}"
             )
+
+
         } catch (exp: RuntimeException) {
 
         }
 
 
-        if(!wantChange)
-        btnCorrectListOfClients.setOnCheckedChangeListener { _, isChecked ->
-            filterList(isChecked)
-        }
+        if (!wantChange)
+            btnCorrectListOfClients.setOnCheckedChangeListener { _, isChecked ->
+                filterList(isChecked)
+            }
 
 
         val btnReturnToHome: ImageView = findViewById(R.id.btnReturnToHome)
@@ -415,7 +355,7 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
                 filterList(btnCorrectListOfClients.isChecked)
             }
 
-            if(wantChange){
+            if (wantChange) {
                 // тут надо сделать проверку признак wantChange если да, то с одним или с другим
                 val someList = typeOfWorkRecyclerViewAdapter4.getListData()
                 val job = GlobalScope.launch(Dispatchers.Default) {
@@ -426,7 +366,7 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
                             i._id,
                             i.Price,
                         )
-                        Log.d("mytag", "items back print = ${i.CategoryName}")
+                        Log.d("mytag", "items back print = ${i.CategoryName} prise = ${i.Price}")
                     }
                 }
 
@@ -436,7 +376,7 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
                     getTransition()
                     Log.d("mytag", "Main Thread is Running")
                 }
-            }else {
+            } else {
                 // тут надо сделать проверку признак wantChange если да, то с одним или с другим
                 val someList = typeOfWorkRecyclerViewAdapter.getListData()
                 val job = GlobalScope.launch(Dispatchers.Default) {
@@ -463,7 +403,90 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
 
         }
 
+    }
 
+    private fun createClientAndEstimateModificationRow(
+        clientAndEstimate: ClientAndEstimate,
+        typeLayout: Int,
+        nameCategory: String
+    ): ClientAndEstimateModification {
+        return ClientAndEstimateModification(
+            clientAndEstimate.CategoryName,
+            clientAndEstimate.Count,
+            clientAndEstimate._idTypeCategory,
+            clientAndEstimate._idTypeOfWork,
+            clientAndEstimate.Price,
+            clientAndEstimate.CategoryName,
+            nameCategory,
+            typeLayout,
+            clientAndEstimate.UnitsOfMeasurement,
+        )
+    }
+
+    private fun createRecyclerViewAboutEstimate(recyclerView: RecyclerView) {
+
+        recyclerView.apply {
+            layoutManager = LinearLayoutManager(this@TypeOfWorkActivity)
+            typeOfWorkRecyclerViewAdapter =
+                TypeOfWorkRecyclerViewAdapter3(this@TypeOfWorkActivity)
+            adapter = typeOfWorkRecyclerViewAdapter
+            val divider =
+                DividerItemDecoration(
+                    applicationContext,
+                    StaggeredGridLayoutManager.VERTICAL
+                )
+            addItemDecoration(divider)
+            recycledViewPool.setMaxRecycledViews(0, 300)
+        }
+    }
+
+    private fun createRecyclerViewAboutPrice(recyclerView: RecyclerView) {
+
+        recyclerView.apply {
+            layoutManager = LinearLayoutManager(this@TypeOfWorkActivity)
+            typeOfWorkRecyclerViewAdapter4 =
+                TypeOfWorkRecyclerViewAdapter4(this@TypeOfWorkActivity)
+            adapter = typeOfWorkRecyclerViewAdapter4
+            val divider =
+                DividerItemDecoration(
+                    applicationContext,
+                    StaggeredGridLayoutManager.VERTICAL
+                )
+            addItemDecoration(divider)
+            recycledViewPool.setMaxRecycledViews(0, 300)
+        }
+    }
+
+    private fun exceptionReturn() {
+        val toast = Toast.makeText(
+            applicationContext,
+            "Произошла ошибка выбора типа работы. Обратитесь к разработчику",
+            Toast.LENGTH_SHORT
+        )
+        toast.show()
+
+
+        val intent = Intent(this, MainActivity::class.java).also {
+            it.putExtra("ClientEntity", getClientFromPreviousActivity())
+            it.putExtra("PreviousActivity", "TypeOfWorkActivity")
+
+        }
+        startActivity(intent)
+    }
+
+    private fun hasDuplicates(someList: MutableList<ViewEstimate>): Boolean {
+
+        for (i in 0 until someList.size) {
+            for (j in (i+1) until someList.size) {
+                if (someList[j]._id == someList[i]._id) {
+
+                    return true
+
+                }
+            }
+        }
+
+        return false
     }
 
     @SuppressLint("NotifyDataSetChanged")
@@ -477,7 +500,7 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
             listDataFull.addAll(items)
 
             for (value in items) {
-                Log.d("mytag", "items print = ${value.CategoryName}")
+                // Log.d("mytag", "items print = ${value.CategoryName}")
             }
 
             items.removeAll { it.Count == 0F }
@@ -526,7 +549,7 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
             btnCorrectListOfClients.isChecked = false
             filterList(btnCorrectListOfClients.isChecked)
         }
-        if(wantChange){
+        if (wantChange) {
             val someList = typeOfWorkRecyclerViewAdapter4.getListData()
             val job = GlobalScope.launch(Dispatchers.Default) {
 
@@ -536,7 +559,13 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
                         i._id,
                         i.Price,
                     )
-                    Log.d("mytag", "items back print = ${i.CategoryName}")
+                    if (i.CategoryName == "Установка потолочного профиля") {
+                        Log.d(
+                            "mytag",
+                            "items back button print  = ${i.CategoryName} new price = ${i.Price} id = ${i._id}"
+                        )
+                    }
+
                 }
             }
 
@@ -546,8 +575,7 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
                 getTransition()
                 Log.d("mytag", "Main Thread is Running")
             }
-        }
-        else {
+        } else {
             val someList = typeOfWorkRecyclerViewAdapter.getListData()
             val job = GlobalScope.launch(Dispatchers.Default) {
 
@@ -600,14 +628,21 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
         val tv = findViewById<TextView>(R.id.textView2)
         val oldSum = tv.text.split(" ")[1].toFloat()
         var newSum = 0F
-        if (typeChange == "down") newSum = oldSum - data.Price
-        else if (typeChange == "up") newSum = oldSum + data.Price
-        else if (typeChange == "set") newSum = oldSum + data.Price * deltaEdit
+        when (typeChange) {
+            "down" -> newSum = oldSum - data.Price
+            "up" -> newSum = oldSum + data.Price
+            "set" -> newSum = oldSum + data.Price * deltaEdit
+        }
 
+        if (!wantChange) {
+            val string = "сумма: $newSum ₽"
+            tv.text = string
+        }
+        else {
+            tv.text = ""
+            showHide(btnCorrectListOfClients)
 
-        val string = "сумма: $newSum ₽"
-        tv.text = string
-
+        }
         val indexPrevious = typeOfWorkRecyclerViewAdapter.getListData().indexOf(
             ClientAndEstimateModification(
                 data.ClientName,
@@ -625,10 +660,7 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
 
         items.add(indexPrevious, data)
         items.removeAt(indexPrevious + 1)
-
-        for (i in items) {
-            Log.d("mytag", "items print = ${i.CategoryName}")
-        }
+        
         typeOfWorkRecyclerViewAdapter.setListData(items)
         typeOfWorkRecyclerViewAdapter.notifyDataSetChanged()
     }
@@ -643,41 +675,49 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
         saveButton.setText("Update")*/
 
     }
-
+    fun showHide(view: View) {
+        view.visibility = if (view.visibility == View.VISIBLE){
+            View.INVISIBLE
+        } else{
+            View.VISIBLE
+        }
+    }
     override fun onDeleteUserClickListener(user: ViewEstimate) {
         TODO("Not yet implemented")
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    override fun onChangeClick(data: ViewEstimate, oldPrice: Int, typeChange: String) {
+    override fun onChangeClickPrice(data: ViewEstimate, oldPrice: Int, typeChange: String) {
 
 
-
-            if (typeChange == "set") {
-
-            }
-
-
-            val indexPrevious = typeOfWorkRecyclerViewAdapter4.getListData().indexOf(
-                ViewEstimate(
-                    data._id,
-                    data._idTypeOfWork,
-                    oldPrice,
-                    data.CategoryName,
-                    data.UnitsOfMeasurement,
+        val indexPrevious = typeOfWorkRecyclerViewAdapter4.getListData().indexOf(
+            ViewEstimate(
+                data._id,
+                data._idTypeOfWork,
+                oldPrice,
+                data.CategoryName,
+                data.UnitsOfMeasurement,
 
                 )
-            )
-            val items = typeOfWorkRecyclerViewAdapter4.getListData()
+        )
+        val items = typeOfWorkRecyclerViewAdapter4.getListData()
 
-            items.add(indexPrevious, data)
-            items.removeAt(indexPrevious + 1)
-
-            for (i in items) {
-                Log.d("mytag", "items print = ${i.CategoryName}")
-            }
-            typeOfWorkRecyclerViewAdapter4.setListData(items)
-            typeOfWorkRecyclerViewAdapter4.notifyDataSetChanged()
+        //items.add(indexPrevious, data)
+        //items.removeAt(indexPrevious + 1)
+        Log.d(
+            "mytag",
+            "index arr = $indexPrevious data new price = ${data.Price} | data old price = $oldPrice"
+        )
+        items[indexPrevious] = data
+        Log.d(
+            "mytag",
+            "index arr items= $indexPrevious data new price = ${items[indexPrevious].Price} | data old price = $oldPrice"
+        )
+        for (i in items) {
+            //Log.d("mytag", "change price  print = ${i.CategoryName} price = ${i.Price}")
+        }
+        typeOfWorkRecyclerViewAdapter4.setListData(items)
+        typeOfWorkRecyclerViewAdapter4.notifyDataSetChanged()
     }
 
     override fun onItemClickListener(user: ViewEstimate) {

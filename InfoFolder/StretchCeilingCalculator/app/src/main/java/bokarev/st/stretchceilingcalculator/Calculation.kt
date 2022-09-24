@@ -10,6 +10,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat.startActivity
 import bokarev.st.stretchceilingcalculator.entities.Client
 import bokarev.st.stretchceilingcalculator.entities.PdfToDisplay
 import bokarev.st.stretchceilingcalculator.entities.relations.ClientAndEstimate
@@ -26,7 +27,6 @@ class Calculation : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.calculation)
 
-
         val tvNameOfClient: TextView = findViewById(R.id.textView2)
 
         try {
@@ -39,49 +39,15 @@ class Calculation : AppCompatActivity() {
                 "previousActivity = $previousActivity nameOfClient = ${client.ClientName}"
             )
 
-            if ((previousActivity == "ClientActivity") or (previousActivity == "Clients") or (previousActivity == "TypeOfWorkActivity")) {
 
-                if (client.ClientName == "") {
-                    tvNameOfClient.text = "Выберите категорию \nдля редактирования"
-                    tvNameOfClient.textSize = 12f
-                } else {
-                    tvNameOfClient.text = client.ClientName
-                }
-                var sum = 0.0F
-                val job = GlobalScope.launch(Dispatchers.Default) {
-
-                    val dao = CategoriesDataBase.getInstance(this@Calculation).categoriesDao
-                    val someList =
-                        dao.selectStrokesEstimateByClient(getClientFromPreviousActivity()._id)
-
-                    for (i in someList) {
-                        sum += i.Price * i.Count
-
-                        Log.d(
-                            "mytag",
-                            "calculation items CategoryName = ${i.CategoryName} Price = ${i.Price} Count = ${i.Count}"
-                        )
-                    }
-                }
-                runBlocking {
-                    // waiting for the coroutine to finish it"s work
-                    job.join()
-                    //set view
-
-                    val tvSum = findViewById<TextView>(R.id.MainSumCalculation)
-
-                    tvSum.text = "$sum ₽"
-
-                    Log.d("mytag", "Main Thread is Running")
-                }
-
-            } else if (previousActivity == "StartActivity" || previousActivity == "TypeOfWorkActivity") {
+            if (client.ClientName == "") {
                 tvNameOfClient.text = "Выберите категорию \nдля редактирования"
                 tvNameOfClient.textSize = 12f
-
             } else {
-                tvNameOfClient.text = "Что-то незнакомое"
+                tvNameOfClient.text = client.ClientName
             }
+
+            getSumByClient() // установить в текстовое поле обзую сумму сметы по всем категориям
 
 
         } catch (exp: RuntimeException) {
@@ -96,7 +62,6 @@ class Calculation : AppCompatActivity() {
                 "ClientActivity" -> {
                     intent = Intent(this, ClientActivity::class.java).also {
                         it.putExtra("ClientEntity", getClientFromPreviousActivity())
-
                         it.putExtra("PreviousActivity", "Calculation")
                     }
                 }
@@ -133,22 +98,20 @@ class Calculation : AppCompatActivity() {
 
         val btnDemoCalculation: ImageView = findViewById(R.id.btnDemoCalculation)
         btnDemoCalculation.setOnClickListener {
-            /*  val toast = Toast.makeText(
-                  applicationContext,
-                  "btnDemoCalculation ДЕМО сметы pressed",
-                  Toast.LENGTH_SHORT
-              )
-              toast.show()
-
-              */
 
             val intent = Intent(this, TypeOfWorkActivity::class.java).also {
                 it.putExtra("ClientEntity", getClientFromPreviousActivity())
                 it.putExtra("PreviousActivity", "Calculation")
                 it.putExtra("idTypeOfWork", 0)
-                val l = arrayListOf<Int>()
-                it.putExtra("idTypeOfWorkList", l)
-                it.putExtra("NameTypeOfWork", "Общая смета")
+                it.putExtra("idTypeOfWorkList", arrayListOf<Int>())
+                it.putExtra("NameTypeOfWork", "Все позиции в смете")
+                if (previousActivity == "StartActivity" || (previousActivity == "TypeOfWorkActivity") && getClientFromPreviousActivity().ClientName == "") {
+                    // хотим менять цены
+                    it.putExtra("WantChange", true)
+                } else {
+                    // не хотим менять цены
+                    it.putExtra("WantChange", false)
+                }
             }
             startActivity(intent)
 
@@ -156,16 +119,9 @@ class Calculation : AppCompatActivity() {
 
         val btnExportCalculation: ImageView = findViewById(R.id.btnExportCalculation)
         btnExportCalculation.setOnClickListener {
-            /*val toast = Toast.makeText(
-                applicationContext,
-                "btnExportCalculation экспорт файла pressed",
-                Toast.LENGTH_SHORT
-            )
-            toast.show()*/
 
             val finishList: MutableList<ClientAndEstimateModification> = arrayListOf()
             var someList: MutableList<ClientAndEstimate>
-
 
             val job = GlobalScope.launch(Dispatchers.Default) {
 
@@ -195,15 +151,6 @@ class Calculation : AppCompatActivity() {
                     }
 
                 }
-                /* for (i in someList) {
-
-                     sum += i.Price * i.Count
-
-                     Log.d(
-                         "mytag",
-                         "calculation items CategoryName = ${i.CategoryName} Price = ${i.Price} Count = ${i.Count}"
-                     )
-                 }*/
 
             }
             runBlocking {
@@ -237,28 +184,11 @@ class Calculation : AppCompatActivity() {
                 Log.d("mytag", "Main Thread is Running")
             }
 
-
-            /*
-
-              val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
-                  addCategory(Intent.CATEGORY_OPENABLE)
-                  type = "application/pdf"
-                  //type = "text/plain"
-                  putExtra(Intent.EXTRA_TITLE, "fileName.pdf")
-                 // putExtra(Intent.EXTRA_STREAM, file)
-                  putExtra(DocumentsContract.EXTRA_INITIAL_URI, "")
-              }
-
-              resultLauncher.launch(intent)*/
-
         }
 
         val btnGoToSystem: Button = findViewById(R.id.btnGoToSystem)
         btnGoToSystem.setOnClickListener {
-            /*val toast = Toast.makeText(applicationContext, "btnGoToSystem открываем активность тип работы с Системой", Toast.LENGTH_SHORT)
-            toast.show()
 
-             */
             val intent = Intent(this, TypeOfWorkActivity::class.java).also {
                 it.putExtra("ClientEntity", getClientFromPreviousActivity())
                 it.putExtra("PreviousActivity", "Calculation")
@@ -337,6 +267,38 @@ class Calculation : AppCompatActivity() {
             startActivity(intent)
         }
 
+    }
+
+    @OptIn(DelicateCoroutinesApi::class)
+    private fun getSumByClient() {
+        var sum = 0.0F
+
+        val job = GlobalScope.launch(Dispatchers.Default) {
+
+            val dao = CategoriesDataBase.getInstance(this@Calculation).categoriesDao
+            val someList =
+                dao.selectStrokesEstimateByClient(getClientFromPreviousActivity()._id)
+
+            for (i in someList) {
+                sum += i.Price * i.Count
+
+                Log.d(
+                    "mytag",
+                    "calculation items CategoryName = ${i.CategoryName} Price = ${i.Price} Count = ${i.Count}"
+                )
+            }
+        }
+        runBlocking {
+            // waiting for the coroutine to finish it"s work
+            job.join()
+
+            //set view
+            val tvSum = findViewById<TextView>(R.id.MainSumCalculation)
+            val str = "$sum ₽"
+            tvSum.text = str
+
+            Log.d("mytag", "Main Thread is Running")
+        }
     }
 
 

@@ -59,6 +59,10 @@ interface TypeCategoryDao {
     suspend fun getEstimate(): MutableList<ViewEstimate>
 
     @Transaction
+    @Query("SELECT  TypeCategory._id, TypeCategory._idTypeOfWork, TypeCategory.Price, TypeCategory.CategoryName, TypeCategory.UnitsOfMeasurement FROM TypeCategory ORDER BY TypeCategory._idTypeOfWork")
+    suspend fun getTypesCategory(): MutableList<ViewEstimate>
+
+    @Transaction
     @Query("SELECT  _id, TypeCategory._idTypeOfWork, TypeCategory.Price, TypeCategory.CategoryName, TypeCategory.UnitsOfMeasurement FROM  TypeCategory  WHERE TypeCategory._idTypeOfWork IN (:typeCategoryIdList) ORDER BY TypeCategory._idTypeOfWork")
     suspend fun getEstimateByList(typeCategoryIdList: List<Int>): MutableList<ViewEstimate>
 

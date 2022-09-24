@@ -13,18 +13,20 @@ import androidx.recyclerview.widget.RecyclerView
 import bokarev.st.stretchceilingcalculator.entities.Client
 
 
-class ClientsRecyclerViewAdapter(private val listener: RowClickListener): RecyclerView.Adapter<ClientsRecyclerViewAdapter.MyViewHolder>() {
+class ClientsRecyclerViewAdapter(private val listener: RowClickListener) :
+    RecyclerView.Adapter<ClientsRecyclerViewAdapter.MyViewHolder>() {
 
-    private var items  = ArrayList<Client>()
+    private var items = ArrayList<Client>()
 
     fun setListData(data: ArrayList<Client>) {
         this.items = data
     }
-    fun getListData(): ArrayList<Client> {
-        return items
-    }
+
+    fun getListData(): ArrayList<Client> = items
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyViewHolder {
-       val inflater = LayoutInflater.from(parent.context).inflate(R.layout.clients_recyclerview_row, parent, false)
+        val inflater = LayoutInflater.from(parent.context)
+            .inflate(R.layout.clients_recyclerview_row, parent, false)
         return MyViewHolder(inflater, listener)
     }
 
@@ -41,7 +43,8 @@ class ClientsRecyclerViewAdapter(private val listener: RowClickListener): Recycl
 
     }
 
-    class MyViewHolder(view: View, private val listener: RowClickListener): RecyclerView.ViewHolder(view) {
+    class MyViewHolder(view: View, private val listener: RowClickListener) :
+        RecyclerView.ViewHolder(view) {
 
         private val tvName = view.findViewById<TextView>(R.id.tvName)
         private val tvEmail = view.findViewById<TextView>(R.id.tvEmail)
@@ -56,7 +59,7 @@ class ClientsRecyclerViewAdapter(private val listener: RowClickListener): Recycl
 
             tvPhone.text = data.Tel
 
-            tvPhone.setOnClickListener{
+            tvPhone.setOnClickListener {
 
                 val clipboard =
                     itemView.context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager?
@@ -76,7 +79,7 @@ class ClientsRecyclerViewAdapter(private val listener: RowClickListener): Recycl
         }
     }
 
-    interface RowClickListener{
+    interface RowClickListener {
         fun onDeleteUserClickListener(user: Client)
         fun onItemClickListener(user: Client)
     }

@@ -78,7 +78,7 @@ class TypeOfWorkRecyclerViewAdapter4(private val listener: RowClickListener) :
             GlobalScope.launch(Dispatchers.Default) {
                 val dao = CategoriesDataBase.getInstance(itemView.context).categoriesDao
 
-                titleOfWork.text =  dao.getTypeOfWorkNameByTypeCategory(data._idTypeOfWork)
+                titleOfWork.text = dao.getTypeOfWorkNameByTypeCategory(data._idTypeOfWork)
             }
             nameOfWork.text = data.CategoryName
             nameOfMensure.text = data.UnitsOfMeasurement
@@ -86,7 +86,7 @@ class TypeOfWorkRecyclerViewAdapter4(private val listener: RowClickListener) :
             val priseStr = "${data.Price}"
             price.setText(priseStr)
 
-            val previousNumber =price.text.toString().toInt()
+            var previousPrice = data.Price
 
             // edit text enter key listener
             price.setOnKeyListener(object : View.OnKeyListener {
@@ -97,32 +97,30 @@ class TypeOfWorkRecyclerViewAdapter4(private val listener: RowClickListener) :
                     ) {
 
 
-                        val previousCount = price.text.toString().split(" ")[0].toInt()
+                        val newPrice = price.text.toString().split(" ")[0].toInt()
 
-                        Log.d("mytag", "previousCount = $previousCount")
-                        if (previousCount >= 0) {
+                        Log.d("mytag", "new price = $newPrice")
+                        if (newPrice >= 0) {
 
-                           val string = "$previousCount"
+                            val string = "$newPrice"
                             price.setText(string)
 
-                            listener.onChangeClick(
+                            listener.onChangeClickPrice(
                                 ViewEstimate(
                                     data._id,
                                     data._idTypeOfWork,
-                                    price.text.toString().toInt(),
+                                    newPrice,
                                     data.CategoryName,
                                     data.UnitsOfMeasurement,
 
 
-                                ), previousNumber, "set"
+                                    ), previousPrice, "set"
                             )
 
-
-
+                            previousPrice = newPrice
                         }
                         // clear focus and hide cursor from edit text
                         price.clearFocus()
-                        price.isCursorVisible = false
 
                         return true
                     }
@@ -136,7 +134,7 @@ class TypeOfWorkRecyclerViewAdapter4(private val listener: RowClickListener) :
 
     interface RowClickListener {
         fun onDeleteUserClickListener(user: ViewEstimate)
-        fun onChangeClick(
+        fun onChangeClickPrice(
             data: ViewEstimate,
             oldPrice: Int,
             typeChange: String,
