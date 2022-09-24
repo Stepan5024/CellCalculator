@@ -1,8 +1,8 @@
-package bokarev.st.stretchceilingcalculator.models
+package bokarev.st.stretchceilingcalculator.entities
 
 
 
-data class ClientAndEstimateMidifation(
+data class ClientAndEstimateModification(
 
     val ClientName: String,
     val Count: Float,

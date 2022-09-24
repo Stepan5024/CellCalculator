@@ -3,7 +3,7 @@ package bokarev.st.stretchceilingcalculator
 import androidx.room.*
 import bokarev.st.stretchceilingcalculator.entities.*
 import bokarev.st.stretchceilingcalculator.entities.relations.*
-import bokarev.st.stretchceilingcalculator.models.ViewEstimate
+import bokarev.st.stretchceilingcalculator.entities.ViewEstimate
 
 @Dao
 interface TypeCategoryDao {

@@ -1,4 +1,4 @@
-package bokarev.st.stretchceilingcalculator.models
+package bokarev.st.stretchceilingcalculator.entities
 
 data class ViewEstimate(
     val _id: Int,
@@ -6,7 +6,5 @@ data class ViewEstimate(
     val Price: Int,
     val CategoryName: String,
     val UnitsOfMeasurement: String,
-
-
 
 )

@@ -10,7 +10,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import bokarev.st.stretchceilingcalculator.R
-import bokarev.st.stretchceilingcalculator.models.ClientAndEstimateMidifation
+import bokarev.st.stretchceilingcalculator.entities.ClientAndEstimateModification
 import kotlin.math.roundToInt
 import kotlin.math.truncate
 
@@ -18,13 +18,13 @@ import kotlin.math.truncate
 class TypeOfWorkRecyclerViewAdapter3(private val listener: RowClickListener) :
     RecyclerView.Adapter<TypeOfWorkRecyclerViewAdapter3.MyViewHolder>() {
 
-    private var items: MutableList<ClientAndEstimateMidifation> = arrayListOf()
+    private var items: MutableList<ClientAndEstimateModification> = arrayListOf()
 
-    fun setListData(data: MutableList<ClientAndEstimateMidifation>) {
+    fun setListData(data: MutableList<ClientAndEstimateModification>) {
         this.items = data
     }
 
-    fun getListData(): MutableList<ClientAndEstimateMidifation> {
+    fun getListData(): MutableList<ClientAndEstimateModification> {
         return items
     }
 
@@ -60,7 +60,7 @@ class TypeOfWorkRecyclerViewAdapter3(private val listener: RowClickListener) :
         private val btnDownCounter = view.findViewById<ImageView>(R.id.btnCounterDown)!!
 
 
-        fun bind(data: ClientAndEstimateMidifation) {
+        fun bind(data: ClientAndEstimateModification) {
 
             // if (data.TypeLayout == 1) {
             // layoutType0.isInvisible = true
@@ -105,7 +105,7 @@ class TypeOfWorkRecyclerViewAdapter3(private val listener: RowClickListener) :
                             countOfElement.setText(string)
 
                             listener.onChangeClick(
-                                ClientAndEstimateMidifation(
+                                ClientAndEstimateModification(
                                     data.ClientName,
                                     previousCount,
                                     data._idTypeCategory,
@@ -141,7 +141,7 @@ class TypeOfWorkRecyclerViewAdapter3(private val listener: RowClickListener) :
                     countOfElement.setText(string)
 
                     listener.onChangeClick(
-                        ClientAndEstimateMidifation(
+                        ClientAndEstimateModification(
                             data.ClientName,
                             previousCount + 1,
                             data._idTypeCategory,
@@ -165,7 +165,7 @@ class TypeOfWorkRecyclerViewAdapter3(private val listener: RowClickListener) :
 
 
                     listener.onChangeClick(
-                        ClientAndEstimateMidifation(
+                        ClientAndEstimateModification(
                             data.ClientName,
                             ((previousCount - 1) * 100f).roundToInt() / 100f,
                             data._idTypeCategory,
@@ -194,15 +194,15 @@ class TypeOfWorkRecyclerViewAdapter3(private val listener: RowClickListener) :
     }
 
     interface RowClickListener {
-        fun onDeleteUserClickListener(user: ClientAndEstimateMidifation)
+        fun onDeleteUserClickListener(user: ClientAndEstimateModification)
         fun onChangeClick(
-            data: ClientAndEstimateMidifation,
+            data: ClientAndEstimateModification,
             typeChange: String,
             priceOld: Int,
             countOld: Float,
             deltaEdit: Float,
         )
 
-        fun onItemClickListener(user: ClientAndEstimateMidifation)
+        fun onItemClickListener(user: ClientAndEstimateModification)
     }
 }

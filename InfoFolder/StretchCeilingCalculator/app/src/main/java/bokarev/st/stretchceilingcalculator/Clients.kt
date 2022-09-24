@@ -30,7 +30,10 @@ class Clients : AppCompatActivity(), ClientsRecyclerViewAdapter.RowClickListener
         try {
             val client = getClientFromPreviousActivity()
             val previousActivity = intent.getStringExtra("PreviousActivity")
-            Log.d("mytag", "previousActivity = $previousActivity nameOfClient = ${client.ClientName}")
+            Log.d(
+                "mytag",
+                "previousActivity = $previousActivity nameOfClient = ${client.ClientName}"
+            )
 
         } catch (exp: RuntimeException) {
 
@@ -48,7 +51,7 @@ class Clients : AppCompatActivity(), ClientsRecyclerViewAdapter.RowClickListener
 
         val btnCorrectListOfClients: ImageView = findViewById(R.id.btnCorrectListOfClients)
         btnCorrectListOfClients.setOnClickListener {
-            if(clientsRecyclerViewAdapter.getListData().isNotEmpty()){
+            if (clientsRecyclerViewAdapter.getListData().isNotEmpty()) {
                 val toast = Toast.makeText(
                     applicationContext,
                     "Теперь нажмите на любую запись для редактирования",
@@ -70,9 +73,6 @@ class Clients : AppCompatActivity(), ClientsRecyclerViewAdapter.RowClickListener
         val addNewClient: RelativeLayout = findViewById(R.id.addNewClient)
         addNewClient.setOnClickListener {
 
-            /*val toast = Toast.makeText(applicationContext, "Relative Layout pressed", Toast.LENGTH_SHORT)
-            toast.show()*/
-
             val intent = Intent(this, ClientActivity::class.java).also {
                 it.putExtra("ClientEntity", setNullClient())
                 it.putExtra("PreviousActivity", "Clients")
@@ -91,8 +91,6 @@ class Clients : AppCompatActivity(), ClientsRecyclerViewAdapter.RowClickListener
             addItemDecoration(divider)
         }
 
-
-        //Without ViewModelFactory
         lifecycleScope.launch {
             viewModel = ViewModelProvider(this@Clients)[ClientsViewModel::class.java]
             viewModel.getAllUsersObservers().observe(this@Clients) {
@@ -106,7 +104,6 @@ class Clients : AppCompatActivity(), ClientsRecyclerViewAdapter.RowClickListener
 
     }
 
-    // Kotlin
     override fun onBackPressed() {
         val intent = Intent(this, MainActivity::class.java).also {
             it.putExtra("ClientEntity", setNullClient())
@@ -134,9 +131,6 @@ class Clients : AppCompatActivity(), ClientsRecyclerViewAdapter.RowClickListener
         } else {
             // открываем смету выбранного клиента и заполненные данные клиента
 
-            /*val toast = Toast.makeText(applicationContext, "имя клиента ${user.ClientName}", Toast.LENGTH_SHORT)
-            toast.show()*/
-
             val intent = Intent(this, Calculation::class.java).also {
 
                 it.putExtra("PreviousActivity", "Clients")
@@ -145,13 +139,8 @@ class Clients : AppCompatActivity(), ClientsRecyclerViewAdapter.RowClickListener
             startActivity(intent)
         }
 
-        /*nameInput.setText(user.name)
-        emailInput.setText(user.email)
-        phoneInput.setText(user.phone)
-        nameInput.setTag(nameInput.id, user.id)
-        saveButton.setText("Update")*/
-
     }
+
     private fun setNullClient(): Client {
 
         return Client(
@@ -162,8 +151,7 @@ class Clients : AppCompatActivity(), ClientsRecyclerViewAdapter.RowClickListener
 
     }
 
-    private fun getClientFromPreviousActivity(): Client {
+    private fun getClientFromPreviousActivity(): Client =
+        intent.getSerializableExtra("ClientEntity") as Client
 
-        return intent.getSerializableExtra("ClientEntity") as Client
-    }
 }

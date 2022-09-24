@@ -18,8 +18,8 @@ import bokarev.st.stretchceilingcalculator.adapters.TypeOfWorkRecyclerViewAdapte
 import bokarev.st.stretchceilingcalculator.adapters.TypeOfWorkRecyclerViewAdapter4
 import bokarev.st.stretchceilingcalculator.entities.Client
 import bokarev.st.stretchceilingcalculator.entities.relations.ClientAndEstimate
-import bokarev.st.stretchceilingcalculator.models.ClientAndEstimateMidifation
-import bokarev.st.stretchceilingcalculator.models.ViewEstimate
+import bokarev.st.stretchceilingcalculator.entities.ClientAndEstimateModification
+import bokarev.st.stretchceilingcalculator.entities.ViewEstimate
 import kotlinx.coroutines.*
 import kotlin.math.roundToInt
 
@@ -27,7 +27,7 @@ import kotlin.math.roundToInt
 class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.RowClickListener,
     TypeOfWorkRecyclerViewAdapter4.RowClickListener {
 
-    private var listDataFull: MutableList<ClientAndEstimateMidifation> = arrayListOf()
+    private var listDataFull: MutableList<ClientAndEstimateModification> = arrayListOf()
 
 
     private val dao = CategoriesDataBase.getInstance(this).categoriesDao
@@ -141,7 +141,7 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
                     recycledViewPool.setMaxRecycledViews(0, 300)
                 }
 
-                val finalList: MutableList<ClientAndEstimateMidifation> = arrayListOf()
+                val finalList: MutableList<ClientAndEstimateModification> = arrayListOf()
                 //Without ViewModelFactory
                 lifecycleScope.launch {
                     var getClientAndEstimate: MutableList<ClientAndEstimate>
@@ -160,8 +160,8 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
                         for (i in getClientAndEstimate) {
                             if (i._idTypeOfWork == prev) {
                                 val nameCategory = dao.getTypeOfWorkNameByTypeCategory(prev)
-                                val clientAndEstimateMidifation =
-                                    ClientAndEstimateMidifation(
+                                val clientAndEstimateModification =
+                                    ClientAndEstimateModification(
                                         i.CategoryName,
                                         i.Count,
                                         i._idTypeCategory,
@@ -172,13 +172,13 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
                                         1,
                                         i.UnitsOfMeasurement,
                                     )
-                                finalList.add(clientAndEstimateMidifation)
+                                finalList.add(clientAndEstimateModification)
 
                             } else {
                                 prev++
                                 val nameCategory = dao.getTypeOfWorkNameByTypeCategory(prev)
                                 /* val clientAndEstimateMidifation1 =
-                                     ClientAndEstimateMidifation(
+                                     ClientAndEstimateModification(
                                          "NewList",
                                          0,
                                          i._idTypeCategory,
@@ -189,8 +189,8 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
                                          0
                                      )*/
 
-                                val clientAndEstimateMidifation2 =
-                                    ClientAndEstimateMidifation(
+                                val clientAndEstimateModification2 =
+                                    ClientAndEstimateModification(
                                         i.CategoryName,
                                         i.Count,
                                         i._idTypeCategory,
@@ -202,7 +202,7 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
                                         i.UnitsOfMeasurement,
                                     )
                                 //finalList.add(clientAndEstimateMidifation1)
-                                finalList.add(clientAndEstimateMidifation2)
+                                finalList.add(clientAndEstimateModification2)
                             }
 
 
@@ -230,8 +230,8 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
                                     if (j._idTypeOfWork == idTypeOfWork) {
                                         val nameCategory =
                                             dao.getTypeOfWorkNameByTypeCategory(idTypeOfWork)
-                                        val clientAndEstimateMidifation =
-                                            ClientAndEstimateMidifation(
+                                        val clientAndEstimateModification =
+                                            ClientAndEstimateModification(
                                                 j.CategoryName,
                                                 j.Count,
                                                 j._idTypeCategory,
@@ -242,14 +242,14 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
                                                 1,
                                                 j.UnitsOfMeasurement,
                                             )
-                                        finalList.add(clientAndEstimateMidifation)
+                                        finalList.add(clientAndEstimateModification)
 
                                     } else {
                                         prev++
                                         val nameCategory =
                                             dao.getTypeOfWorkNameByTypeCategory(idTypeOfWork)
                                         /* val clientAndEstimateMidifation1 =
-                                             ClientAndEstimateMidifation(
+                                             ClientAndEstimateModification(
                                                  "NewList",
                                                  0,
                                                  i._idTypeCategory,
@@ -260,8 +260,8 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
                                                  0
                                              )*/
 
-                                        val clientAndEstimateMidifation2 =
-                                            ClientAndEstimateMidifation(
+                                        val clientAndEstimateModification2 =
+                                            ClientAndEstimateModification(
                                                 j.CategoryName,
                                                 j.Count,
                                                 j._idTypeCategory,
@@ -273,7 +273,7 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
                                                 j.UnitsOfMeasurement,
                                             )
                                         //finalList.add(clientAndEstimateMidifation1)
-                                        finalList.add(clientAndEstimateMidifation2)
+                                        finalList.add(clientAndEstimateModification2)
                                     }
                                 }
                             }
@@ -287,8 +287,8 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
                             for (i in getClientAndEstimate) {
                                 if (i._idTypeOfWork == prev) {
                                     val nameCategory = dao.getTypeOfWorkNameByTypeCategory(prev)
-                                    val clientAndEstimateMidifation =
-                                        ClientAndEstimateMidifation(
+                                    val clientAndEstimateModification =
+                                        ClientAndEstimateModification(
                                             i.CategoryName,
                                             i.Count,
                                             i._idTypeCategory,
@@ -299,13 +299,13 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
                                             1,
                                             i.UnitsOfMeasurement,
                                         )
-                                    finalList.add(clientAndEstimateMidifation)
+                                    finalList.add(clientAndEstimateModification)
 
                                 } else {
                                     prev++
                                     val nameCategory = dao.getTypeOfWorkNameByTypeCategory(prev)
                                     /* val clientAndEstimateMidifation1 =
-                                         ClientAndEstimateMidifation(
+                                         ClientAndEstimateModification(
                                              "NewList",
                                              0,
                                              i._idTypeCategory,
@@ -316,8 +316,8 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
                                              0
                                          )*/
 
-                                    val clientAndEstimateMidifation2 =
-                                        ClientAndEstimateMidifation(
+                                    val clientAndEstimateModification2 =
+                                        ClientAndEstimateModification(
                                             i.CategoryName,
                                             i.Count,
                                             i._idTypeCategory,
@@ -329,7 +329,7 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
                                             i.UnitsOfMeasurement,
                                         )
                                     //finalList.add(clientAndEstimateMidifation1)
-                                    finalList.add(clientAndEstimateMidifation2)
+                                    finalList.add(clientAndEstimateModification2)
                                 }
                             }
                         }
@@ -508,7 +508,7 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
                     }
                 }
             }
-            val listDataShort = ArrayList<ClientAndEstimateMidifation>()
+            val listDataShort = ArrayList<ClientAndEstimateModification>()
             listDataShort.clear()
             listDataShort.addAll(listDataFull)
             typeOfWorkRecyclerViewAdapter.setListData(listDataShort)
@@ -584,13 +584,13 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
     private fun getClientFromPreviousActivity(): Client =
         intent.getSerializableExtra("ClientEntity") as Client
 
-    override fun onDeleteUserClickListener(user: ClientAndEstimateMidifation) {
+    override fun onDeleteUserClickListener(user: ClientAndEstimateModification) {
 
     }
 
     @SuppressLint("NotifyDataSetChanged")
     override fun onChangeClick(
-        data: ClientAndEstimateMidifation,
+        data: ClientAndEstimateModification,
         typeChange: String,
         priceOld: Int,
         countOld: Float,
@@ -609,7 +609,7 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
         tv.text = string
 
         val indexPrevious = typeOfWorkRecyclerViewAdapter.getListData().indexOf(
-            ClientAndEstimateMidifation(
+            ClientAndEstimateModification(
                 data.ClientName,
                 countOld,
                 data._idTypeCategory,
@@ -633,7 +633,7 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
         typeOfWorkRecyclerViewAdapter.notifyDataSetChanged()
     }
 
-    override fun onItemClickListener(user: ClientAndEstimateMidifation) {
+    override fun onItemClickListener(user: ClientAndEstimateModification) {
 
 
         /*nameInput.setText(user.name)

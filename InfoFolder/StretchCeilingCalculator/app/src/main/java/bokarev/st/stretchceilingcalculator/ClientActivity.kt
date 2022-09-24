@@ -7,7 +7,6 @@ import android.util.Log
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 import bokarev.st.stretchceilingcalculator.entities.Client
 import bokarev.st.stretchceilingcalculator.entities.Estimate
 import kotlinx.coroutines.*
@@ -18,13 +17,10 @@ class ClientActivity : AppCompatActivity() {
 
     private lateinit var viewModel: ClientsViewModel
 
-
-    @OptIn(DelicateCoroutinesApi::class)
     @SuppressLint("SimpleDateFormat")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.client)
-
 
         val editTextNameClientVal: EditText = findViewById(R.id.editTextNameClient)
         val editTextAddress: EditText = findViewById(R.id.editTextAddress)
@@ -48,7 +44,6 @@ class ClientActivity : AppCompatActivity() {
                 "previousActivity = $previousActivity nameOfClient = ${client.ClientName}"
             )
 
-
         } catch (exp: RuntimeException) {
 
         }
@@ -67,16 +62,15 @@ class ClientActivity : AppCompatActivity() {
         val addNewClient: RelativeLayout = findViewById(R.id.addNewClient)
         addNewClient.setOnClickListener {
 
-
             val name = editTextNameClientVal.text.toString()
             val address = editTextAddress.text.toString()
             val phone = editTextPhone.text.toString()
 
-            val sdf = SimpleDateFormat("dd.MM.yyyy HH:mm:ss")
-            val currentDate = sdf.format(Date())
+
+            val currentDate = SimpleDateFormat("dd.MM.yyyy HH:mm:ss").format(Date())
             Log.d("mytag", "currentDate = $currentDate")
 
-            if(name == "" || address == "" || phone == "") {
+            if (name == "" || address == "" || phone == "") {
                 val toast = Toast.makeText(
                     applicationContext,
                     "Заполните имя, адрес и телефон Клиента",
@@ -85,10 +79,9 @@ class ClientActivity : AppCompatActivity() {
                 toast.show()
 
             } else {
-                var idUser = setNullClient()
+
 
                 if (tvState.text.equals("Продолжить")) {
-
 
                     val user = Client(
                         0, name, address, phone,
@@ -100,60 +93,11 @@ class ClientActivity : AppCompatActivity() {
                     )
 
                     // костыль
-                    //Without ViewModelFactory
-                    lifecycleScope.launch {
-                        viewModel =
-                            ViewModelProvider(this@ClientActivity)[ClientsViewModel::class.java]
-                    }
 
-                    viewModel.insertUserInfo(user) // вставка нового клиента
-
-
-                    val job = GlobalScope.launch(Dispatchers.Default) {
-                        //кастыль чтобы найти Id только что вставленного клиента
-                        idUser = viewModel.getAllUsersForStepan(name, currentDate)
-
-
-                        val dao = CategoriesDataBase.getInstance(this@ClientActivity).categoriesDao
-                        val typesCategory = dao.getTypeCategory()
-                        val estimate: MutableList<Estimate> = arrayListOf()
-
-
-                        var index = 1
-                        for (element in typesCategory) {
-                            Log.d("mytag", "element in typesCategory = ${element._id}")
-                            estimate.add(
-                                Estimate(
-                                    0,
-                                    idUser._id,
-                                    element._id,
-                                    0.0,
-                                    currentDate,
-                                    currentDate
-                                )
-                            )
-                            index++
-                        }
-
-                        // здесь добавить чтение БД таблицы CategoryName и отталкиваясь от кол-ва делать цикл,
-                        // куда записывать все нулевые значения
-
-
-                        estimate.forEach { dao.insertEstimate(it) }
-
-                        Log.d("mytag", "new client id = ${idUser._id}")
-
-                    }
-
-                    runBlocking {
-                        // waiting for the coroutine to finish it"s work
-                        job.join()
-                        getTransition(idUser)
-                        Log.d("mytag", "Main Thread is Running")
-                    }
+                    insertNewClientInDataBase(user)
 
                 } else {
-                    // Обновление данных пока заглушка!!!
+                    // Обновление данных клиента
                     //Надо добавить поиск сущеествующего пользователя и чтение предыдущих значений с его полей
                     // и вместо булевых пеерменных записывать то что было
                     val id = getClientFromPreviousActivity()._id
@@ -182,6 +126,63 @@ class ClientActivity : AppCompatActivity() {
             }
         }
 
+    }
+
+    private fun insertNewClientInDataBase(user: Client) {
+
+        viewModel =
+            ViewModelProvider(this@ClientActivity)[ClientsViewModel::class.java]
+
+        viewModel.insertUserInfo(user) // вставка нового клиента
+
+
+
+
+        createBlankCalculationToNewClient(user)
+    }
+
+    @OptIn(DelicateCoroutinesApi::class)
+    private fun createBlankCalculationToNewClient(client: Client) {
+        var idUser = setNullClient()
+
+        val job = GlobalScope.launch(Dispatchers.Default) {
+            //кастыль чтобы найти Id только что вставленного клиента
+            idUser = viewModel.getAllUsersForStepan(client.ClientName, client.DateOfCreation)
+
+
+            val dao = CategoriesDataBase.getInstance(this@ClientActivity).categoriesDao
+            val typesCategory = dao.getTypeCategory()
+            val estimate: MutableList<Estimate> = arrayListOf()
+
+
+            var index = 1
+            for (element in typesCategory) {
+                Log.d("mytag", "element in typesCategory = ${element._id}")
+                estimate.add(
+                    Estimate(
+                        0,
+                        idUser._id,
+                        element._id,
+                        0.0,
+                        client.DateOfCreation,
+                        client.DateOfCreation
+                    )
+                )
+                index++
+            }
+
+            estimate.forEach { dao.insertEstimate(it) }
+
+            Log.d("mytag", "new client id = ${idUser._id}")
+
+        }
+
+        runBlocking {
+            // waiting for the coroutine to finish it"s work
+            job.join()
+            getTransition(idUser)
+            Log.d("mytag", "Main Thread is Running")
+        }
     }
 
     private fun getTransition(client: Client) {

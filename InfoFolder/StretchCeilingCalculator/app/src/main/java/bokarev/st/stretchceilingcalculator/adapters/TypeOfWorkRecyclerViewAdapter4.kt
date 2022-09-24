@@ -10,7 +10,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import bokarev.st.stretchceilingcalculator.CategoriesDataBase
 import bokarev.st.stretchceilingcalculator.R
-import bokarev.st.stretchceilingcalculator.models.ViewEstimate
+import bokarev.st.stretchceilingcalculator.entities.ViewEstimate
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -141,7 +141,7 @@ class TypeOfWorkRecyclerViewAdapter4(private val listener: RowClickListener) :
             oldPrice: Int,
             typeChange: String,
 
-        )
+            )
 
         fun onItemClickListener(user: ViewEstimate)
     }

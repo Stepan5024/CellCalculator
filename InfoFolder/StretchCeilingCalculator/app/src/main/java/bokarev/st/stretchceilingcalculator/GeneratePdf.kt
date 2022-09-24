@@ -4,17 +4,17 @@ import android.graphics.*
 import android.graphics.pdf.PdfDocument
 import android.os.Environment
 import android.util.Log
-import bokarev.st.stretchceilingcalculator.models.ClientAndEstimateMidifation
+import bokarev.st.stretchceilingcalculator.entities.PdfToDisplay
+import bokarev.st.stretchceilingcalculator.entities.ClientAndEstimateModification
 
 import java.io.File
-import java.io.File.separator
 import java.io.FileOutputStream
 import java.time.LocalDateTime
 import kotlin.math.roundToInt
 
 object GeneratePdf {
 
-    fun generate(bmp: Bitmap, receipt: Receipt): String {
+    fun generate(bmp: Bitmap, pdfToDisplay: PdfToDisplay): String {
 
         val tag = "GeneratePdf"
         val pdfDocument = PdfDocument()
@@ -26,23 +26,23 @@ object GeneratePdf {
         var sum = 0.0
         var ind = 0
         var globalIndexPage = 1
-        val parts: MutableList<MutableList<ClientAndEstimateMidifation>> = arrayListOf()
 
-        if (receipt.dataList.size < 30) {
+
+        if (pdfToDisplay.dataList.size < 30) {
             globalIndexPage = 1
-        } else if (receipt.dataList.size < 50) {
+        } else if (pdfToDisplay.dataList.size < 50) {
             globalIndexPage = 2
-        } else if (receipt.dataList.size < 80) {
+        } else if (pdfToDisplay.dataList.size < 80) {
             globalIndexPage = 3
-        } else if (receipt.dataList.size < 110) {
+        } else if (pdfToDisplay.dataList.size < 110) {
             globalIndexPage = 4
-        } else if (receipt.dataList.size < 141) {
+        } else if (pdfToDisplay.dataList.size < 141) {
             globalIndexPage = 5
-        } else if (receipt.dataList.size < 171) {
+        } else if (pdfToDisplay.dataList.size < 171) {
             globalIndexPage = 6
-        } else if (receipt.dataList.size < 191) {
+        } else if (pdfToDisplay.dataList.size < 191) {
             globalIndexPage = 7
-        } else if (receipt.dataList.size >= 191) {
+        } else if (pdfToDisplay.dataList.size >= 191) {
             globalIndexPage = 8
         }
         val separator = 150
@@ -52,7 +52,7 @@ object GeneratePdf {
         var pageInfo: PdfDocument.PageInfo =
             PdfDocument.PageInfo.Builder(
                 pageWith,
-                receipt.dataList.size  * 30 + marginTop + marginBottom,
+                pdfToDisplay.dataList.size  * 30 + marginTop + marginBottom,
                 1
             ).create()
         var pdfPage: PdfDocument.Page = pdfDocument.startPage(pageInfo)
@@ -60,7 +60,7 @@ object GeneratePdf {
         var titlePaint = Paint()
         var myPaint = Paint()
 
-        Log.d("mytag", "REST STEPAN ${receipt.dataList[0].ClientName}")
+        Log.d("mytag", "REST STEPAN ${pdfToDisplay.dataList[0].ClientName}")
         var scaledBmp = Bitmap.createScaledBitmap(bmp, 1200, 280, false)
         canvas.drawBitmap(scaledBmp, 0.0f, 0.0f, Paint())
 
@@ -71,65 +71,65 @@ object GeneratePdf {
 
 
         titlePaint.typeface = Typeface.create(Typeface.DEFAULT, Typeface.ITALIC)
-        val nameClient = receipt.dataList[0].ClientName
-        if ("Клиент ${nameClient}, ${receipt.address}, ${receipt.tel}".length > 30) {
+        val nameClient = pdfToDisplay.dataList[0].ClientName
+        if ("Клиент ${nameClient}, ${pdfToDisplay.address}, ${pdfToDisplay.tel}".length > 30) {
             canvas.drawText(
-                "Клиент ${nameClient}, ${receipt.tel}",
+                "Клиент ${nameClient}, ${pdfToDisplay.tel}",
                 pageWith / 2f,
                 550f,
                 titlePaint
             )
-            if (receipt.address.length > 30) {
+            if (pdfToDisplay.address.length > 30) {
                 canvas.drawText(
-                    "Адрес клиента ${receipt.address.substring(0, 30)}-",
+                    "Адрес клиента ${pdfToDisplay.address.substring(0, 30)}-",
                     pageWith / 2f,
                     600f,
                     titlePaint
                 )
                 canvas.drawText(
-                    receipt.address.substring(30, receipt.address.length),
+                    pdfToDisplay.address.substring(30, pdfToDisplay.address.length),
                     pageWith / 2f,
                     655f,
                     titlePaint
                 )
             } else
                 canvas.drawText(
-                    "Адрес клиента ${receipt.address}",
+                    "Адрес клиента ${pdfToDisplay.address}",
                     pageWith / 2f,
                     600f,
                     titlePaint
                 )
         } else
             canvas.drawText(
-                "Клиент ${nameClient}, ${receipt.address}, ${receipt.tel}",
+                "Клиент ${nameClient}, ${pdfToDisplay.address}, ${pdfToDisplay.tel}",
                 pageWith / 2f,
                 600f,
                 titlePaint
             )
 
 
-        val part1: MutableList<ClientAndEstimateMidifation> = arrayListOf()
-        val part2: MutableList<ClientAndEstimateMidifation> = arrayListOf()
-        val part3: MutableList<ClientAndEstimateMidifation> = arrayListOf()
-        val part4: MutableList<ClientAndEstimateMidifation> = arrayListOf()
-        val part5: MutableList<ClientAndEstimateMidifation> = arrayListOf()
+        val part1: MutableList<ClientAndEstimateModification> = arrayListOf()
+        val part2: MutableList<ClientAndEstimateModification> = arrayListOf()
+        val part3: MutableList<ClientAndEstimateModification> = arrayListOf()
+        val part4: MutableList<ClientAndEstimateModification> = arrayListOf()
+        val part5: MutableList<ClientAndEstimateModification> = arrayListOf()
 
-        for (i in (0 until receipt.dataList.size * 1 / 5).withIndex()) {
-            part1.add(receipt.dataList[ind])
+        for (i in (0 until pdfToDisplay.dataList.size * 1 / 5).withIndex()) {
+            part1.add(pdfToDisplay.dataList[ind])
             ind++
         }
 
         /* var counter = 1
          for (i in 1..globalIndexPage) {
-             val part: MutableList<ClientAndEstimateMidifation> = arrayListOf()
+             val part: MutableList<ClientAndEstimateModification> = arrayListOf()
              part.clear()
 
              // одна страница примерно 40 записей
-             // (receipt.dataList.size / globalIndexPage) = кол-во страниц в документе
-             Log.d("mytag", "end granitcha = ${(receipt.dataList.size / (globalIndexPage + 1)) * i}")
-             for (j in (ind until (receipt.dataList.size / (globalIndexPage + 1)) * i)) {
-                 part.add(receipt.dataList[ind])
-                 Log.d("mytag", "${receipt.dataList[ind].CategoryName} = name category")
+             // (pdfToDisplay.dataList.size / globalIndexPage) = кол-во страниц в документе
+             Log.d("mytag", "end granitcha = ${(pdfToDisplay.dataList.size / (globalIndexPage + 1)) * i}")
+             for (j in (ind until (pdfToDisplay.dataList.size / (globalIndexPage + 1)) * i)) {
+                 part.add(pdfToDisplay.dataList[ind])
+                 Log.d("mytag", "${pdfToDisplay.dataList[ind].CategoryName} = name category")
                  ind++
              }
 
@@ -145,7 +145,7 @@ object GeneratePdf {
              var pageInfo: PdfDocument.PageInfo =
                  PdfDocument.PageInfo.Builder(
                      pageWith,
-                     (receipt.dataList.size / globalIndexPage) * i * 100 + marginBottom + marginTop,
+                     (pdfToDisplay.dataList.size / globalIndexPage) * i * 100 + marginBottom + marginTop,
                      i
                  ).create()
              var pdfPage: PdfDocument.Page = pdfDocument.startPage(pageInfo)
@@ -153,7 +153,7 @@ object GeneratePdf {
              var titlePaint = Paint()
              var myPaint = Paint()
 
-             Log.d("mytag", "REST STEPAN ${receipt.dataList[0].ClientName}")
+             Log.d("mytag", "REST STEPAN ${pdfToDisplay.dataList[0].ClientName}")
              var scaledBmp = Bitmap.createScaledBitmap(bmp, 1200, 280, false)
              canvas.drawBitmap(scaledBmp, 0.0f, 0.0f, Paint())
 
@@ -163,37 +163,37 @@ object GeneratePdf {
              canvas.drawText("Смета", pageWith / 2f, 300f, titlePaint)
 
              titlePaint.typeface = Typeface.create(Typeface.DEFAULT, Typeface.ITALIC)
-             val nameClient = receipt.dataList[0].ClientName
-             if ("Клиент ${nameClient}, ${receipt.address}, ${receipt.tel}".length > 30) {
+             val nameClient = pdfToDisplay.dataList[0].ClientName
+             if ("Клиент ${nameClient}, ${pdfToDisplay.address}, ${pdfToDisplay.tel}".length > 30) {
                  canvas.drawText(
-                     "Клиент ${nameClient}, ${receipt.tel}",
+                     "Клиент ${nameClient}, ${pdfToDisplay.tel}",
                      pageWith / 2f,
                      550f,
                      titlePaint
                  )
-                 if (receipt.address.length > 30) {
+                 if (pdfToDisplay.address.length > 30) {
                      canvas.drawText(
-                         "Адрес клиента ${receipt.address.substring(0, 30)}-",
+                         "Адрес клиента ${pdfToDisplay.address.substring(0, 30)}-",
                          pageWith / 2f,
                          600f,
                          titlePaint
                      )
                      canvas.drawText(
-                         receipt.address.substring(30, receipt.address.length),
+                         pdfToDisplay.address.substring(30, pdfToDisplay.address.length),
                          pageWith / 2f,
                          655f,
                          titlePaint
                      )
                  } else
                  canvas.drawText(
-                     "Адрес клиента ${receipt.address}",
+                     "Адрес клиента ${pdfToDisplay.address}",
                      pageWith / 2f,
                      600f,
                      titlePaint
                  )
              } else
                  canvas.drawText(
-                     "Клиент ${nameClient}, ${receipt.address}, ${receipt.tel}",
+                     "Клиент ${nameClient}, ${pdfToDisplay.address}, ${pdfToDisplay.tel}",
                      pageWith / 2f,
                      600f,
                      titlePaint
@@ -246,9 +246,9 @@ object GeneratePdf {
              val mun = 180
              /*canvas.drawLine(
                  50f,
-                 (receipt.dataList.size / 5 * mun + marginTop).toFloat(),
+                 (pdfToDisplay.dataList.size / 5 * mun + marginTop).toFloat(),
                  pageWith - 50f,
-                 (receipt.dataList.size / 5 * mun + marginTop).toFloat(),
+                 (pdfToDisplay.dataList.size / 5 * mun + marginTop).toFloat(),
                  myPaint
              )*/
 
@@ -266,9 +266,9 @@ object GeneratePdf {
 
                  /*canvas.drawLine(
                      50f,
-                     ((receipt.dataList.size / globalIndexPage) * i * mun + marginTop).toFloat(),
+                     ((pdfToDisplay.dataList.size / globalIndexPage) * i * mun + marginTop).toFloat(),
                      pageWith - 50f,
-                     ((receipt.dataList.size / globalIndexPage) * i * mun + marginTop).toFloat(),
+                     ((pdfToDisplay.dataList.size / globalIndexPage) * i * mun + marginTop).toFloat(),
                      myPaint
                  )*/
 
@@ -278,7 +278,7 @@ object GeneratePdf {
                  canvas.drawText(
                      "Сумма заказа: ${(sum * 100f).roundToInt() / 100f}",
                      (pageWith - pageWith / 3).toFloat(),
-                     ((receipt.dataList.size / globalIndexPage) * i * mun + marginTop).toFloat(),
+                     ((pdfToDisplay.dataList.size / globalIndexPage) * i * mun + marginTop).toFloat(),
                      myPaint
                  )
 
@@ -288,7 +288,7 @@ object GeneratePdf {
                  canvas.drawText(
                      "***  Конец сметы  ***",
                      pageWith / 2f,
-                     ((receipt.dataList.size / globalIndexPage) * i * mun + marginTop +  200).toFloat(),
+                     ((pdfToDisplay.dataList.size / globalIndexPage) * i * mun + marginTop +  200).toFloat(),
                      titlePaint
                  )
 
@@ -350,9 +350,9 @@ object GeneratePdf {
         val mun = 180
         /*canvas.drawLine(
             50f,
-            (receipt.dataList.size / 5 * mun + marginTop).toFloat(),
+            (pdfToDisplay.dataList.size / 5 * mun + marginTop).toFloat(),
             pageWith - 50f,
-            (receipt.dataList.size / 5 * mun + marginTop).toFloat(),
+            (pdfToDisplay.dataList.size / 5 * mun + marginTop).toFloat(),
             myPaint
         )*/
 
@@ -367,21 +367,21 @@ object GeneratePdf {
 
 
 
-        for (i in (receipt.dataList.size / 5 until receipt.dataList.size * 2 / 5).withIndex()) {
-            part2.add(receipt.dataList[ind])
+        for (i in (pdfToDisplay.dataList.size / 5 until pdfToDisplay.dataList.size * 2 / 5).withIndex()) {
+            part2.add(pdfToDisplay.dataList[ind])
             ind++
         }
-        for (i in (receipt.dataList.size * 2 / 5 until receipt.dataList.size * 3 / 5).withIndex()) {
-            part3.add(receipt.dataList[ind])
+        for (i in (pdfToDisplay.dataList.size * 2 / 5 until pdfToDisplay.dataList.size * 3 / 5).withIndex()) {
+            part3.add(pdfToDisplay.dataList[ind])
             ind++
         }
-        for (i in (receipt.dataList.size * 3 / 5 until receipt.dataList.size * 4 / 5).withIndex()) {
-            part4.add(receipt.dataList[ind])
+        for (i in (pdfToDisplay.dataList.size * 3 / 5 until pdfToDisplay.dataList.size * 4 / 5).withIndex()) {
+            part4.add(pdfToDisplay.dataList[ind])
             ind++
         }
 
-        for (i in (receipt.dataList.size * 4 / 5 until receipt.dataList.size).withIndex()) {
-            part5.add(receipt.dataList[ind])
+        for (i in (pdfToDisplay.dataList.size * 4 / 5 until pdfToDisplay.dataList.size).withIndex()) {
+            part5.add(pdfToDisplay.dataList[ind])
             ind++
         }
 
@@ -389,7 +389,7 @@ object GeneratePdf {
         pageInfo =
             PdfDocument.PageInfo.Builder(
                 pageWith,
-                receipt.dataList.size * 30 + marginBottom + marginTop,
+                pdfToDisplay.dataList.size * 30 + marginBottom + marginTop,
                 2
             ).create()
         pdfPage = pdfDocument.startPage(pageInfo)
@@ -397,7 +397,7 @@ object GeneratePdf {
         titlePaint = Paint()
         myPaint = Paint()
 
-        Log.d("mytag", "REST STEPAN ${receipt.dataList[0].ClientName}")
+        Log.d("mytag", "REST STEPAN ${pdfToDisplay.dataList[0].ClientName}")
         scaledBmp = Bitmap.createScaledBitmap(bmp, 1200, 280, false)
         canvas.drawBitmap(scaledBmp, 0.0f, 0.0f, Paint())
 
@@ -407,36 +407,36 @@ object GeneratePdf {
         canvas.drawText("Смета: 2ая страница из 5ти", pageWith / 2f, 100f, titlePaint)
 
         titlePaint.typeface = Typeface.create(Typeface.DEFAULT, Typeface.ITALIC)
-        if ("Клиент ${nameClient}, ${receipt.address}, ${receipt.tel}".length > 30) {
+        if ("Клиент ${nameClient}, ${pdfToDisplay.address}, ${pdfToDisplay.tel}".length > 30) {
             canvas.drawText(
-                "Клиент ${nameClient}, ${receipt.tel}",
+                "Клиент ${nameClient}, ${pdfToDisplay.tel}",
                 pageWith / 2f,
                 550f,
                 titlePaint
             )
-            if (receipt.address.length > 30) {
+            if (pdfToDisplay.address.length > 30) {
                 canvas.drawText(
-                    "Адрес клиента ${receipt.address.substring(0, 30)}-",
+                    "Адрес клиента ${pdfToDisplay.address.substring(0, 30)}-",
                     pageWith / 2f,
                     600f,
                     titlePaint
                 )
                 canvas.drawText(
-                    receipt.address.substring(30, receipt.address.length),
+                    pdfToDisplay.address.substring(30, pdfToDisplay.address.length),
                     pageWith / 2f,
                     655f,
                     titlePaint
                 )
             } else
                 canvas.drawText(
-                    "Адрес клиента ${receipt.address}",
+                    "Адрес клиента ${pdfToDisplay.address}",
                     pageWith / 2f,
                     600f,
                     titlePaint
                 )
         } else
             canvas.drawText(
-                "Клиент ${nameClient}, ${receipt.address}, ${receipt.tel}",
+                "Клиент ${nameClient}, ${pdfToDisplay.address}, ${pdfToDisplay.tel}",
                 pageWith / 2f,
                 600f,
                 titlePaint
@@ -445,7 +445,7 @@ object GeneratePdf {
        // titlePaint.typeface = Typeface.create(Typeface.DEFAULT, Typeface.ITALIC)
 
         /*canvas.drawText(
-            "Клиент ${nameClient}, ${receipt.address}, ${receipt.tel}",
+            "Клиент ${nameClient}, ${pdfToDisplay.address}, ${pdfToDisplay.tel}",
             pageWith / 2f,
             600f,
             titlePaint
@@ -501,9 +501,9 @@ object GeneratePdf {
 
         /* canvas.drawLine(
              50f,
-             (receipt.dataList.size / 5 * mun + marginTop).toFloat(),
+             (pdfToDisplay.dataList.size / 5 * mun + marginTop).toFloat(),
              pageWith - 50f,
-             (receipt.dataList.size / 5 * mun + marginTop).toFloat(),
+             (pdfToDisplay.dataList.size / 5 * mun + marginTop).toFloat(),
              myPaint
          )*/
 
@@ -522,7 +522,7 @@ object GeneratePdf {
         pageInfo =
             PdfDocument.PageInfo.Builder(
                 pageWith,
-                receipt.dataList.size * 30 + marginBottom + marginTop,
+                pdfToDisplay.dataList.size * 30 + marginBottom + marginTop,
                 3
             ).create()
         pdfPage = pdfDocument.startPage(pageInfo)
@@ -530,7 +530,7 @@ object GeneratePdf {
         titlePaint = Paint()
         myPaint = Paint()
 
-        Log.d("mytag", "REST STEPAN ${receipt.dataList[0].ClientName}")
+        Log.d("mytag", "REST STEPAN ${pdfToDisplay.dataList[0].ClientName}")
         scaledBmp = Bitmap.createScaledBitmap(bmp, 1200, 280, false)
         canvas.drawBitmap(scaledBmp, 0.0f, 0.0f, Paint())
 
@@ -541,36 +541,36 @@ object GeneratePdf {
 
         titlePaint.typeface = Typeface.create(Typeface.DEFAULT, Typeface.ITALIC)
 
-        if ("Клиент ${nameClient}, ${receipt.address}, ${receipt.tel}".length > 30) {
+        if ("Клиент ${nameClient}, ${pdfToDisplay.address}, ${pdfToDisplay.tel}".length > 30) {
             canvas.drawText(
-                "Клиент ${nameClient}, ${receipt.tel}",
+                "Клиент ${nameClient}, ${pdfToDisplay.tel}",
                 pageWith / 2f,
                 550f,
                 titlePaint
             )
-            if (receipt.address.length > 30) {
+            if (pdfToDisplay.address.length > 30) {
                 canvas.drawText(
-                    "Адрес клиента ${receipt.address.substring(0, 30)}-",
+                    "Адрес клиента ${pdfToDisplay.address.substring(0, 30)}-",
                     pageWith / 2f,
                     600f,
                     titlePaint
                 )
                 canvas.drawText(
-                    receipt.address.substring(30, receipt.address.length),
+                    pdfToDisplay.address.substring(30, pdfToDisplay.address.length),
                     pageWith / 2f,
                     655f,
                     titlePaint
                 )
             } else
                 canvas.drawText(
-                    "Адрес клиента ${receipt.address}",
+                    "Адрес клиента ${pdfToDisplay.address}",
                     pageWith / 2f,
                     600f,
                     titlePaint
                 )
         } else
             canvas.drawText(
-                "Клиент ${nameClient}, ${receipt.address}, ${receipt.tel}",
+                "Клиент ${nameClient}, ${pdfToDisplay.address}, ${pdfToDisplay.tel}",
                 pageWith / 2f,
                 600f,
                 titlePaint
@@ -579,7 +579,7 @@ object GeneratePdf {
        // titlePaint.typeface = Typeface.create(Typeface.DEFAULT, Typeface.ITALIC)
 
         /* canvas.drawText(
-             "Клиент ${nameClient}, ${receipt.address}, ${receipt.tel}",
+             "Клиент ${nameClient}, ${pdfToDisplay.address}, ${pdfToDisplay.tel}",
              pageWith / 2f,
              600f,
              titlePaint
@@ -635,9 +635,9 @@ object GeneratePdf {
 
         /* canvas.drawLine(
              50f,
-             (receipt.dataList.size / 5 * mun + marginTop).toFloat(),
+             (pdfToDisplay.dataList.size / 5 * mun + marginTop).toFloat(),
              pageWith - 50f,
-             (receipt.dataList.size / 5 * mun + marginTop).toFloat(),
+             (pdfToDisplay.dataList.size / 5 * mun + marginTop).toFloat(),
              myPaint
          )*/
 
@@ -656,7 +656,7 @@ object GeneratePdf {
         pageInfo =
             PdfDocument.PageInfo.Builder(
                 pageWith,
-                receipt.dataList.size * 30 + marginBottom + marginTop,
+                pdfToDisplay.dataList.size * 30 + marginBottom + marginTop,
                 4
             ).create()
         pdfPage = pdfDocument.startPage(pageInfo)
@@ -664,7 +664,7 @@ object GeneratePdf {
         titlePaint = Paint()
         myPaint = Paint()
 
-        Log.d("mytag", "REST STEPAN ${receipt.dataList[0].ClientName}")
+        Log.d("mytag", "REST STEPAN ${pdfToDisplay.dataList[0].ClientName}")
         scaledBmp = Bitmap.createScaledBitmap(bmp, 1200, 280, false)
         canvas.drawBitmap(scaledBmp, 0.0f, 0.0f, Paint())
 
@@ -675,36 +675,36 @@ object GeneratePdf {
 
         titlePaint.typeface = Typeface.create(Typeface.DEFAULT, Typeface.ITALIC)
 
-        if ("Клиент ${nameClient}, ${receipt.address}, ${receipt.tel}".length > 30) {
+        if ("Клиент ${nameClient}, ${pdfToDisplay.address}, ${pdfToDisplay.tel}".length > 30) {
             canvas.drawText(
-                "Клиент ${nameClient}, ${receipt.tel}",
+                "Клиент ${nameClient}, ${pdfToDisplay.tel}",
                 pageWith / 2f,
                 550f,
                 titlePaint
             )
-            if (receipt.address.length > 30) {
+            if (pdfToDisplay.address.length > 30) {
                 canvas.drawText(
-                    "Адрес клиента ${receipt.address.substring(0, 30)}-",
+                    "Адрес клиента ${pdfToDisplay.address.substring(0, 30)}-",
                     pageWith / 2f,
                     600f,
                     titlePaint
                 )
                 canvas.drawText(
-                    receipt.address.substring(30, receipt.address.length),
+                    pdfToDisplay.address.substring(30, pdfToDisplay.address.length),
                     pageWith / 2f,
                     655f,
                     titlePaint
                 )
             } else
                 canvas.drawText(
-                    "Адрес клиента ${receipt.address}",
+                    "Адрес клиента ${pdfToDisplay.address}",
                     pageWith / 2f,
                     600f,
                     titlePaint
                 )
         } else
             canvas.drawText(
-                "Клиент ${nameClient}, ${receipt.address}, ${receipt.tel}",
+                "Клиент ${nameClient}, ${pdfToDisplay.address}, ${pdfToDisplay.tel}",
                 pageWith / 2f,
                 600f,
                 titlePaint
@@ -713,7 +713,7 @@ object GeneratePdf {
        // titlePaint.typeface = Typeface.create(Typeface.DEFAULT, Typeface.ITALIC)
 
         /*canvas.drawText(
-            "Клиент ${nameClient}, ${receipt.address}, ${receipt.tel}",
+            "Клиент ${nameClient}, ${pdfToDisplay.address}, ${pdfToDisplay.tel}",
             pageWith / 2f,
             600f,
             titlePaint
@@ -769,9 +769,9 @@ object GeneratePdf {
 
         /* canvas.drawLine(
              50f,
-             (receipt.dataList.size / 5 * mun + marginTop).toFloat(),
+             (pdfToDisplay.dataList.size / 5 * mun + marginTop).toFloat(),
              pageWith - 50f,
-             (receipt.dataList.size / 5 * mun + marginTop).toFloat(),
+             (pdfToDisplay.dataList.size / 5 * mun + marginTop).toFloat(),
              myPaint
          )*/
 
@@ -786,7 +786,7 @@ object GeneratePdf {
         pageInfo =
             PdfDocument.PageInfo.Builder(
                 pageWith,
-                receipt.dataList.size * 30 + marginBottom + marginTop,
+                pdfToDisplay.dataList.size * 30 + marginBottom + marginTop,
                 5
             ).create()
         pdfPage = pdfDocument.startPage(pageInfo)
@@ -804,36 +804,36 @@ object GeneratePdf {
 
         titlePaint.typeface = Typeface.create(Typeface.DEFAULT, Typeface.ITALIC)
 
-        if ("Клиент ${nameClient}, ${receipt.address}, ${receipt.tel}".length > 30) {
+        if ("Клиент ${nameClient}, ${pdfToDisplay.address}, ${pdfToDisplay.tel}".length > 30) {
             canvas.drawText(
-                "Клиент ${nameClient}, ${receipt.tel}",
+                "Клиент ${nameClient}, ${pdfToDisplay.tel}",
                 pageWith / 2f,
                 550f,
                 titlePaint
             )
-            if (receipt.address.length > 30) {
+            if (pdfToDisplay.address.length > 30) {
                 canvas.drawText(
-                    "Адрес клиента ${receipt.address.substring(0, 30)}-",
+                    "Адрес клиента ${pdfToDisplay.address.substring(0, 30)}-",
                     pageWith / 2f,
                     600f,
                     titlePaint
                 )
                 canvas.drawText(
-                    receipt.address.substring(30, receipt.address.length),
+                    pdfToDisplay.address.substring(30, pdfToDisplay.address.length),
                     pageWith / 2f,
                     655f,
                     titlePaint
                 )
             } else
                 canvas.drawText(
-                    "Адрес клиента ${receipt.address}",
+                    "Адрес клиента ${pdfToDisplay.address}",
                     pageWith / 2f,
                     600f,
                     titlePaint
                 )
         } else
             canvas.drawText(
-                "Клиент ${nameClient}, ${receipt.address}, ${receipt.tel}",
+                "Клиент ${nameClient}, ${pdfToDisplay.address}, ${pdfToDisplay.tel}",
                 pageWith / 2f,
                 600f,
                 titlePaint
@@ -842,7 +842,7 @@ object GeneratePdf {
        //        titlePaint.typeface = Typeface.create(Typeface.DEFAULT, Typeface.ITALIC)
 
         /*canvas.drawText(
-            "Клиент ${nameClient}, ${receipt.address}, ${receipt.tel}",
+            "Клиент ${nameClient}, ${pdfToDisplay.address}, ${pdfToDisplay.tel}",
             pageWith / 2f,
             600f,
             titlePaint
@@ -896,9 +896,9 @@ object GeneratePdf {
 
         /*canvas.drawLine(
             50f,
-            ((receipt.dataList.size / globalIndexPage) * i * mun + marginTop).toFloat(),
+            ((pdfToDisplay.dataList.size / globalIndexPage) * i * mun + marginTop).toFloat(),
             pageWith - 50f,
-            ((receipt.dataList.size / globalIndexPage) * i * mun + marginTop).toFloat(),
+            ((pdfToDisplay.dataList.size / globalIndexPage) * i * mun + marginTop).toFloat(),
             myPaint
         )*/
 
@@ -911,14 +911,14 @@ object GeneratePdf {
             250f,
             myPaint
         )
-        // ((receipt.dataList.size / globalIndexPage) * 5 * mun + marginTop).toFloat(),
+        // ((pdfToDisplay.dataList.size / globalIndexPage) * 5 * mun + marginTop).toFloat(),
 
         titlePaint.typeface = Typeface.create(Typeface.DEFAULT, Typeface.ITALIC)
 
         canvas.drawText(
             "***  Конец сметы  ***",
             pageWith / 2f,
-            ((receipt.dataList.size / globalIndexPage) * 5 * mun + marginTop + 200).toFloat(),
+            ((pdfToDisplay.dataList.size / globalIndexPage) * 5 * mun + marginTop + 200).toFloat(),
             titlePaint
         )
 
@@ -927,7 +927,7 @@ object GeneratePdf {
 
         val file = File(
             Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
-            "Смета_${receipt.dataList[0].ClientName}_" + LocalDateTime.now().month + "_" + LocalDateTime.now().dayOfMonth + "_" + LocalDateTime.now().hour + "_" + LocalDateTime.now().minute + ".pdf"
+            "Смета_${pdfToDisplay.dataList[0].ClientName}_" + LocalDateTime.now().month + "_" + LocalDateTime.now().dayOfMonth + "_" + LocalDateTime.now().hour + "_" + LocalDateTime.now().minute + ".pdf"
         )
         try {
             pdfDocument.writeTo(FileOutputStream(file))

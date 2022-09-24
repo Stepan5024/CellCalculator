@@ -11,8 +11,9 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import bokarev.st.stretchceilingcalculator.entities.Client
+import bokarev.st.stretchceilingcalculator.entities.PdfToDisplay
 import bokarev.st.stretchceilingcalculator.entities.relations.ClientAndEstimate
-import bokarev.st.stretchceilingcalculator.models.ClientAndEstimateMidifation
+import bokarev.st.stretchceilingcalculator.entities.ClientAndEstimateModification
 import kotlinx.coroutines.*
 
 class Calculation : AppCompatActivity() {
@@ -162,7 +163,7 @@ class Calculation : AppCompatActivity() {
             )
             toast.show()*/
 
-            val finishList: MutableList<ClientAndEstimateMidifation> = arrayListOf()
+            val finishList: MutableList<ClientAndEstimateModification> = arrayListOf()
             var someList: MutableList<ClientAndEstimate>
 
 
@@ -178,7 +179,7 @@ class Calculation : AppCompatActivity() {
                 )
                 for (i in someList) {
                     val nameTypeOfWork = dao.getTypeOfWorkNameByTypeCategory(i._idTypeOfWork)
-                    val suk = ClientAndEstimateMidifation(
+                    val suk = ClientAndEstimateModification(
                         i.ClientName,
                         i.Count,
                         i._idTypeCategory,
@@ -210,7 +211,7 @@ class Calculation : AppCompatActivity() {
                 job.join()
                 //set view
                 if (finishList.isNotEmpty()) {
-                    val receipt = Receipt(
+                    val pdfToDisplay = PdfToDisplay(
                         0,
                         finishList,
                         getClientFromPreviousActivity().Address,
@@ -219,11 +220,11 @@ class Calculation : AppCompatActivity() {
                     )
 
                     //gotShowPdfPage(receipt)
-                    if (receipt.FilePath.isEmpty() || receipt.FilePath.isBlank()) {
-                        generatePdf(receipt)
-                        displayPdf(receipt)
+                    if (pdfToDisplay.FilePath.isEmpty() || pdfToDisplay.FilePath.isBlank()) {
+                        generatePdf(pdfToDisplay)
+                        displayPdf(pdfToDisplay)
                     } else {
-                        displayPdf(receipt)
+                        displayPdf(pdfToDisplay)
                     }
                 } else {
                     val toast = Toast.makeText(
@@ -339,27 +340,27 @@ class Calculation : AppCompatActivity() {
     }
 
 
-    private fun generatePdf(receipt: Receipt) {
+    private fun generatePdf(pdfToDisplay: PdfToDisplay) {
         val bitmapFactory = BitmapFactory.decodeResource(
             this.resources, R.drawable.pizzahead
         )
         val filePath = GeneratePdf.generate(
-            bitmapFactory, receipt
+            bitmapFactory, pdfToDisplay
         )
-        receipt.FilePath = filePath
+        pdfToDisplay.FilePath = filePath
 
 
     }
 
-    private fun displayPdf(receipt: Receipt) {
+    private fun displayPdf(pdfToDisplay: PdfToDisplay) {
 
-        val filePath = ShowPdf().findFilePath(receipt.FilePath)
+        val filePath = ShowPdf().findFilePath(pdfToDisplay.FilePath)
         if (filePath != null) {
 
             SharePdf().sharePdf(this, filePath)
 
         } else {
-            generatePdf(receipt)
+            generatePdf(pdfToDisplay)
         }
     }
 
