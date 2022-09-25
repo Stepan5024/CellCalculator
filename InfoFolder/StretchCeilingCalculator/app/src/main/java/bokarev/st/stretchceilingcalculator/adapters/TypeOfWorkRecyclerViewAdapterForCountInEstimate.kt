@@ -15,8 +15,8 @@ import kotlin.math.roundToInt
 import kotlin.math.truncate
 
 
-class TypeOfWorkRecyclerViewAdapter3(private val listener: RowClickListener) :
-    RecyclerView.Adapter<TypeOfWorkRecyclerViewAdapter3.MyViewHolder>() {
+class TypeOfWorkRecyclerViewAdapterForCountInEstimate(private val listener: RowClickListenerRecyclerCountInEstimate) :
+    RecyclerView.Adapter<TypeOfWorkRecyclerViewAdapterForCountInEstimate.MyViewHolder>() {
 
     private var items: MutableList<ClientAndEstimateModification> = arrayListOf()
 
@@ -48,7 +48,7 @@ class TypeOfWorkRecyclerViewAdapter3(private val listener: RowClickListener) :
 
     }
 
-    class MyViewHolder(view: View, private val listener: RowClickListener) :
+    class MyViewHolder(view: View, private val listener: RowClickListenerRecyclerCountInEstimate) :
         RecyclerView.ViewHolder(view) {
 
         private val nameOfWork = view.findViewById<TextView>(R.id.NameOfWork)!!
@@ -193,8 +193,8 @@ class TypeOfWorkRecyclerViewAdapter3(private val listener: RowClickListener) :
 
     }
 
-    interface RowClickListener {
-        fun onDeleteUserClickListener(user: ClientAndEstimateModification)
+    interface RowClickListenerRecyclerCountInEstimate {
+
         fun onChangeClick(
             data: ClientAndEstimateModification,
             typeChange: String,

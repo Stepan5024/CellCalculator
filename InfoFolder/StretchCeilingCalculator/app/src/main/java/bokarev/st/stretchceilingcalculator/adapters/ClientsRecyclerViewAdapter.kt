@@ -1,4 +1,4 @@
-package bokarev.st.stretchceilingcalculator
+package bokarev.st.stretchceilingcalculator.adapters
 
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -10,11 +10,12 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
+import bokarev.st.stretchceilingcalculator.R
 import bokarev.st.stretchceilingcalculator.entities.Client
 
 
-class ClientsRecyclerViewAdapter(private val listener: RowClickListener) :
-    RecyclerView.Adapter<ClientsRecyclerViewAdapter.MyViewHolder>() {
+class ClientsRecyclerViewAdapter(private val listener: RowClickListenerClients) :
+    RecyclerView.Adapter<ClientsRecyclerViewAdapter.ClientsViewHolder>() {
 
     private var items = ArrayList<Client>()
 
@@ -24,17 +25,17 @@ class ClientsRecyclerViewAdapter(private val listener: RowClickListener) :
 
     fun getListData(): ArrayList<Client> = items
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ClientsViewHolder {
         val inflater = LayoutInflater.from(parent.context)
             .inflate(R.layout.clients_recyclerview_row, parent, false)
-        return MyViewHolder(inflater, listener)
+        return ClientsViewHolder(inflater, listener)
     }
 
     override fun getItemCount(): Int {
         return items.size
     }
 
-    override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: ClientsViewHolder, position: Int) {
 
         holder.itemView.setOnClickListener {
             listener.onItemClickListener(items[position])
@@ -43,7 +44,7 @@ class ClientsRecyclerViewAdapter(private val listener: RowClickListener) :
 
     }
 
-    class MyViewHolder(view: View, private val listener: RowClickListener) :
+    class ClientsViewHolder(view: View, private val listener: RowClickListenerClients) :
         RecyclerView.ViewHolder(view) {
 
         private val tvName = view.findViewById<TextView>(R.id.tvName)
@@ -53,10 +54,7 @@ class ClientsRecyclerViewAdapter(private val listener: RowClickListener) :
 
         fun bind(data: Client) {
             tvName.text = data.ClientName
-
             tvEmail.text = data.Address
-
-
             tvPhone.text = data.Tel
 
             tvPhone.setOnClickListener {
@@ -79,7 +77,7 @@ class ClientsRecyclerViewAdapter(private val listener: RowClickListener) :
         }
     }
 
-    interface RowClickListener {
+    interface RowClickListenerClients {
         fun onDeleteUserClickListener(user: Client)
         fun onItemClickListener(user: Client)
     }

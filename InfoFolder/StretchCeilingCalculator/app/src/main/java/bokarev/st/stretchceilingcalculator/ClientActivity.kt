@@ -51,12 +51,9 @@ class ClientActivity : AppCompatActivity() {
 
         val btnReturnToHome: ImageView = findViewById(R.id.btnReturnToHome)
         btnReturnToHome.setOnClickListener {
-            val intent = Intent(this, Clients::class.java).also {
-                it.putExtra("ClientEntity", setNullClient())
-                it.putExtra("PreviousActivity", "ClientActivity")
+            returnToPreviousActivity()
 
-            }
-            startActivity(intent)
+
         }
 
 
@@ -121,6 +118,15 @@ class ClientActivity : AppCompatActivity() {
             }
         }
 
+    }
+
+    private fun returnToPreviousActivity() {
+        val intent = Intent(this, Clients::class.java).also {
+            it.putExtra("ClientEntity", setNullClient())
+            it.putExtra("PreviousActivity", "ClientActivity")
+
+        }
+        startActivity(intent)
     }
 
     private fun updateInfoClient(client: Client) {
@@ -201,14 +207,10 @@ class ClientActivity : AppCompatActivity() {
         startActivity(intent)
     }
 
-    // Kotlin
-    override fun onBackPressed() {
-        val intent = Intent(this, Clients::class.java).also {
-            it.putExtra("ClientEntity", setNullClient())
-            it.putExtra("PreviousActivity", "ClientActivity")
-        }
-        startActivity(intent)
-    }
+
+    override fun onBackPressed() =
+        returnToPreviousActivity()
+
 
     private fun setNullClient(): Client = Client(
         0, "", "", "", IsNew = false, IsPurchase = false, IsArchive = false,

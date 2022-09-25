@@ -14,10 +14,11 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import androidx.lifecycle.lifecycleScope
+import bokarev.st.stretchceilingcalculator.adapters.ClientsRecyclerViewAdapter
 import bokarev.st.stretchceilingcalculator.entities.Client
 import kotlinx.coroutines.launch
 
-class Clients : AppCompatActivity(), ClientsRecyclerViewAdapter.RowClickListener {
+class Clients : AppCompatActivity(), ClientsRecyclerViewAdapter.RowClickListenerClients {
 
     private lateinit var clientsRecyclerViewAdapter: ClientsRecyclerViewAdapter
     private lateinit var viewModel: ClientsViewModel
@@ -41,12 +42,10 @@ class Clients : AppCompatActivity(), ClientsRecyclerViewAdapter.RowClickListener
 
         val btnReturnToHome: ImageView = findViewById(R.id.btnReturnToHome)
         btnReturnToHome.setOnClickListener {
-            val intent = Intent(this, MainActivity::class.java).also {
-                it.putExtra("ClientEntity", setNullClient())
-                it.putExtra("PreviousActivity", "ClientsActivity")
 
-            }
-            startActivity(intent)
+            returnToPreviousActivity()
+
+
         }
 
         val btnCorrectListOfClients: ImageView = findViewById(R.id.btnCorrectListOfClients)
@@ -104,13 +103,17 @@ class Clients : AppCompatActivity(), ClientsRecyclerViewAdapter.RowClickListener
 
     }
 
-    override fun onBackPressed() {
+    private fun returnToPreviousActivity() {
         val intent = Intent(this, MainActivity::class.java).also {
             it.putExtra("ClientEntity", setNullClient())
-            it.putExtra("PreviousActivity", "Clients")
+            it.putExtra("PreviousActivity", "ClientsActivity")
+
         }
         startActivity(intent)
     }
+
+    override fun onBackPressed() = returnToPreviousActivity()
+
 
     override fun onDeleteUserClickListener(user: Client) {
         viewModel.deleteUserInfo(user)

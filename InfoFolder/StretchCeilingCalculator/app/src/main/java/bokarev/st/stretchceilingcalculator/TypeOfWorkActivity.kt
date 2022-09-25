@@ -5,15 +5,18 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
-import android.widget.*
+import android.widget.CheckBox
+import android.widget.ImageView
+import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
-import bokarev.st.stretchceilingcalculator.adapters.TypeOfWorkRecyclerViewAdapter3
-import bokarev.st.stretchceilingcalculator.adapters.TypeOfWorkRecyclerViewAdapter4
+import bokarev.st.stretchceilingcalculator.adapters.TypeOfWorkRecyclerViewAdapterForCountInEstimate
+import bokarev.st.stretchceilingcalculator.adapters.TypeOfWorkRecyclerViewAdapterForPriceInEstimate
 import bokarev.st.stretchceilingcalculator.entities.Client
 import bokarev.st.stretchceilingcalculator.entities.ClientAndEstimateModification
 import bokarev.st.stretchceilingcalculator.entities.ViewEstimate
@@ -24,14 +27,14 @@ import kotlin.math.roundToInt
 
 
 @OptIn(DelicateCoroutinesApi::class)
-class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.RowClickListener,
-    TypeOfWorkRecyclerViewAdapter4.RowClickListener {
+class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapterForCountInEstimate.RowClickListenerRecyclerCountInEstimate,
+    TypeOfWorkRecyclerViewAdapterForPriceInEstimate.RowClickListenerRecyclerPriceInEstimate {
 
     private var listDataFull: MutableList<ClientAndEstimateModification> = arrayListOf()
     private var wantChange = false
 
-    private lateinit var typeOfWorkRecyclerViewAdapter: TypeOfWorkRecyclerViewAdapter3
-    private lateinit var typeOfWorkRecyclerViewAdapter4: TypeOfWorkRecyclerViewAdapter4
+    private lateinit var typeOfWorkRecyclerViewAdapter: TypeOfWorkRecyclerViewAdapterForCountInEstimate
+    private lateinit var typeOfWorkRecyclerViewAdapterForPriceInEstimate: TypeOfWorkRecyclerViewAdapterForPriceInEstimate
 
     @OptIn(DelicateCoroutinesApi::class)
     @SuppressLint("NotifyDataSetChanged")
@@ -39,27 +42,24 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
         super.onCreate(savedInstanceState)
         setContentView(R.layout.type_of_work_activity)
 
-        val recyclerView:RecyclerView = findViewById(R.id.TypeOfWorkRecyclerView)
+        val recyclerView: RecyclerView = findViewById(R.id.TypeOfWorkRecyclerView)
         val tvNameOfWork: TextView = findViewById(R.id.tvNameOfWork)
         val btnCorrectListOfClients: CheckBox = findViewById(R.id.btnCorrectListOfClients)
         val dao = CategoriesDataBase.getInstance(this).categoriesDao
 
-        val idTypesOfWorkList: ArrayList<Int>
+        var idTypesOfWorkList: MutableList<Int>
 
-        var idTypeOfWork: Int
+        var allListTypesOfWork: Boolean
         val previousActivity: String
 
 
         try {
             previousActivity = intent.getStringExtra("PreviousActivity").toString()
             val client = getClientFromPreviousActivity()
-            idTypeOfWork = intent.getIntExtra("idTypeOfWork", -1)
+            allListTypesOfWork = intent.getBooleanExtra("idTypeOfWork", false)
             wantChange = intent.getBooleanExtra("WantChange", false)
             idTypesOfWorkList =
                 intent.getIntegerArrayListExtra("idTypeOfWorkList") as ArrayList<Int>
-            // idTypeOfWork == 0 означает вывести все категории работ в смете
-            // idTypeOfWork == -1 означает что пользователь попал на активность не по кнопкам Система, Освещение, Доп. работы, материалы
-            if (idTypeOfWork == -1) exceptionReturn()
 
             Log.d("mytag", "WantChange Value = $wantChange")
 
@@ -68,16 +68,15 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
 
                 createRecyclerViewAboutPrice(recyclerView)
 
-                val dao = CategoriesDataBase.getInstance(this@TypeOfWorkActivity).categoriesDao
+
                 val job = GlobalScope.launch(Dispatchers.Default) {
 
                     Log.d("mytag", "idTypesOfWorkList data size = ${idTypesOfWorkList.size}")
-                    Log.d("mytag", "idTypeOfWork data size = $idTypeOfWork")
-                    val someList: MutableList<ViewEstimate> = if (idTypeOfWork == 0)
+                    Log.d("mytag", "idTypeOfWork data size = $allListTypesOfWork")
+                    val someList: MutableList<ViewEstimate> = if (allListTypesOfWork)
 
                     // надо вывести весь список со всеми категориями
                         dao.getTypesCategory()
-
                     else
                     // выводим список выбранных категорий
                         dao.getEstimateByList(
@@ -94,8 +93,8 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
                         Log.d("mytag", "No repeated elements found = ${someList.size}")
                     }*/
 
-                    typeOfWorkRecyclerViewAdapter4.setListData(someList)
-                    typeOfWorkRecyclerViewAdapter4.notifyDataSetChanged()
+                    typeOfWorkRecyclerViewAdapterForPriceInEstimate.setListData(someList)
+                    typeOfWorkRecyclerViewAdapterForPriceInEstimate.notifyDataSetChanged()
 
                 }
                 runBlocking {
@@ -108,163 +107,42 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
 
                 createRecyclerViewAboutEstimate(recyclerView)
 
-                var finalList: MutableList<ClientAndEstimateModification> = arrayListOf()
+                val finalList: MutableList<ClientAndEstimateModification> = arrayListOf()
 
                 lifecycleScope.launch {
                     var getClientAndEstimate: MutableList<ClientAndEstimate>
 
-                    if (idTypeOfWork == 0) {
+                    if (allListTypesOfWork) {
                         // надо вывести весь список со всеми категориями
+                        idTypesOfWorkList =
+                            dao.getIdTypeOfWorkList() // typeOfWorkList с столбцом только ID
+                        // заполняем массив с Id всех категорий
+                    }
+
+
+                   // if (idTypesOfWorkList.size == 0) idTypesOfWorkList.add(allListTypesOfWork) // если надо вывести только конкретную категорию, то ее просто заносим в лист
+
+                    // выводим массив категорий
+
+                    var idTypeOfWork = 0
+                    for (i in idTypesOfWorkList) {
+
+                        Log.d("mytag", "i = $i ")
+                        idTypeOfWork = i
+
                         getClientAndEstimate =
-                            dao.getClientAndEstimate(getClientFromPreviousActivity()._id)
-                        Log.d(
-                            "mytag",
-                            "someList.size = ${getClientAndEstimate.size}"
-
-                        )
-
-                        var previousIdTypeOfWork = 0
-                        // здесь сделать разный тип лайаута для ресуклер вью. Например разные категории разделять фоновым цветом или записью
-                        for (i in getClientAndEstimate) {
-                            if (i._idTypeOfWork == previousIdTypeOfWork) {
-                                val nameCategory = dao.getTypeOfWorkNameByTypeCategory(previousIdTypeOfWork)
-
-                                finalList.add(createClientAndEstimateModificationRow(i, 1, nameCategory))
-
-                            } else {
-                                previousIdTypeOfWork++
-                                val nameCategory = dao.getTypeOfWorkNameByTypeCategory(previousIdTypeOfWork)
-
-                                finalList.add(createClientAndEstimateModificationRow(i, 0, nameCategory))
-                            }
-
-
-                        }
-
-
-                    } else {
-                        if (idTypesOfWorkList.size > 0) {
-
-                            Log.d("mytag", "ты попал на вывод листа ")
-
-                            for (i in idTypesOfWorkList) {
-
-                                Log.d("mytag", "i = $i ")
-                                idTypeOfWork = i
-
-                                getClientAndEstimate =
-                                    dao.getUnionClientAndEstimateAndTypeCategory2(
-                                        getClientFromPreviousActivity()._id,
-                                        idTypeOfWork
-                                    )
-                                var prev = 0
-                                for (j in getClientAndEstimate) {
-                                    if (j._idTypeOfWork == idTypeOfWork) {
-                                        val nameCategory =
-                                            dao.getTypeOfWorkNameByTypeCategory(idTypeOfWork)
-                                        val clientAndEstimateModification =
-                                            ClientAndEstimateModification(
-                                                j.CategoryName,
-                                                j.Count,
-                                                j._idTypeCategory,
-                                                j._idTypeOfWork,
-                                                j.Price,
-                                                j.CategoryName,
-                                                nameCategory,
-                                                1,
-                                                j.UnitsOfMeasurement,
-                                            )
-                                        finalList.add(clientAndEstimateModification)
-
-                                    } else {
-                                        prev++
-                                        val nameCategory =
-                                            dao.getTypeOfWorkNameByTypeCategory(idTypeOfWork)
-                                        /* val clientAndEstimateMidifation1 =
-                                             ClientAndEstimateModification(
-                                                 "NewList",
-                                                 0,
-                                                 i._idTypeCategory,
-                                                 prev,
-                                                 0,
-                                                 nameCategory,
-                                                 nameCategory,
-                                                 0
-                                             )*/
-
-                                        val clientAndEstimateModification2 =
-                                            ClientAndEstimateModification(
-                                                j.CategoryName,
-                                                j.Count,
-                                                j._idTypeCategory,
-                                                j._idTypeOfWork,
-                                                j.Price,
-                                                j.CategoryName,
-                                                nameCategory,
-                                                1,
-                                                j.UnitsOfMeasurement,
-                                            )
-                                        //finalList.add(clientAndEstimateMidifation1)
-                                        finalList.add(clientAndEstimateModification2)
-                                    }
-                                }
-                            }
-                        } else {
-                            getClientAndEstimate = dao.getUnionClientAndEstimateAndTypeCategory2(
+                            dao.getUnionClientAndEstimateAndTypeCategory2(
                                 getClientFromPreviousActivity()._id,
                                 idTypeOfWork
                             )
-
-                            var prev = 0
-                            for (i in getClientAndEstimate) {
-                                if (i._idTypeOfWork == prev) {
-                                    val nameCategory = dao.getTypeOfWorkNameByTypeCategory(prev)
-                                    val clientAndEstimateModification =
-                                        ClientAndEstimateModification(
-                                            i.CategoryName,
-                                            i.Count,
-                                            i._idTypeCategory,
-                                            i._idTypeOfWork,
-                                            i.Price,
-                                            i.CategoryName,
-                                            nameCategory,
-                                            1,
-                                            i.UnitsOfMeasurement,
-                                        )
-                                    finalList.add(clientAndEstimateModification)
-
-                                } else {
-                                    prev++
-                                    val nameCategory = dao.getTypeOfWorkNameByTypeCategory(prev)
-                                    /* val clientAndEstimateMidifation1 =
-                                         ClientAndEstimateModification(
-                                             "NewList",
-                                             0,
-                                             i._idTypeCategory,
-                                             prev,
-                                             0,
-                                             nameCategory,
-                                             nameCategory,
-                                             0
-                                         )*/
-
-                                    val clientAndEstimateModification2 =
-                                        ClientAndEstimateModification(
-                                            i.CategoryName,
-                                            i.Count,
-                                            i._idTypeCategory,
-                                            i._idTypeOfWork,
-                                            i.Price,
-                                            i.CategoryName,
-                                            nameCategory,
-                                            1,
-                                            i.UnitsOfMeasurement,
-                                        )
-                                    //finalList.add(clientAndEstimateMidifation1)
-                                    finalList.add(clientAndEstimateModification2)
-                                }
-                            }
+                        for (j in setListDataByClient(
+                            getClientAndEstimate,
+                            idTypeOfWork,
+                            dao
+                        )) {
+                            finalList.add(j)
                         }
+                        //  }
                     }
                     typeOfWorkRecyclerViewAdapter.setListData(finalList)
                     typeOfWorkRecyclerViewAdapter.notifyDataSetChanged()
@@ -273,31 +151,22 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
 
                 }
 
-
             }
 
-
             // вывести значение суммы по категори
-            if (previousActivity == "Calculation" || idTypeOfWork == 0) {
+            if (previousActivity == "Calculation" || allListTypesOfWork) {
                 var sum = 0f
-
 
                 tvNameOfWork.text = intent.getStringExtra("NameTypeOfWork").toString()
 
                 val job = GlobalScope.launch(Dispatchers.Default) {
 
-                    val dao =
-                        CategoriesDataBase.getInstance(this@TypeOfWorkActivity).categoriesDao
-
-                    val someList: MutableList<ClientAndEstimate> = if (idTypeOfWork == 0)
+                    val someList: MutableList<ClientAndEstimate> = if (allListTypesOfWork)
 
                     // надо вывести весь список со всеми категориями
                         dao.getClientAndEstimate(getClientFromPreviousActivity()._id)
                     else
-                    /* dao.getUnionClientAndEstimateAndTypeCategory2(
-                         getClientFromPreviousActivity()._id,
-                         idTypeOfWork
-                     )*/
+
                         dao.getUnionClientAndEstimateAndTypeCategoryInLists(
                             getClientFromPreviousActivity()._id,
                             idTypesOfWorkList
@@ -317,12 +186,13 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
                     job.join()
                     //set view
                     val tvSum = findViewById<TextView>(R.id.textView2)
-                    if(!wantChange) {
+                    if (!wantChange) {
 
                         val string = "сумма: ${(sum * 100f).roundToInt() / 100f} ₽"
                         tvSum.text = string
-                    }else {
-                        tvSum.text = ""
+                    } else {
+                        tvSum.text = "" //  идеале надо удалить с разметки и центрировать оставшееся textview
+
                         showHide(btnCorrectListOfClients)
 
                     }
@@ -350,60 +220,105 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
         val btnReturnToHome: ImageView = findViewById(R.id.btnReturnToHome)
         btnReturnToHome.setOnClickListener {
 
-            if (btnCorrectListOfClients.isChecked) {
-                btnCorrectListOfClients.isChecked = false
-                filterList(btnCorrectListOfClients.isChecked)
-            }
-
-            if (wantChange) {
-                // тут надо сделать проверку признак wantChange если да, то с одним или с другим
-                val someList = typeOfWorkRecyclerViewAdapter4.getListData()
-                val job = GlobalScope.launch(Dispatchers.Default) {
-
-                    val dao = CategoriesDataBase.getInstance(this@TypeOfWorkActivity).categoriesDao
-                    for (i in someList) {
-                        dao.updatePriceByTypeCategory(
-                            i._id,
-                            i.Price,
-                        )
-                        Log.d("mytag", "items back print = ${i.CategoryName} prise = ${i.Price}")
-                    }
-                }
-
-                runBlocking {
-                    // waiting for the coroutine to finish it"s work
-                    job.join()
-                    getTransition()
-                    Log.d("mytag", "Main Thread is Running")
-                }
-            } else {
-                // тут надо сделать проверку признак wantChange если да, то с одним или с другим
-                val someList = typeOfWorkRecyclerViewAdapter.getListData()
-                val job = GlobalScope.launch(Dispatchers.Default) {
-
-                    val dao = CategoriesDataBase.getInstance(this@TypeOfWorkActivity).categoriesDao
-                    for (i in someList) {
-                        dao.updateCountStrokesEstimateByClient(
-                            getClientFromPreviousActivity()._id,
-                            i._idTypeCategory,
-                            i.Count
-                        )
-                        Log.d("mytag", "items back print = ${i.CategoryName}")
-                    }
-                }
-
-                runBlocking {
-                    // waiting for the coroutine to finish it"s work
-                    job.join()
-                    getTransition()
-                    Log.d("mytag", "Main Thread is Running")
-                }
-            }
-
+            saveResultInDataBase(dao, btnCorrectListOfClients)
 
         }
 
     }
+
+    private fun saveResultInDataBase(dao: TypeCategoryDao, btnCorrectListOfClients: CheckBox) {
+
+        if (btnCorrectListOfClients.isChecked) {
+            btnCorrectListOfClients.isChecked = false
+            filterList(btnCorrectListOfClients.isChecked)
+        }
+
+        if (wantChange) {
+            // тут проверка признака wantChange если да, то с одним сохраняем типо или с другим типом
+            // тип кол-во в смете
+            val someList = typeOfWorkRecyclerViewAdapterForPriceInEstimate.getListData()
+            val job = GlobalScope.launch(Dispatchers.Default) {
+
+                for (i in someList) {
+                    dao.updatePriceByTypeCategory(
+                        i._id,
+                        i.Price,
+                    )
+                    Log.d("mytag", "items back print = ${i.CategoryName} prise = ${i.Price}")
+                }
+            }
+
+            runBlocking {
+                // waiting for the coroutine to finish it"s work
+                job.join()
+                getTransition()
+                Log.d("mytag", "Main Thread is Running")
+            }
+        } else {
+            // тут проверка признака wantChange если да, то с одним сохраняем типо или с другим типом
+            // тип цена, ед. измерения, название
+            val someList = typeOfWorkRecyclerViewAdapter.getListData()
+            val job = GlobalScope.launch(Dispatchers.Default) {
+
+                for (i in someList) {
+                    dao.updateCountStrokesEstimateByClient(
+                        getClientFromPreviousActivity()._id,
+                        i._idTypeCategory,
+                        i.Count
+                    )
+                    Log.d("mytag", "items back print = ${i.CategoryName}")
+                }
+            }
+
+            runBlocking {
+                // waiting for the coroutine to finish it"s work
+                job.join()
+                getTransition()
+                Log.d("mytag", "Main Thread is Running")
+            }
+        }
+
+
+    }
+
+    private suspend fun setListDataByClient(
+        clientAndEstimate: MutableList<ClientAndEstimate>,
+        idTypeOfWork: Int,
+        dao: TypeCategoryDao
+    ): MutableList<ClientAndEstimateModification> {
+
+        val finalList: MutableList<ClientAndEstimateModification> = arrayListOf()
+
+        var prev = 0
+        for (j in clientAndEstimate) {
+            if (j._idTypeOfWork == idTypeOfWork) {
+                val nameCategory =
+                    dao.getTypeOfWorkNameByTypeCategory(idTypeOfWork)
+
+                finalList.add(
+                    createClientAndEstimateModificationRow(
+                        j,
+                        1,
+                        nameCategory
+                    )
+                )
+            } else {
+                prev++
+                val nameCategory =
+                    dao.getTypeOfWorkNameByTypeCategory(idTypeOfWork)
+
+                finalList.add(
+                    createClientAndEstimateModificationRow(
+                        j,
+                        0,
+                        nameCategory
+                    )
+                )
+            }
+        }
+        return finalList
+    }
+
 
     private fun createClientAndEstimateModificationRow(
         clientAndEstimate: ClientAndEstimate,
@@ -428,7 +343,7 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
         recyclerView.apply {
             layoutManager = LinearLayoutManager(this@TypeOfWorkActivity)
             typeOfWorkRecyclerViewAdapter =
-                TypeOfWorkRecyclerViewAdapter3(this@TypeOfWorkActivity)
+                TypeOfWorkRecyclerViewAdapterForCountInEstimate(this@TypeOfWorkActivity)
             adapter = typeOfWorkRecyclerViewAdapter
             val divider =
                 DividerItemDecoration(
@@ -444,9 +359,9 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
 
         recyclerView.apply {
             layoutManager = LinearLayoutManager(this@TypeOfWorkActivity)
-            typeOfWorkRecyclerViewAdapter4 =
-                TypeOfWorkRecyclerViewAdapter4(this@TypeOfWorkActivity)
-            adapter = typeOfWorkRecyclerViewAdapter4
+            typeOfWorkRecyclerViewAdapterForPriceInEstimate =
+                TypeOfWorkRecyclerViewAdapterForPriceInEstimate(this@TypeOfWorkActivity)
+            adapter = typeOfWorkRecyclerViewAdapterForPriceInEstimate
             val divider =
                 DividerItemDecoration(
                     applicationContext,
@@ -465,7 +380,6 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
         )
         toast.show()
 
-
         val intent = Intent(this, MainActivity::class.java).also {
             it.putExtra("ClientEntity", getClientFromPreviousActivity())
             it.putExtra("PreviousActivity", "TypeOfWorkActivity")
@@ -474,7 +388,7 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
         startActivity(intent)
     }
 
-    private fun hasDuplicates(someList: MutableList<ViewEstimate>): Boolean {
+    /*private fun hasDuplicates(someList: MutableList<ViewEstimate>): Boolean {
 
         for (i in 0 until someList.size) {
             for (j in (i+1) until someList.size) {
@@ -487,7 +401,7 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
         }
 
         return false
-    }
+    }*/
 
     @SuppressLint("NotifyDataSetChanged")
     private fun filterList(isChecked: Boolean) {
@@ -499,9 +413,6 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
             listDataFull.clear()
             listDataFull.addAll(items)
 
-            for (value in items) {
-                // Log.d("mytag", "items print = ${value.CategoryName}")
-            }
 
             items.removeAll { it.Count == 0F }
 
@@ -541,16 +452,19 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
 
     }
 
-    // Kotlin
+
     override fun onBackPressed() {
 
-        val btnCorrectListOfClients: CheckBox = findViewById(R.id.btnCorrectListOfClients)
+        val dao = CategoriesDataBase.getInstance(this@TypeOfWorkActivity).categoriesDao
+        saveResultInDataBase(dao, btnCorrectListOfClients)
+
+       /* val btnCorrectListOfClients: CheckBox = findViewById(R.id.btnCorrectListOfClients)
         if (btnCorrectListOfClients.isChecked) {
             btnCorrectListOfClients.isChecked = false
             filterList(btnCorrectListOfClients.isChecked)
         }
         if (wantChange) {
-            val someList = typeOfWorkRecyclerViewAdapter4.getListData()
+            val someList = typeOfWorkRecyclerViewAdapterForPriceInEstimate.getListData()
             val job = GlobalScope.launch(Dispatchers.Default) {
 
                 val dao = CategoriesDataBase.getInstance(this@TypeOfWorkActivity).categoriesDao
@@ -596,7 +510,7 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
                 getTransition()
                 Log.d("mytag", "Main Thread is Running")
             }
-        }
+        }*/
 
 
     }
@@ -612,9 +526,6 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
     private fun getClientFromPreviousActivity(): Client =
         intent.getSerializableExtra("ClientEntity") as Client
 
-    override fun onDeleteUserClickListener(user: ClientAndEstimateModification) {
-
-    }
 
     @SuppressLint("NotifyDataSetChanged")
     override fun onChangeClick(
@@ -637,13 +548,12 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
         if (!wantChange) {
             val string = "сумма: $newSum ₽"
             tv.text = string
-        }
-        else {
+        } else {
             tv.text = ""
             showHide(btnCorrectListOfClients)
 
         }
-        val indexPrevious = typeOfWorkRecyclerViewAdapter.getListData().indexOf(
+        var indexPrevious = typeOfWorkRecyclerViewAdapter.getListData().indexOf(
             ClientAndEstimateModification(
                 data.ClientName,
                 countOld,
@@ -658,9 +568,12 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
         )
         val items = typeOfWorkRecyclerViewAdapter.getListData()
 
-        items.add(indexPrevious, data)
-        items.removeAt(indexPrevious + 1)
-        
+        /*items.add(indexPrevious, data)
+        items.removeAt(indexPrevious + 1)*/
+        if (indexPrevious == -1) indexPrevious = 0
+
+        items[indexPrevious] = data
+
         typeOfWorkRecyclerViewAdapter.setListData(items)
         typeOfWorkRecyclerViewAdapter.notifyDataSetChanged()
     }
@@ -675,14 +588,16 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
         saveButton.setText("Update")*/
 
     }
-    fun showHide(view: View) {
-        view.visibility = if (view.visibility == View.VISIBLE){
+
+    private fun showHide(view: View) {
+        view.visibility = if (view.visibility == View.VISIBLE) {
             View.INVISIBLE
-        } else{
+        } else {
             View.VISIBLE
         }
     }
-    override fun onDeleteUserClickListener(user: ViewEstimate) {
+
+    override fun onDeletePriceClickListener(user: ViewEstimate) {
         TODO("Not yet implemented")
     }
 
@@ -690,7 +605,7 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
     override fun onChangeClickPrice(data: ViewEstimate, oldPrice: Int, typeChange: String) {
 
 
-        val indexPrevious = typeOfWorkRecyclerViewAdapter4.getListData().indexOf(
+        val indexPrevious = typeOfWorkRecyclerViewAdapterForPriceInEstimate.getListData().indexOf(
             ViewEstimate(
                 data._id,
                 data._idTypeOfWork,
@@ -700,7 +615,7 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
 
                 )
         )
-        val items = typeOfWorkRecyclerViewAdapter4.getListData()
+        val items = typeOfWorkRecyclerViewAdapterForPriceInEstimate.getListData()
 
         //items.add(indexPrevious, data)
         //items.removeAt(indexPrevious + 1)
@@ -708,16 +623,15 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapter3.R
             "mytag",
             "index arr = $indexPrevious data new price = ${data.Price} | data old price = $oldPrice"
         )
+
         items[indexPrevious] = data
         Log.d(
             "mytag",
             "index arr items= $indexPrevious data new price = ${items[indexPrevious].Price} | data old price = $oldPrice"
         )
-        for (i in items) {
-            //Log.d("mytag", "change price  print = ${i.CategoryName} price = ${i.Price}")
-        }
-        typeOfWorkRecyclerViewAdapter4.setListData(items)
-        typeOfWorkRecyclerViewAdapter4.notifyDataSetChanged()
+
+        typeOfWorkRecyclerViewAdapterForPriceInEstimate.setListData(items)
+        typeOfWorkRecyclerViewAdapterForPriceInEstimate.notifyDataSetChanged()
     }
 
     override fun onItemClickListener(user: ViewEstimate) {

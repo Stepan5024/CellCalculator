@@ -21,17 +21,19 @@ interface TypeCategoryDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertClient(client: Client)
 
+
     @Transaction
-    @Query("SELECT * FROM TypeOfWork WHERE _id = :typeOfWorkId")
-    suspend fun getTypeOfWorkWithTypeCategory(typeOfWorkId: Int): List<TypeOfWorkWithTypeCategory>
+    @Query("SELECT _id FROM TypeOfWork")
+    suspend fun getIdTypeOfWorkList(): MutableList<Int>
+
+    @Transaction
+    @Query("SELECT _id FROM TypeOfWork")
+    suspend fun getIdTypeOfWorkList2(): MutableList<Int>
 
     @Transaction
     @Query("SELECT TypeOfWorkName FROM TypeOfWork WHERE _id = :typeOfWorkId")
     suspend fun getTypeOfWorkNameByTypeCategory(typeOfWorkId: Int): String
 
-    @Transaction
-    @Query("SELECT * FROM TypeCategory WHERE _id = :typeCategoryId")
-    suspend fun getTypeCategoryInEstimate(typeCategoryId: Int): List<TypeCategoryInEstimate>
 
     @Transaction
     @Query("SELECT * FROM TypeCategory ORDER BY _id")

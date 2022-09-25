@@ -17,12 +17,10 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
 
-class TypeOfWorkRecyclerViewAdapter4(private val listener: RowClickListener) :
-    RecyclerView.Adapter<TypeOfWorkRecyclerViewAdapter4.MyViewHolder>() {
+class TypeOfWorkRecyclerViewAdapterForPriceInEstimate(private val listener: RowClickListenerRecyclerPriceInEstimate) :
+    RecyclerView.Adapter<TypeOfWorkRecyclerViewAdapterForPriceInEstimate.PriceViewHolder>() {
 
     private var items: MutableList<ViewEstimate> = arrayListOf()
-    //= ArrayList<ClientAndEstimate>()
-    //val mutableList : MutableList<ClientAndEstimate> = arrayListOf()
 
     fun setListData(data: MutableList<ViewEstimate>) {
         this.items = data
@@ -32,18 +30,18 @@ class TypeOfWorkRecyclerViewAdapter4(private val listener: RowClickListener) :
         return items
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PriceViewHolder {
 
         val inflater = LayoutInflater.from(parent.context)
             .inflate(R.layout.type_of_work_recyclerview_row_without_count, parent, false)
-        return MyViewHolder(inflater, listener)
+        return PriceViewHolder(inflater, listener)
     }
 
     override fun getItemCount(): Int {
         return items.size
     }
 
-    override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: PriceViewHolder, position: Int) {
 
         holder.itemView.setOnClickListener {
             listener.onItemClickListener(items[position])
@@ -52,11 +50,11 @@ class TypeOfWorkRecyclerViewAdapter4(private val listener: RowClickListener) :
 
     }
 
-    class MyViewHolder(view: View, private val listener: RowClickListener) :
+    class PriceViewHolder(view: View, private val listener: RowClickListenerRecyclerPriceInEstimate) :
         RecyclerView.ViewHolder(view) {
 
         private val nameOfWork = view.findViewById<TextView>(R.id.NameOfWork)!!
-        private val nameOfMensure = view.findViewById<TextView>(R.id.tvMensure)!!
+        private val nameOfMeansure = view.findViewById<TextView>(R.id.tvMensure)!!
         private val titleOfWork = view.findViewById<TextView>(R.id.textTypeOfWorkTitle)!!
         private val price = view.findViewById<EditText>(R.id.Price)!!
 
@@ -81,7 +79,7 @@ class TypeOfWorkRecyclerViewAdapter4(private val listener: RowClickListener) :
                 titleOfWork.text = dao.getTypeOfWorkNameByTypeCategory(data._idTypeOfWork)
             }
             nameOfWork.text = data.CategoryName
-            nameOfMensure.text = data.UnitsOfMeasurement
+            nameOfMeansure.text = data.UnitsOfMeasurement
 
             val priseStr = "${data.Price}"
             price.setText(priseStr)
@@ -95,7 +93,6 @@ class TypeOfWorkRecyclerViewAdapter4(private val listener: RowClickListener) :
                     if (event.action == KeyEvent.ACTION_DOWN &&
                         keyCode == KeyEvent.KEYCODE_ENTER
                     ) {
-
 
                         val newPrice = price.text.toString().split(" ")[0].toInt()
 
@@ -132,8 +129,8 @@ class TypeOfWorkRecyclerViewAdapter4(private val listener: RowClickListener) :
 
     }
 
-    interface RowClickListener {
-        fun onDeleteUserClickListener(user: ViewEstimate)
+    interface RowClickListenerRecyclerPriceInEstimate {
+        fun onDeletePriceClickListener(user: ViewEstimate)
         fun onChangeClickPrice(
             data: ViewEstimate,
             oldPrice: Int,
