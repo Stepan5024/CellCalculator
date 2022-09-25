@@ -48,7 +48,7 @@
                 android:layout_centerHorizontal="true"
                 android:text="Иванов"
                 android:textColor="@color/black"
-                android:textSize="26sp" />
+                android:textSize="20sp" />
 
             <ImageView
                 android:id="@+id/btnDemoCalculation"

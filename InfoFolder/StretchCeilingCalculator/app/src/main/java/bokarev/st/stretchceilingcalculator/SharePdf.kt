@@ -23,7 +23,7 @@ class SharePdf {
         sharingIntent.putExtra(Intent.EXTRA_STREAM, contentUri)
 
 
-        val chooser = Intent.createChooser(sharingIntent, "Share File 123")
+        val chooser = Intent.createChooser(sharingIntent, "Отправить смету")
         val resInfoList: List<ResolveInfo> = context.packageManager
             .queryIntentActivities(chooser, PackageManager.MATCH_DEFAULT_ONLY)
         for (resolveInfo in resInfoList) {

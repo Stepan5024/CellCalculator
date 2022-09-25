@@ -41,10 +41,6 @@ interface TypeCategoryDao {
 
 
     @Transaction
-    @Query("SELECT * FROM Client WHERE _id = :clientId")
-    suspend fun getClientWithEstimate(clientId: Int): List<ClientWithEstimate>
-
-    @Transaction
     @Query("SELECT * FROM Client WHERE ClientName = :clientName AND DateOfCreation = :dateOfCreation")
     suspend fun getClient(clientName: String, dateOfCreation: String): Client
 

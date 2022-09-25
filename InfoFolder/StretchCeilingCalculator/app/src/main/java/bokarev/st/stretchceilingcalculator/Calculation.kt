@@ -305,7 +305,7 @@ class Calculation : AppCompatActivity() {
             bitmapFactory, pdfToDisplay
         )
         pdfToDisplay.FilePath = filePath
-        
+
     }
 
     private fun displayPdf(pdfToDisplay: PdfToDisplay) {
