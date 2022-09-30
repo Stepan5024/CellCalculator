@@ -78,6 +78,8 @@
         android:layout_weight="7"
         android:orientation="vertical">
 
+
+
         <android.widget.Button
             android:id="@+id/btnGoToSystem"
             android:layout_width="180dp"

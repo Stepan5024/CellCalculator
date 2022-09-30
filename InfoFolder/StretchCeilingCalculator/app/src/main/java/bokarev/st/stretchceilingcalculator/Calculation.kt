@@ -8,12 +8,14 @@ import android.util.Log
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContentProviderCompat.requireContext
 import bokarev.st.stretchceilingcalculator.entities.Client
+import bokarev.st.stretchceilingcalculator.entities.ClientAndEstimateModification
 import bokarev.st.stretchceilingcalculator.entities.PdfToDisplay
 import bokarev.st.stretchceilingcalculator.entities.relations.ClientAndEstimate
-import bokarev.st.stretchceilingcalculator.entities.ClientAndEstimateModification
 import kotlinx.android.synthetic.main.calculation.*
 import kotlinx.coroutines.*
+
 
 class Calculation : AppCompatActivity() {
 
@@ -143,6 +145,8 @@ class Calculation : AppCompatActivity() {
             }
 
         }
+
+
 
         val btnGoToSystem: Button = findViewById(R.id.btnGoToSystem)
         btnGoToSystem.setOnClickListener {
