@@ -5,10 +5,13 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.view.inputmethod.EditorInfo
 import android.widget.CheckBox
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.widget.doOnTextChanged
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -20,20 +23,29 @@ import bokarev.st.stretchceilingcalculator.entities.Client
 import bokarev.st.stretchceilingcalculator.entities.ClientAndEstimateModification
 import bokarev.st.stretchceilingcalculator.entities.ViewEstimate
 import bokarev.st.stretchceilingcalculator.entities.relations.ClientAndEstimate
+import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
 import kotlinx.android.synthetic.main.type_of_work_activity.*
 import kotlinx.coroutines.*
 import kotlin.math.roundToInt
 
 
 @OptIn(DelicateCoroutinesApi::class)
-class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapterForCountInEstimate.RowClickListenerRecyclerCountInEstimate,
+class TypeOfWorkActivity : AppCompatActivity(),
+    TypeOfWorkRecyclerViewAdapterForCountInEstimate.RowClickListenerRecyclerCountInEstimate,
     TypeOfWorkRecyclerViewAdapterForPriceInEstimate.RowClickListenerRecyclerPriceInEstimate {
 
-    private var listDataFull: MutableList<ClientAndEstimateModification> = arrayListOf()
+
     private var wantChange = false
+
+    private val constantCopyListClient: MutableList<ClientAndEstimateModification> =
+        arrayListOf() // содержит в себе первозданную копию массива значений сметы клиента
+    private val constantCopyListPrices: MutableList<ViewEstimate> =
+        arrayListOf() // содержит в себе первозданную копию массива цен смет
 
     private lateinit var typeOfWorkRecyclerViewAdapter: TypeOfWorkRecyclerViewAdapterForCountInEstimate
     private lateinit var typeOfWorkRecyclerViewAdapterForPriceInEstimate: TypeOfWorkRecyclerViewAdapterForPriceInEstimate
+
 
     @OptIn(DelicateCoroutinesApi::class)
     @SuppressLint("NotifyDataSetChanged")
@@ -81,6 +93,7 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapterFor
 
                     typeOfWorkRecyclerViewAdapterForPriceInEstimate.setListData(someList)
                     typeOfWorkRecyclerViewAdapterForPriceInEstimate.notifyDataSetChanged()
+                    constantCopyListPrices.addAll(typeOfWorkRecyclerViewAdapterForPriceInEstimate.getListData())
 
                 }
                 runBlocking {
@@ -129,6 +142,7 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapterFor
                     }
                     typeOfWorkRecyclerViewAdapter.setListData(finalList)
                     typeOfWorkRecyclerViewAdapter.notifyDataSetChanged()
+                    constantCopyListClient.addAll(typeOfWorkRecyclerViewAdapter.getListData())
 
                     // фильтрация нужна или нет?
 
@@ -167,7 +181,8 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapterFor
                         val string = "сумма: ${(sum * 100f).roundToInt() / 100f} ₽"
                         tvSum.text = string
                     } else {
-                        tvSum.text = "" //  идеале надо удалить с разметки и центрировать оставшееся textview
+                        tvSum.text =
+                            "" //  идеале надо удалить с разметки и центрировать оставшееся textview
 
                         showHide(btnCorrectListOfClients)
 
@@ -188,20 +203,121 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapterFor
             }
 
 
+        val textField = findViewById<TextInputLayout>(R.id.cost_of_service)
+        val editText = findViewById<TextInputEditText>(R.id.cost_of_service_edit_text)
+
+
+        textField.editText?.doOnTextChanged { inputText, _, _, _ ->
+            // Respond to input text change
+            Log.d(
+                "mytag2",
+                " constantCopyListClient size = ${constantCopyListClient.size} doOnTextChanged editText.getText() = ${editText.text}"
+            )
+
+
+            if (!wantChange) {
+                // надо в ресуклер цен отфильтроваться по наименованию
+                val finalList: MutableList<ClientAndEstimateModification> = arrayListOf()
+
+                finalList.clear()
+                finalList.addAll(saveChangesInStringFilter(editText, btnCorrectListOfClients.isChecked))
+                // обновим данные в финальный лист
+                typeOfWorkRecyclerViewAdapter.setListData(finalList)
+                typeOfWorkRecyclerViewAdapter.notifyDataSetChanged()
+            }
+        }
+
+        textField.setEndIconOnClickListener {
+            // Respond to end icon presses
+            // очистить поле ввода
+            Log.d("mytag2", "setEndIconOnClickListener обнуление")
+            editText.setText("")
+            editText.clearFocus()
+            saveResultInDataBase(dao, btnCorrectListOfClients, false)
+        }
+
+        // очистить фокус с текстового ввода при нажатии на Готово на клаве
+        editText.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                // Call onDone result here
+                Toast.makeText(this, editText.text, Toast.LENGTH_SHORT).show()
+                // clear focus from edit text
+                editText.clearFocus()
+
+            }
+            false
+        }
+
+
         val btnReturnToHome: ImageView = findViewById(R.id.btnReturnToHome)
         btnReturnToHome.setOnClickListener {
 
-            saveResultInDataBase(dao, btnCorrectListOfClients)
+            saveResultInDataBase(dao, btnCorrectListOfClients, true)
 
         }
 
     }
 
-    private fun saveResultInDataBase(dao: TypeCategoryDao, btnCorrectListOfClients: CheckBox) {
+    private fun saveChangesInStringFilter(editText: TextInputEditText, isResultFlagActivated: Boolean): Collection<ClientAndEstimateModification> {
+        // надо в ресуклер цен отфильтроваться по наименованию
+        val btnCorrectListOfClients: CheckBox = findViewById(R.id.btnCorrectListOfClients)
 
+        val previousList: MutableList<ClientAndEstimateModification> =
+           typeOfWorkRecyclerViewAdapter.getListData() // хранятся измененные значения
+           // constantCopyListClient
+        val finalList: MutableList<ClientAndEstimateModification> = arrayListOf()
+
+        if (editText.text.toString() == "") {
+            // когда пользователь нажал очистить все и надо сохранить результат повышения/понижения кол-ва элементов
+
+            for (i in constantCopyListClient) {
+                if (previousList.indexOf(i) == -1) {
+                    // индекс не найден, а это означает что кол-во у этой категории изменено
+                    for (j in previousList) {
+                        if (j._idTypeCategory == i._idTypeCategory) {
+                            // одинаковое наименование, но разное кол-во
+                            i.Count = j.Count
+
+                        }
+                    }
+                }
+                if (btnCorrectListOfClients.isChecked && i.Count > 0) {
+                    finalList.add(i)
+                    Log.d("mytag3", "check box is not switched")
+                } else if (!btnCorrectListOfClients.isChecked)
+
+                    finalList.add(i)
+
+
+            }
+
+        } else
+            for (i in constantCopyListClient) {
+                if (i.CategoryName.contains(editText.text.toString())) {
+                    // наименование содержит введенный в поиск текст
+                    // добавим найденный элемент в финалььный список
+                   if (isResultFlagActivated && i.Count > 0) {
+                        finalList.add(i)
+                        Log.d("mytag3", "check box is not switched")
+                    } else if (!isResultFlagActivated)
+
+
+                        finalList.add(i)
+                }
+            }
+        return finalList
+    }
+
+    private fun saveResultInDataBase(
+        dao: TypeCategoryDao,
+        btnCorrectListOfClients: CheckBox,
+        needTransition: Boolean
+    ) {
+        var flag = false
         if (btnCorrectListOfClients.isChecked) {
             btnCorrectListOfClients.isChecked = false
             filterList(btnCorrectListOfClients.isChecked)
+            flag = true
         }
 
         if (wantChange) {
@@ -222,10 +338,12 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapterFor
             runBlocking {
                 // waiting for the coroutine to finish it"s work
                 job.join()
-                getTransition()
+                if (needTransition)
+                    getTransition()
                 Log.d("mytag", "Main Thread is Running")
             }
-        } else {
+        }
+        else {
             // тут проверка признака wantChange если да, то с одним сохраняем типо или с другим типом
             // тип цена, ед. измерения, название
             val someList = typeOfWorkRecyclerViewAdapter.getListData()
@@ -244,12 +362,16 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapterFor
             runBlocking {
                 // waiting for the coroutine to finish it"s work
                 job.join()
-                getTransition()
+                if (needTransition)
+                    getTransition()
                 Log.d("mytag", "Main Thread is Running")
             }
         }
 
-
+        if (flag) {
+            btnCorrectListOfClients.isChecked = true
+            filterList(btnCorrectListOfClients.isChecked)
+        }
     }
 
     private suspend fun setListDataByClient(
@@ -361,30 +483,54 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapterFor
 
     @SuppressLint("NotifyDataSetChanged")
     private fun filterList(isChecked: Boolean) {
+     val editText = findViewById<TextInputEditText>(R.id.cost_of_service_edit_text)
+        /*   val finalList: MutableList<ClientAndEstimateModification> = arrayListOf()
+        val str = editText.text
+        editText.setText("")
+        finalList.clear()
+        finalList.addAll(saveChangesInStringFilter(editText, isChecked))
+        editText.text = str
+        // обновим данные в финальный лист
+        //typeOfWorkRecyclerViewAdapter.setListData(finalList)
+        //typeOfWorkRecyclerViewAdapter.notifyDataSetChanged()
+        editText.setSelection(str!!.length)*/
+
         if (isChecked) {
 
             Log.d("mytag", "Флажок выбран")
             // в recycler view удалить все строки содержащие нули
-            val items = typeOfWorkRecyclerViewAdapter.getListData()
-            listDataFull.clear()
-            listDataFull.addAll(items)
+            val items = //constantCopyListClient
+                typeOfWorkRecyclerViewAdapter.getListData()
+            val  items2 = ArrayList<ClientAndEstimateModification>()
+            //val items = constantCopyListClient
+         //   constantCopyListClient.clear()
+          //  constantCopyListClient.addAll(items)
 
 
             items.removeAll { it.Count == 0F }
-
-            typeOfWorkRecyclerViewAdapter.setListData(items)
+            if (editText.text.toString() != "") {
+                //items.clear()
+                //items.addAll(saveChangesInStringFilter(editText, true))
+              items2.addAll(
+                    items.filter { it.CategoryName.contains(editText.text.toString()) }.toMutableList()) // все символы, кроме 'z'
+            } else {items2.addAll(items)}
+            typeOfWorkRecyclerViewAdapter.setListData(items2)
         } else {
 
             Log.d("mytag", "Флажок не выбран")
 
-            for (i in listDataFull) {
-                Log.d("mytag", "listDataFull перед тем как обновлять данные ${i.CategoryName}")
+            for (i in constantCopyListClient) {
+                Log.d(
+                    "mytag",
+                    "constantCopyListClient перед тем как обновлять данные ${i.CategoryName}"
+                )
             }
-            // мб записывать listDataFull в shared Preferense
+            // мб записывать constantCopyListClient в shared Preferense
             // в recycler view вывести все строк
-            val items = typeOfWorkRecyclerViewAdapter.getListData()
-            for ((counter, i) in listDataFull.withIndex()) {
-                Log.d("mytag", "listDataFull print = ${i.CategoryName}")
+            val items = //= constantCopyListClient
+                typeOfWorkRecyclerViewAdapter.getListData()
+            for ((counter, i) in constantCopyListClient.withIndex()) {
+                Log.d("mytag", "constantCopyListClient print = ${i.CategoryName}")
                 for (j in items) {
                     if (j.CategoryName == i.CategoryName && j._idTypeOfWork == i._idTypeOfWork && j._idTypeCategory == i._idTypeCategory) {
                         // совпали имена, но значения штук могут быть разные
@@ -393,15 +539,23 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapterFor
                             "отработала проверка перезаписи $counter and ${i.CategoryName}"
                         )
 
-                        listDataFull[counter] = j
+                        constantCopyListClient[counter] = j
 
                     }
                 }
             }
             val listDataShort = ArrayList<ClientAndEstimateModification>()
+            val listDataShort2  = ArrayList<ClientAndEstimateModification>()
             listDataShort.clear()
-            listDataShort.addAll(listDataFull)
-            typeOfWorkRecyclerViewAdapter.setListData(listDataShort)
+            listDataShort.addAll(constantCopyListClient)
+            if (editText.text.toString() != "") {
+               // listDataShort.clear()
+                //listDataShort.addAll(saveChangesInStringFilter(editText, false))
+                 listDataShort2.addAll( listDataShort.filter { it.CategoryName.contains(editText.text.toString()) } as ArrayList<ClientAndEstimateModification>) // все символы, кроме 'z'
+
+            }else {listDataShort2.addAll(listDataShort)}
+
+            typeOfWorkRecyclerViewAdapter.setListData(listDataShort2)
         }
 
         typeOfWorkRecyclerViewAdapter.notifyDataSetChanged()
@@ -412,61 +566,61 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapterFor
     override fun onBackPressed() {
 
         val dao = CategoriesDataBase.getInstance(this@TypeOfWorkActivity).categoriesDao
-        saveResultInDataBase(dao, btnCorrectListOfClients)
+        saveResultInDataBase(dao, btnCorrectListOfClients, true)
 
-       /* val btnCorrectListOfClients: CheckBox = findViewById(R.id.btnCorrectListOfClients)
-        if (btnCorrectListOfClients.isChecked) {
-            btnCorrectListOfClients.isChecked = false
-            filterList(btnCorrectListOfClients.isChecked)
-        }
-        if (wantChange) {
-            val someList = typeOfWorkRecyclerViewAdapterForPriceInEstimate.getListData()
-            val job = GlobalScope.launch(Dispatchers.Default) {
+        /* val btnCorrectListOfClients: CheckBox = findViewById(R.id.btnCorrectListOfClients)
+         if (btnCorrectListOfClients.isChecked) {
+             btnCorrectListOfClients.isChecked = false
+             filterList(btnCorrectListOfClients.isChecked)
+         }
+         if (wantChange) {
+             val someList = typeOfWorkRecyclerViewAdapterForPriceInEstimate.getListData()
+             val job = GlobalScope.launch(Dispatchers.Default) {
 
-                val dao = CategoriesDataBase.getInstance(this@TypeOfWorkActivity).categoriesDao
-                for (i in someList) {
-                    dao.updatePriceByTypeCategory(
-                        i._id,
-                        i.Price,
-                    )
-                    if (i.CategoryName == "Установка потолочного профиля") {
-                        Log.d(
-                            "mytag",
-                            "items back button print  = ${i.CategoryName} new price = ${i.Price} id = ${i._id}"
-                        )
-                    }
+                 val dao = CategoriesDataBase.getInstance(this@TypeOfWorkActivity).categoriesDao
+                 for (i in someList) {
+                     dao.updatePriceByTypeCategory(
+                         i._id,
+                         i.Price,
+                     )
+                     if (i.CategoryName == "Установка потолочного профиля") {
+                         Log.d(
+                             "mytag",
+                             "items back button print  = ${i.CategoryName} new price = ${i.Price} id = ${i._id}"
+                         )
+                     }
 
-                }
-            }
+                 }
+             }
 
-            runBlocking {
-                // waiting for the coroutine to finish it"s work
-                job.join()
-                getTransition()
-                Log.d("mytag", "Main Thread is Running")
-            }
-        } else {
-            val someList = typeOfWorkRecyclerViewAdapter.getListData()
-            val job = GlobalScope.launch(Dispatchers.Default) {
+             runBlocking {
+                 // waiting for the coroutine to finish it"s work
+                 job.join()
+                 getTransition()
+                 Log.d("mytag", "Main Thread is Running")
+             }
+         } else {
+             val someList = typeOfWorkRecyclerViewAdapter.getListData()
+             val job = GlobalScope.launch(Dispatchers.Default) {
 
-                val dao = CategoriesDataBase.getInstance(this@TypeOfWorkActivity).categoriesDao
-                for (i in someList) {
-                    dao.updateCountStrokesEstimateByClient(
-                        getClientFromPreviousActivity()._id,
-                        i._idTypeCategory,
-                        i.Count
-                    )
-                    Log.d("mytag", "items back print = ${i.CategoryName}")
-                }
-            }
+                 val dao = CategoriesDataBase.getInstance(this@TypeOfWorkActivity).categoriesDao
+                 for (i in someList) {
+                     dao.updateCountStrokesEstimateByClient(
+                         getClientFromPreviousActivity()._id,
+                         i._idTypeCategory,
+                         i.Count
+                     )
+                     Log.d("mytag", "items back print = ${i.CategoryName}")
+                 }
+             }
 
-            runBlocking {
-                // waiting for the coroutine to finish it"s work
-                job.join()
-                getTransition()
-                Log.d("mytag", "Main Thread is Running")
-            }
-        }*/
+             runBlocking {
+                 // waiting for the coroutine to finish it"s work
+                 job.join()
+                 getTransition()
+                 Log.d("mytag", "Main Thread is Running")
+             }
+         }*/
 
 
     }

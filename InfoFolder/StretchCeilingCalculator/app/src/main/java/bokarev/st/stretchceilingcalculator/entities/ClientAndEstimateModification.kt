@@ -5,7 +5,7 @@ package bokarev.st.stretchceilingcalculator.entities
 data class ClientAndEstimateModification(
 
     val ClientName: String,
-    val Count: Float,
+    var Count: Float,
     val _idTypeCategory: Int,
     val _idTypeOfWork: Int,
     val Price: Int,

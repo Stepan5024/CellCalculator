@@ -13,13 +13,12 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1.3"
+        android:layout_weight="1.5"
         android:orientation="horizontal">
 
         <RelativeLayout
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight="1"
             tools:ignore="NestedWeights">
 
             <ImageView
@@ -70,16 +69,51 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="10"
+        android:paddingBottom="100dp"
         android:orientation="vertical">
 
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="0dp"
+            android:layout_height="match_parent"
             android:layout_gravity="center"
             android:layout_marginTop="10dp"
-            android:layout_weight="3"
+
             android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+               >
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/cost_of_service"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                app:hintTextColor="@color/black"
+                android:hint="поиск по наименованию"
+                app:startIconDrawable="@drawable/ic_search_black_24dp"
+                app:startIconContentDescription="поиск по наименованию"
+                app:endIconMode="clear_text"
+                app:counterOverflowTextColor="@color/black"
+                app:counterTextColor="@color/black"
+                android:textColorHint="@color/black"
+                app:boxStrokeColor="@color/black"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/cost_of_service_edit_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:outlineAmbientShadowColor="@color/black"
+                    android:outlineSpotShadowColor="@color/black"
+                    android:textColor="@color/black"
+                    android:inputType="text" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+            </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/addNewClient"
@@ -87,6 +121,7 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="10dp"
                 android:orientation="horizontal">
+
 
                 <LinearLayout
                     android:layout_width="0dp"
