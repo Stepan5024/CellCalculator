@@ -8,7 +8,6 @@ import android.view.View
 import android.widget.CheckBox
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -49,14 +48,13 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapterFor
 
         var idTypesOfWorkList: MutableList<Int>
 
-        var allListTypesOfWork: Boolean
+        val needAllListTypesOfWork: Boolean
         val previousActivity: String
 
 
         try {
             previousActivity = intent.getStringExtra("PreviousActivity").toString()
-            val client = getClientFromPreviousActivity()
-            allListTypesOfWork = intent.getBooleanExtra("idTypeOfWork", false)
+            needAllListTypesOfWork = intent.getBooleanExtra("idTypeOfWork", false)
             wantChange = intent.getBooleanExtra("WantChange", false)
             idTypesOfWorkList =
                 intent.getIntegerArrayListExtra("idTypeOfWorkList") as ArrayList<Int>
@@ -71,10 +69,7 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapterFor
 
                 val job = GlobalScope.launch(Dispatchers.Default) {
 
-                    Log.d("mytag", "idTypesOfWorkList data size = ${idTypesOfWorkList.size}")
-                    Log.d("mytag", "idTypeOfWork data size = $allListTypesOfWork")
-                    val someList: MutableList<ViewEstimate> = if (allListTypesOfWork)
-
+                    val someList: MutableList<ViewEstimate> = if (needAllListTypesOfWork)
                     // надо вывести весь список со всеми категориями
                         dao.getTypesCategory()
                     else
@@ -83,15 +78,6 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapterFor
                             idTypesOfWorkList
                         )
 
-                    Log.d("mytag", "someList data size = ${someList.size}")
-
-                    /*if (hasDuplicates(someList)) {
-                        Log.d("mytag", "Repeated id elements found = ${someList.size}")
-                        println("Repeated id elements found")
-                    } else {
-                        println("No repeated elements found")
-                        Log.d("mytag", "No repeated elements found = ${someList.size}")
-                    }*/
 
                     typeOfWorkRecyclerViewAdapterForPriceInEstimate.setListData(someList)
                     typeOfWorkRecyclerViewAdapterForPriceInEstimate.notifyDataSetChanged()
@@ -112,19 +98,16 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapterFor
                 lifecycleScope.launch {
                     var getClientAndEstimate: MutableList<ClientAndEstimate>
 
-                    if (allListTypesOfWork) {
+                    if (needAllListTypesOfWork) {
                         // надо вывести весь список со всеми категориями
                         idTypesOfWorkList =
                             dao.getIdTypeOfWorkList() // typeOfWorkList с столбцом только ID
                         // заполняем массив с Id всех категорий
                     }
 
-
-                   // if (idTypesOfWorkList.size == 0) idTypesOfWorkList.add(allListTypesOfWork) // если надо вывести только конкретную категорию, то ее просто заносим в лист
-
                     // выводим массив категорий
 
-                    var idTypeOfWork = 0
+                    var idTypeOfWork: Int
                     for (i in idTypesOfWorkList) {
 
                         Log.d("mytag", "i = $i ")
@@ -142,7 +125,7 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapterFor
                         )) {
                             finalList.add(j)
                         }
-                        //  }
+
                     }
                     typeOfWorkRecyclerViewAdapter.setListData(finalList)
                     typeOfWorkRecyclerViewAdapter.notifyDataSetChanged()
@@ -154,32 +137,25 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapterFor
             }
 
             // вывести значение суммы по категори
-            if (previousActivity == "Calculation" || allListTypesOfWork) {
+            if (previousActivity == "Calculation" || needAllListTypesOfWork) {
                 var sum = 0f
 
                 tvNameOfWork.text = intent.getStringExtra("NameTypeOfWork").toString()
 
                 val job = GlobalScope.launch(Dispatchers.Default) {
 
-                    val someList: MutableList<ClientAndEstimate> = if (allListTypesOfWork)
-
+                    val someList: MutableList<ClientAndEstimate> = if (needAllListTypesOfWork)
                     // надо вывести весь список со всеми категориями
                         dao.getClientAndEstimate(getClientFromPreviousActivity()._id)
                     else
-
                         dao.getUnionClientAndEstimateAndTypeCategoryInLists(
                             getClientFromPreviousActivity()._id,
                             idTypesOfWorkList
                         )
 
-                    for (i in someList) {
-                        sum += i.Price * i.Count
+                    for (i in someList) sum += i.Price * i.Count
 
-                        Log.d(
-                            "mytag",
-                            "calculation items CategoryName = ${i.CategoryName} Price = ${i.Price} Count = ${i.Count}"
-                        )
-                    }
+
                 }
                 runBlocking {
                     // waiting for the coroutine to finish it"s work
@@ -200,13 +176,8 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapterFor
                 }
             }
 
-            Log.d(
-                "mytag",
-                "previousActivity = $previousActivity nameOfClient = ${client.ClientName} idClient = ${client._id}"
-            )
 
-
-        } catch (exp: RuntimeException) {
+        } catch (_: RuntimeException) {
 
         }
 
@@ -372,21 +343,6 @@ class TypeOfWorkActivity : AppCompatActivity(), TypeOfWorkRecyclerViewAdapterFor
         }
     }
 
-    private fun exceptionReturn() {
-        val toast = Toast.makeText(
-            applicationContext,
-            "Произошла ошибка выбора типа работы. Обратитесь к разработчику",
-            Toast.LENGTH_SHORT
-        )
-        toast.show()
-
-        val intent = Intent(this, MainActivity::class.java).also {
-            it.putExtra("ClientEntity", getClientFromPreviousActivity())
-            it.putExtra("PreviousActivity", "TypeOfWorkActivity")
-
-        }
-        startActivity(intent)
-    }
 
     /*private fun hasDuplicates(someList: MutableList<ViewEstimate>): Boolean {
 

@@ -18,7 +18,7 @@ import kotlin.math.roundToInt
 
 object GeneratePdf {
 
-    @SuppressLint("SimpleDateFormat")
+    @SuppressLint("SimpleDateFormat", "SuspiciousIndentation")
     fun generate(bmp: Bitmap, pdfToDisplay: PdfToDisplay): String {
 
         val tag = "GeneratePdf"

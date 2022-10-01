@@ -27,7 +27,7 @@ class MainActivity : AppCompatActivity() {
                 "mytag",
                 "previousActivity = $previousActivity nameOfClient = ${client.ClientName}"
             )
-        } catch (exp: RuntimeException) {
+        } catch (_: RuntimeException) {
 
         }
 

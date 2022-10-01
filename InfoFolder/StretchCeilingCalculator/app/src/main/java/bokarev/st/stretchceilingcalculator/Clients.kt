@@ -36,7 +36,7 @@ class Clients : AppCompatActivity(), ClientsRecyclerViewAdapter.RowClickListener
                 "previousActivity = $previousActivity nameOfClient = ${client.ClientName}"
             )
 
-        } catch (exp: RuntimeException) {
+        } catch (_: RuntimeException) {
 
         }
 

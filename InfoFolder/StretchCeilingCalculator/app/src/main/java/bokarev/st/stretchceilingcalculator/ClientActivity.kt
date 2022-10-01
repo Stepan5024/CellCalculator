@@ -45,7 +45,7 @@ class ClientActivity : AppCompatActivity() {
                 "previousActivity = $previousActivity nameOfClient = ${client.ClientName}"
             )
 
-        } catch (exp: RuntimeException) {
+        } catch (_: RuntimeException) {
 
         }
 
@@ -90,15 +90,12 @@ class ClientActivity : AppCompatActivity() {
                         DateOfEditing = currentDate
                     )
 
-                    // костыль
-
                     insertNewClientInDataBase(user)
 
                 } else {
                     // Обновление данных клиента
-                    //Надо добавить поиск сущеествующего пользователя и чтение предыдущих значений с его полей
-                    // и вместо булевых пеерменных записывать то что было
-
+                    //Надо добавить поиск существующего пользователя и чтение предыдущих значений с его полей
+                    // и вместо булевых переменных записывать, то что было
 
                     val id = getClientFromPreviousActivity()._id
                     val user = Client(

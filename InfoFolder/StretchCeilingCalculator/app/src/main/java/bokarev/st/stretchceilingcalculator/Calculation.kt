@@ -8,7 +8,6 @@ import android.util.Log
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContentProviderCompat.requireContext
 import bokarev.st.stretchceilingcalculator.entities.Client
 import bokarev.st.stretchceilingcalculator.entities.ClientAndEstimateModification
 import bokarev.st.stretchceilingcalculator.entities.PdfToDisplay
@@ -54,7 +53,7 @@ class Calculation : AppCompatActivity() {
             getSumByClient() // установить в текстовое поле обзую сумму сметы по всем категориям
 
 
-        } catch (exp: RuntimeException) {
+        } catch (_: RuntimeException) {
 
         }
 
@@ -95,7 +94,7 @@ class Calculation : AppCompatActivity() {
                 )
                 for (i in someList) {
                     val nameTypeOfWork = dao.getTypeOfWorkNameByTypeCategory(i._idTypeOfWork)
-                    val suk = ClientAndEstimateModification(
+                    val clientAndEstimateModification = ClientAndEstimateModification(
                         i.ClientName,
                         i.Count,
                         i._idTypeCategory,
@@ -106,8 +105,8 @@ class Calculation : AppCompatActivity() {
                         1,
                         i.UnitsOfMeasurement
                     )
-                    if (suk.Count != 0f) {
-                        finishList.add(suk)
+                    if (clientAndEstimateModification.Count != 0f) {
+                        finishList.add(clientAndEstimateModification)
                     }
 
                 }
