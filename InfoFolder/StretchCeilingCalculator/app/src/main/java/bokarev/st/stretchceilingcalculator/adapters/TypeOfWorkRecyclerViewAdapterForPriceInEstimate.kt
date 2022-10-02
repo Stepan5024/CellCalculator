@@ -4,6 +4,7 @@ import android.util.Log
 import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.OnFocusChangeListener
 import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.TextView
@@ -50,7 +51,10 @@ class TypeOfWorkRecyclerViewAdapterForPriceInEstimate(private val listener: RowC
 
     }
 
-    class PriceViewHolder(view: View, private val listener: RowClickListenerRecyclerPriceInEstimate) :
+    class PriceViewHolder(
+        view: View,
+        private val listener: RowClickListenerRecyclerPriceInEstimate
+    ) :
         RecyclerView.ViewHolder(view) {
 
         private val nameOfWork = view.findViewById<TextView>(R.id.NameOfWork)!!
@@ -99,20 +103,7 @@ class TypeOfWorkRecyclerViewAdapterForPriceInEstimate(private val listener: RowC
                         Log.d("mytag", "new price = $newPrice")
                         if (newPrice >= 0) {
 
-                            val string = "$newPrice"
-                            price.setText(string)
-
-                            listener.onChangeClickPrice(
-                                ViewEstimate(
-                                    data._id,
-                                    data._idTypeOfWork,
-                                    newPrice,
-                                    data.CategoryName,
-                                    data.UnitsOfMeasurement,
-
-
-                                    ), previousPrice, "set"
-                            )
+                            updateInfoFromEditTextPrice(price, newPrice, data, previousPrice)
 
                             previousPrice = newPrice
                         }
@@ -124,10 +115,48 @@ class TypeOfWorkRecyclerViewAdapterForPriceInEstimate(private val listener: RowC
                     return false
                 }
             })
+            price.onFocusChangeListener = OnFocusChangeListener { _, hasFocus ->
+                if (!hasFocus) {
+                    // code to execute when EditText loses focus
+                    val newPrice = price.text.toString().split(" ")[0].toInt()
 
+                    Log.d("mytag", "new price = $newPrice")
+                    if (newPrice >= 0) {
+
+                        updateInfoFromEditTextPrice(price, newPrice, data, previousPrice)
+
+                        previousPrice = newPrice
+                    }
+                    // clear focus and hide cursor from edit text
+                    price.clearFocus()
+                }
+            }
         }
 
+        private fun updateInfoFromEditTextPrice(
+            price: EditText,
+            newPrice: Int,
+            data: ViewEstimate,
+            previousPrice: Int
+        ) {
+            val string = "$newPrice"
+            price.setText(string)
+
+            listener.onChangeClickPrice(
+                ViewEstimate(
+                    data._id,
+                    data._idTypeOfWork,
+                    newPrice,
+                    data.CategoryName,
+                    data.UnitsOfMeasurement,
+
+
+                    ), previousPrice, "set"
+            )
+
+        }
     }
+
 
     interface RowClickListenerRecyclerPriceInEstimate {
         fun onDeletePriceClickListener(user: ViewEstimate)

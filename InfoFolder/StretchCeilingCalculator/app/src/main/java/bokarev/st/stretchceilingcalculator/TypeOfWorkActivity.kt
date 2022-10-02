@@ -246,7 +246,22 @@ class TypeOfWorkActivity : AppCompatActivity(),
                 // обновим данные в финальный лист
                 typeOfWorkRecyclerViewAdapter.setListData(finalList)
                 typeOfWorkRecyclerViewAdapter.notifyDataSetChanged()
-                Log.d("mytag", "Main Thread is Running")
+
+
+            } else {
+                // мы меняем цены, фильтруем позиции цен
+                val finalList: MutableList<ViewEstimate> = arrayListOf()
+
+                finalList.clear()
+                finalList.addAll(
+                    saveChangesPricesInStringFilter(
+                        editText,
+
+                        )
+                )
+                // обновим данные в финальный лист
+                typeOfWorkRecyclerViewAdapterForPriceInEstimate.setListData(finalList)
+                typeOfWorkRecyclerViewAdapterForPriceInEstimate.notifyDataSetChanged()
 
 
             }
@@ -256,9 +271,11 @@ class TypeOfWorkActivity : AppCompatActivity(),
             // Respond to end icon presses
             // очистить поле ввода
             Log.d("mytag2", "setEndIconOnClickListener обнуление")
+            saveResultInDataBase(dao, btnCorrectListOfClients, false)
             editText.setText("")
             editText.clearFocus()
-            saveResultInDataBase(dao, btnCorrectListOfClients, false)
+
+
         }
 
         // очистить фокус с текстового ввода при нажатии на Готово на клаве
@@ -334,6 +351,55 @@ class TypeOfWorkActivity : AppCompatActivity(),
         return finalList
     }
 
+    private fun saveChangesPricesInStringFilter(
+        editText: TextInputEditText,
+
+        ): Collection<ViewEstimate> {
+        // надо в ресуклер цен отфильтроваться по наименованию
+
+
+        val previousList: MutableList<ViewEstimate> =
+            typeOfWorkRecyclerViewAdapterForPriceInEstimate.getListData() // хранятся измененные значения
+
+        val finalList: MutableList<ViewEstimate> = arrayListOf()
+
+        if (editText.text.toString() == "") {
+            // когда пользователь нажал очистить все и надо сохранить результат повышения/понижения цен элементов
+
+            for (i in constantCopyListPrices) {
+                if (previousList.indexOf(i) == -1) {
+                    // индекс не найден, а это означает что кол-во у этой категории изменено
+                    for (j in previousList) {
+                        if (j._id == i._id) {
+                            // одинаковое наименование, но разное кол-во
+                            Log.d(
+                                "mytagRest",
+                                "j._id = ${j._id} = i._id ${i._id} price = ${i.Price} and  "
+                            )
+                            // как показывает тестирование в этот цикл не заходит программа
+                            i.Price = j.Price
+
+                        }
+                    }
+                }
+
+                finalList.add(i)
+
+            }
+
+        } else
+            for (i in constantCopyListPrices) {
+                if (i.CategoryName.contains(editText.text.toString())) {
+                    // наименование содержит введенный в поиск текст
+                    // добавим найденный элемент в финалььный список
+
+
+                    finalList.add(i)
+                }
+            }
+        return finalList
+    }
+
     private fun saveResultInDataBase(
         dao: TypeCategoryDao,
         btnCorrectListOfClients: CheckBox,
@@ -349,7 +415,8 @@ class TypeOfWorkActivity : AppCompatActivity(),
         if (wantChange) {
             // тут проверка признака wantChange если да, то с одним сохраняем типо или с другим типом
             // тип кол-во в смете
-            val someList = typeOfWorkRecyclerViewAdapterForPriceInEstimate.getListData()
+            val someList = //constantCopyListPrices
+                typeOfWorkRecyclerViewAdapterForPriceInEstimate.getListData()
             val job = GlobalScope.launch(Dispatchers.Default) {
 
                 for (i in someList) {
@@ -704,23 +771,45 @@ class TypeOfWorkActivity : AppCompatActivity(),
 
                 )
         )
+
+        val indexPreviousInConstantList = constantCopyListPrices.indexOf(
+            ViewEstimate(
+                data._id,
+                data._idTypeOfWork,
+                oldPrice,
+                data.CategoryName,
+                data.UnitsOfMeasurement,
+
+                )
+        )
+
         val items = typeOfWorkRecyclerViewAdapterForPriceInEstimate.getListData()
 
         //items.add(indexPrevious, data)
         //items.removeAt(indexPrevious + 1)
         Log.d(
-            "mytag",
+            "mytagStepan",
             "index arr = $indexPrevious data new price = ${data.Price} | data old price = $oldPrice"
         )
 
         items[indexPrevious] = data
+
+
+
         Log.d(
-            "mytag",
+            "mytagStepan",
             "index arr items= $indexPrevious data new price = ${items[indexPrevious].Price} | data old price = $oldPrice"
         )
 
+        constantCopyListPrices[indexPreviousInConstantList] = data
         typeOfWorkRecyclerViewAdapterForPriceInEstimate.setListData(items)
-        typeOfWorkRecyclerViewAdapterForPriceInEstimate.notifyDataSetChanged()
+        try {
+            typeOfWorkRecyclerViewAdapterForPriceInEstimate.notifyDataSetChanged()
+        } catch (_: IllegalStateException) {
+
+        }
+
+
     }
 
     override fun onItemClickListener(user: ViewEstimate) {
