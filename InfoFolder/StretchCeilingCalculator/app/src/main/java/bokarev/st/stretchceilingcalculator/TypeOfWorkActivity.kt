@@ -7,13 +7,12 @@ import android.util.Log
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.CheckBox
-import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat.startActivity
 import androidx.core.widget.doOnTextChanged
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -28,12 +27,12 @@ import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import kotlinx.android.synthetic.main.type_of_work_activity.*
 import kotlinx.coroutines.*
+import java.util.Locale.filter
 import kotlin.math.roundToInt
 
 
 @OptIn(DelicateCoroutinesApi::class)
 class TypeOfWorkActivity : AppCompatActivity(),
-    TypeOfWorkRecyclerViewAdapterForCountInEstimate.RowClickListenerRecyclerCountInEstimate,
     TypeOfWorkRecyclerViewAdapterForPriceInEstimate.RowClickListenerRecyclerPriceInEstimate {
 
 
@@ -43,7 +42,8 @@ class TypeOfWorkActivity : AppCompatActivity(),
         arrayListOf() // содержит в себе первозданную копию массива значений сметы клиента
     private val constantCopyListPrices: MutableList<ViewEstimate> =
         arrayListOf() // содержит в себе первозданную копию массива цен смет
-
+    private val dividingArray: MutableList<ClientAndEstimateModification> =
+        arrayListOf() // содержит разделительные элементы
     private lateinit var typeOfWorkRecyclerViewAdapter: TypeOfWorkRecyclerViewAdapterForCountInEstimate
     private lateinit var typeOfWorkRecyclerViewAdapterForPriceInEstimate: TypeOfWorkRecyclerViewAdapterForPriceInEstimate
 
@@ -127,16 +127,38 @@ class TypeOfWorkActivity : AppCompatActivity(),
                         Log.d("mytag", "i = $i ")
                         idTypeOfWork = i
 
+                        // обычный элемент имеет тип layout = 1
                         getClientAndEstimate =
                             dao.getUnionClientAndEstimateAndTypeCategory2(
                                 getClientFromPreviousActivity()._id,
                                 idTypeOfWork
                             )
+                        // разделительный элемент имеет тип layout = 2
+
+                        var idPreviousTypeOfWork = -1
                         for (j in setListDataByClient(
                             getClientAndEstimate,
                             idTypeOfWork,
                             dao
                         )) {
+                            if (idPreviousTypeOfWork != j._idTypeOfWork) {
+
+                                finalList.add(
+                                    ClientAndEstimateModification(
+                                        "разделительный элемент",
+                                        j.Count,
+                                        j._idTypeCategory,
+                                        j._idTypeOfWork,
+                                        j.Price,
+                                        j.CategoryName,
+                                        j.NameTypeOfWork,
+                                        2,
+                                        j.UnitsOfMeasurement,
+                                    )
+                                )
+                                idPreviousTypeOfWork = j._idTypeOfWork
+                            }
+
                             finalList.add(j)
                         }
 
@@ -234,7 +256,7 @@ class TypeOfWorkActivity : AppCompatActivity(),
             if (!wantChange) {
                 // надо в ресуклер цен отфильтроваться по наименованию
 
-                val finalList: MutableList<ClientAndEstimateModification> = arrayListOf()
+                val finalList: MutableList<ClientAndEstimateModification> = mutableListOf()
 
                 finalList.clear()
                 finalList.addAll(
@@ -310,7 +332,18 @@ class TypeOfWorkActivity : AppCompatActivity(),
         val previousList: MutableList<ClientAndEstimateModification> =
             typeOfWorkRecyclerViewAdapter.getListData() // хранятся измененные значения
 
+        val temp: MutableList<ClientAndEstimateModification> = arrayListOf()
+        temp.addAll(constantCopyListClient)
+
+
+        constantCopyListClient.clear()
+        constantCopyListClient.addAll(
+            temp.filter { it.TypeLayout != 2 }
+                .toMutableList()
+        )
+
         val finalList: MutableList<ClientAndEstimateModification> = arrayListOf()
+        var idPreviousTypeOfWork = -1
 
         if (editText.text.toString() == "") {
             // когда пользователь нажал очистить все и надо сохранить результат повышения/понижения кол-ва элементов
@@ -327,27 +360,189 @@ class TypeOfWorkActivity : AppCompatActivity(),
                     }
                 }
                 if (btnCorrectListOfClients.isChecked && i.Count > 0) {
+                    if (idPreviousTypeOfWork != i._idTypeOfWork && finalList.indexOf(
+                            ClientAndEstimateModification(
+                                "разделительный элемент",
+                                i.Count,
+                                i._idTypeCategory,
+                                i._idTypeOfWork,
+                                i.Price,
+                                i.CategoryName,
+                                i.NameTypeOfWork,
+                                2,
+                                i.UnitsOfMeasurement,
+                            )
+                        ) == -1
+                    ) {
+
+                        finalList.add(
+                            ClientAndEstimateModification(
+                                "разделительный элемент",
+                                i.Count,
+                                i._idTypeCategory,
+                                i._idTypeOfWork,
+                                i.Price,
+                                i.CategoryName,
+                                i.NameTypeOfWork,
+                                2,
+                                i.UnitsOfMeasurement,
+                            )
+                        )
+                        idPreviousTypeOfWork = i._idTypeOfWork
+                    }
                     finalList.add(i)
                     Log.d("mytag3", "check box is not switched")
-                } else if (!btnCorrectListOfClients.isChecked)
+                } else if (!btnCorrectListOfClients.isChecked) {
+                    if (idPreviousTypeOfWork != i._idTypeOfWork && finalList.indexOf(
+                            ClientAndEstimateModification(
+                                "разделительный элемент",
+                                i.Count,
+                                i._idTypeCategory,
+                                i._idTypeOfWork,
+                                i.Price,
+                                i.CategoryName,
+                                i.NameTypeOfWork,
+                                2,
+                                i.UnitsOfMeasurement,
+                            )
+                        ) == -1
+                    ) {
+
+                        finalList.add(
+                            ClientAndEstimateModification(
+                                "разделительный элемент",
+                                i.Count,
+                                i._idTypeCategory,
+                                i._idTypeOfWork,
+                                i.Price,
+                                i.CategoryName,
+                                i.NameTypeOfWork,
+                                2,
+                                i.UnitsOfMeasurement,
+                            )
+                        )
+                        idPreviousTypeOfWork = i._idTypeOfWork
+                    }
+
 
                     finalList.add(i)
-
+                }
             }
 
         } else
             for (i in constantCopyListClient) {
-                if (i.CategoryName.contains(editText.text.toString())) {
+                if (i.CategoryName.lowercase().contains(editText.text.toString().lowercase())) {
                     // наименование содержит введенный в поиск текст
                     // добавим найденный элемент в финалььный список
+                    /* if(i.TypeLayout == 2) {
+                         finalList.add(ClientAndEstimateModification(
+                             "разделительный элемент",
+                             i.Count,
+                             i._idTypeCategory,
+                             i._idTypeOfWork,
+                             i.Price,
+                             i.CategoryName,
+                             i.NameTypeOfWork,
+                             2,
+                             i.UnitsOfMeasurement,
+                         ))
+                     }
+
+                     */
+
                     if (isResultFlagActivated && i.Count > 0) {
+                        /*if (finalList.indexOf(ClientAndEstimateModification(
+                                "разделительный элемент",
+                                i.Count,
+                                i._idTypeCategory,
+                                i._idTypeOfWork,
+                                i.Price,
+                                i.CategoryName,
+                                i.NameTypeOfWork,
+                                2,
+                                i.UnitsOfMeasurement,
+                            )) == -1) {
+                            // надо добавить разделитель и потом его удалить т. к. он будет лишним
+                            val toast = Toast.makeText(
+                                applicationContext,
+                                "надо добавить разделитель и потом его удалить т. к. он будет лишним ",
+                                Toast.LENGTH_LONG
+                            )
+                            toast.show()
+                        }*/
+                        if (idPreviousTypeOfWork != i._idTypeOfWork && finalList.indexOf(
+                                ClientAndEstimateModification(
+                                    "разделительный элемент",
+                                    i.Count,
+                                    i._idTypeCategory,
+                                    i._idTypeOfWork,
+                                    i.Price,
+                                    i.CategoryName,
+                                    i.NameTypeOfWork,
+                                    2,
+                                    i.UnitsOfMeasurement,
+                                )
+                            ) == -1
+                        ) {
+
+                            finalList.add(
+                                ClientAndEstimateModification(
+                                    "разделительный элемент",
+                                    i.Count,
+                                    i._idTypeCategory,
+                                    i._idTypeOfWork,
+                                    i.Price,
+                                    i.CategoryName,
+                                    i.NameTypeOfWork,
+                                    2,
+                                    i.UnitsOfMeasurement,
+                                )
+                            )
+                            idPreviousTypeOfWork = i._idTypeOfWork
+                        }
+
+
+
                         finalList.add(i)
                         Log.d("mytag3", "check box is not switched")
                     } else if (!isResultFlagActivated)
+                        if (idPreviousTypeOfWork != i._idTypeOfWork && finalList.indexOf(
+                                ClientAndEstimateModification(
+                                    "разделительный элемент",
+                                    i.Count,
+                                    i._idTypeCategory,
+                                    i._idTypeOfWork,
+                                    i.Price,
+                                    i.CategoryName,
+                                    i.NameTypeOfWork,
+                                    2,
+                                    i.UnitsOfMeasurement,
+                                )
+                            ) == -1
+                        ) {
 
-                        finalList.add(i)
+                            finalList.add(
+                                ClientAndEstimateModification(
+                                    "разделительный элемент",
+                                    i.Count,
+                                    i._idTypeCategory,
+                                    i._idTypeOfWork,
+                                    i.Price,
+                                    i.CategoryName,
+                                    i.NameTypeOfWork,
+                                    2,
+                                    i.UnitsOfMeasurement,
+                                )
+                            )
+                            idPreviousTypeOfWork = i._idTypeOfWork
+                        }
+
+
+                    finalList.add(i)
                 }
             }
+
+
         return finalList
     }
 
@@ -389,7 +584,7 @@ class TypeOfWorkActivity : AppCompatActivity(),
 
         } else
             for (i in constantCopyListPrices) {
-                if (i.CategoryName.contains(editText.text.toString())) {
+                if (i.CategoryName.lowercase().contains(editText.text.toString().lowercase())) {
                     // наименование содержит введенный в поиск текст
                     // добавим найденный элемент в финалььный список
 
@@ -443,11 +638,12 @@ class TypeOfWorkActivity : AppCompatActivity(),
             val job = GlobalScope.launch(Dispatchers.Default) {
 
                 for (i in someList) {
-                    dao.updateCountStrokesEstimateByClient(
-                        getClientFromPreviousActivity()._id,
-                        i._idTypeCategory,
-                        i.Count
-                    )
+                    if (i.ClientName != "разделительный элемент")
+                        dao.updateCountStrokesEstimateByClient(
+                            getClientFromPreviousActivity()._id,
+                            i._idTypeCategory,
+                            i.Count
+                        )
                     Log.d("mytag", "items back print = ${i.CategoryName}")
                 }
             }
@@ -475,32 +671,35 @@ class TypeOfWorkActivity : AppCompatActivity(),
 
         val finalList: MutableList<ClientAndEstimateModification> = arrayListOf()
 
-        var prev = 0
+        //var prev = 0
         for (j in clientAndEstimate) {
-            if (j._idTypeOfWork == idTypeOfWork) {
-                val nameCategory =
-                    dao.getTypeOfWorkNameByTypeCategory(idTypeOfWork)
+            // if (j._idTypeOfWork == idTypeOfWork) {
+            val nameCategory =
+                dao.getTypeOfWorkNameByTypeCategory(idTypeOfWork)
 
-                finalList.add(
-                    createClientAndEstimateModificationRow(
-                        j,
-                        1,
-                        nameCategory
-                    )
+            finalList.add(
+                createClientAndEstimateModificationRow(
+                    j,
+                    1,
+                    nameCategory
                 )
-            } else {
-                prev++
-                val nameCategory =
-                    dao.getTypeOfWorkNameByTypeCategory(idTypeOfWork)
+            )
+            /* } else {
+                 // ветка не работает
+                 prev++
+                 val nameCategory =
+                     dao.getTypeOfWorkNameByTypeCategory(idTypeOfWork)
 
-                finalList.add(
-                    createClientAndEstimateModificationRow(
-                        j,
-                        0,
-                        nameCategory
-                    )
-                )
-            }
+                 finalList.add(
+                     createClientAndEstimateModificationRow(
+                         j,
+                         200,
+                         nameCategory
+                     )
+                 )
+             }
+
+             */
         }
         return finalList
     }
@@ -537,7 +736,7 @@ class TypeOfWorkActivity : AppCompatActivity(),
                     StaggeredGridLayoutManager.VERTICAL
                 )
             addItemDecoration(divider)
-            recycledViewPool.setMaxRecycledViews(0, 300)
+            //  recycledViewPool.setMaxRecycledViews(0, 300)
         }
     }
 
@@ -554,29 +753,39 @@ class TypeOfWorkActivity : AppCompatActivity(),
                     StaggeredGridLayoutManager.VERTICAL
                 )
             addItemDecoration(divider)
-            recycledViewPool.setMaxRecycledViews(0, 300)
+            //recycledViewPool.setMaxRecycledViews(0, 300)
         }
     }
 
 
-    /*private fun hasDuplicates(someList: MutableList<ViewEstimate>): Boolean {
+    private fun hasDuplicates(someList: MutableList<ClientAndEstimateModification>): ClientAndEstimateModification {
 
         for (i in 0 until someList.size) {
-            for (j in (i+1) until someList.size) {
-                if (someList[j]._id == someList[i]._id) {
+            for (j in (i + 1) until someList.size) {
+                if (someList[j].ClientName == someList[i].ClientName) {
 
-                    return true
-
+                    return someList[j]
+                    //return true
                 }
             }
         }
-
-        return false
-    }*/
+        // return false
+        return ClientAndEstimateModification("разделительный элемент", 0f, 0, 0, 0, "", "", 2, "")
+    }
 
     @SuppressLint("NotifyDataSetChanged")
     private fun filterList(isChecked: Boolean) {
         val editText = findViewById<TextInputEditText>(R.id.cost_of_service_edit_text)
+
+        val temp: MutableList<ClientAndEstimateModification> = arrayListOf()
+        temp.addAll(constantCopyListClient)
+
+
+        constantCopyListClient.clear()
+        constantCopyListClient.addAll(
+            temp.filter { it.TypeLayout != 2 }
+                .toMutableList()
+        )
 
 
         if (isChecked) {
@@ -591,28 +800,96 @@ class TypeOfWorkActivity : AppCompatActivity(),
             items.removeAll { it.Count == 0F }
             if (editText.text.toString() != "") {
 
-                items2.addAll(
-                    items.filter { it.CategoryName.contains(editText.text.toString()) }
-                        .toMutableList()
-                ) // все символы, кроме 'z'
+                var idPreviousTypeOfWork = -1
+                for (i in constantCopyListClient) {
+                    if (idPreviousTypeOfWork != i._idTypeOfWork && items2.indexOf(
+                            ClientAndEstimateModification(
+                                "разделительный элемент",
+                                i.Count,
+                                i._idTypeCategory,
+                                i._idTypeOfWork,
+                                i.Price,
+                                i.CategoryName,
+                                i.NameTypeOfWork,
+                                2,
+                                i.UnitsOfMeasurement,
+                            )
+                        ) == -1 && i.CategoryName.lowercase().contains(editText.text.toString().lowercase()) && i.Count != 0f
+                    ) {
+
+                        items2.add(
+                            ClientAndEstimateModification(
+                                "разделительный элемент",
+                                i.Count,
+                                i._idTypeCategory,
+                                i._idTypeOfWork,
+                                i.Price,
+                                i.CategoryName,
+                                i.NameTypeOfWork,
+                                2,
+                                i.UnitsOfMeasurement,
+                            )
+                        )
+                        idPreviousTypeOfWork = i._idTypeOfWork
+
+                    }
+                    if (i.CategoryName.lowercase().contains(editText.text.toString().lowercase()) && i.Count != 0f)
+                        items2.add(i)
+                }
+                /* items2.addAll(
+                     items.filter { it.CategoryName.contains(editText.text.toString()) }
+                        // .filter { it.TypeLayout != 2 }
+                         .toMutableList()
+                 )*/
             } else {
-                items2.addAll(items)
+                var idPreviousTypeOfWork = -1
+                for (i in constantCopyListClient) {
+                    if (idPreviousTypeOfWork != i._idTypeOfWork && items2.indexOf(
+                            ClientAndEstimateModification(
+                                "разделительный элемент",
+                                i.Count,
+                                i._idTypeCategory,
+                                i._idTypeOfWork,
+                                i.Price,
+                                i.CategoryName,
+                                i.NameTypeOfWork,
+                                2,
+                                i.UnitsOfMeasurement,
+                            )
+                        ) == -1 && i.Count != 0f
+                    ) {
+
+                        items2.add(
+                            ClientAndEstimateModification(
+                                "разделительный элемент",
+                                i.Count,
+                                i._idTypeCategory,
+                                i._idTypeOfWork,
+                                i.Price,
+                                i.CategoryName,
+                                i.NameTypeOfWork,
+                                2,
+                                i.UnitsOfMeasurement,
+                            )
+                        )
+                        idPreviousTypeOfWork = i._idTypeOfWork
+
+                    }
+                    if (i.Count != 0f)
+                        items2.add(i)
+                }
+                //items2.addAll(items)
             }
+
             typeOfWorkRecyclerViewAdapter.setListData(items2)
         } else {
 
             Log.d("mytag", "Флажок не выбран")
 
-            for (i in constantCopyListClient) {
-                Log.d(
-                    "mytag",
-                    "constantCopyListClient перед тем как обновлять данные ${i.CategoryName}"
-                )
-            }
-            // мб записывать constantCopyListClient в shared Preferense
             // в recycler view вывести все строк
             val items = //= constantCopyListClient
                 typeOfWorkRecyclerViewAdapter.getListData()
+
             for ((counter, i) in constantCopyListClient.withIndex()) {
                 Log.d("mytag", "constantCopyListClient print = ${i.CategoryName}")
                 for (j in items) {
@@ -634,13 +911,87 @@ class TypeOfWorkActivity : AppCompatActivity(),
             listDataShort.addAll(constantCopyListClient)
             if (editText.text.toString() != "") {
 
-                listDataShort2.addAll(listDataShort.filter { it.CategoryName.contains(editText.text.toString()) } as ArrayList<ClientAndEstimateModification>) //
+                // listDataShort2.addAll(listDataShort.filter { it.CategoryName.contains(editText.text.toString()) } as ArrayList<ClientAndEstimateModification>) //
+                var idPreviousTypeOfWork = -1
+                for (i in constantCopyListClient) {
+                    if (idPreviousTypeOfWork != i._idTypeOfWork && listDataShort2.indexOf(
+                            ClientAndEstimateModification(
+                                "разделительный элемент",
+                                i.Count,
+                                i._idTypeCategory,
+                                i._idTypeOfWork,
+                                i.Price,
+                                i.CategoryName,
+                                i.NameTypeOfWork,
+                                2,
+                                i.UnitsOfMeasurement,
+                            )
+                        ) == -1 && i.CategoryName.lowercase().contains(editText.text.toString().lowercase())
+                    ) {
+
+                        listDataShort2.add(
+                            ClientAndEstimateModification(
+                                "разделительный элемент",
+                                i.Count,
+                                i._idTypeCategory,
+                                i._idTypeOfWork,
+                                i.Price,
+                                i.CategoryName,
+                                i.NameTypeOfWork,
+                                2,
+                                i.UnitsOfMeasurement,
+                            )
+                        )
+                        idPreviousTypeOfWork = i._idTypeOfWork
+
+                    }
+                    if (i.CategoryName.lowercase().contains(editText.text.toString().lowercase()))
+                        listDataShort2.add(i)
+                }
+
+                typeOfWorkRecyclerViewAdapter.setListData(listDataShort2)
 
             } else {
-                listDataShort2.addAll(listDataShort)
-            }
+                var idPreviousTypeOfWork = -1
+                for (i in constantCopyListClient) {
+                    if (idPreviousTypeOfWork != i._idTypeOfWork && listDataShort2.indexOf(
+                            ClientAndEstimateModification(
+                                "разделительный элемент",
+                                i.Count,
+                                i._idTypeCategory,
+                                i._idTypeOfWork,
+                                i.Price,
+                                i.CategoryName,
+                                i.NameTypeOfWork,
+                                2,
+                                i.UnitsOfMeasurement,
+                            )
+                        ) == -1
+                    ) {
 
-            typeOfWorkRecyclerViewAdapter.setListData(listDataShort2)
+                        listDataShort2.add(
+                            ClientAndEstimateModification(
+                                "разделительный элемент",
+                                i.Count,
+                                i._idTypeCategory,
+                                i._idTypeOfWork,
+                                i.Price,
+                                i.CategoryName,
+                                i.NameTypeOfWork,
+                                2,
+                                i.UnitsOfMeasurement,
+                            )
+                        )
+                        idPreviousTypeOfWork = i._idTypeOfWork
+
+                    }
+
+                    listDataShort2.add(i)
+                    //listDataShort2.addAll(listDataShort)
+                }
+
+                typeOfWorkRecyclerViewAdapter.setListData(listDataShort2)
+            }
         }
 
         typeOfWorkRecyclerViewAdapter.notifyDataSetChanged()
@@ -668,7 +1019,7 @@ class TypeOfWorkActivity : AppCompatActivity(),
 
 
     @SuppressLint("NotifyDataSetChanged")
-    override fun onChangeClick(
+    fun onChangeClick(
         data: ClientAndEstimateModification,
         typeChange: String,
         priceOld: Int,
@@ -694,7 +1045,7 @@ class TypeOfWorkActivity : AppCompatActivity(),
 
         }
 
-        val indexPrevious = typeOfWorkRecyclerViewAdapter.getListData().indexOf(
+        var indexPrevious = typeOfWorkRecyclerViewAdapter.getListData().indexOf(
             ClientAndEstimateModification(
                 data.ClientName,
                 countOld,
@@ -711,11 +1062,11 @@ class TypeOfWorkActivity : AppCompatActivity(),
 
         /*items.add(indexPrevious, data)
         items.removeAt(indexPrevious + 1)*/
-        //if (indexPrevious == -1) indexPrevious = 0
+        // if (indexPrevious == -1) indexPrevious = 0
 
         items[indexPrevious] = data
 
-        val indexPreviousInConstantList = constantCopyListClient.indexOf(
+        var indexPreviousInConstantList = constantCopyListClient.indexOf(
             ClientAndEstimateModification(
                 data.ClientName,
                 countOld,
@@ -728,13 +1079,14 @@ class TypeOfWorkActivity : AppCompatActivity(),
                 data.UnitsOfMeasurement,
             )
         )
+        //if (indexPreviousInConstantList == -1) indexPreviousInConstantList = 0
 
         constantCopyListClient[indexPreviousInConstantList] = data
         typeOfWorkRecyclerViewAdapter.setListData(items)
         typeOfWorkRecyclerViewAdapter.notifyDataSetChanged()
     }
 
-    override fun onItemClickListener(user: ClientAndEstimateModification) {
+    fun onItemClickListener(user: ClientAndEstimateModification) {
 
 
         /*nameInput.setText(user.name)

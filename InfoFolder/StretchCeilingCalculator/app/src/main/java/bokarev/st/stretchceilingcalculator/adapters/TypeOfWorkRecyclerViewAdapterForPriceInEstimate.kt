@@ -59,7 +59,7 @@ class TypeOfWorkRecyclerViewAdapterForPriceInEstimate(private val listener: RowC
 
         private val nameOfWork = view.findViewById<TextView>(R.id.NameOfWork)!!
         private val nameOfMeansure = view.findViewById<TextView>(R.id.tvMensure)!!
-        private val titleOfWork = view.findViewById<TextView>(R.id.textTypeOfWorkTitle)!!
+        //private val titleOfWork = view.findViewById<TextView>(R.id.textTypeOfWorkTitle)!!
         private val price = view.findViewById<EditText>(R.id.Price)!!
 
 
@@ -77,11 +77,11 @@ class TypeOfWorkRecyclerViewAdapterForPriceInEstimate(private val listener: RowC
             // layoutType0.layoutParams.height = 0
 
 
-            GlobalScope.launch(Dispatchers.Default) {
+            /*GlobalScope.launch(Dispatchers.Default) {
                 val dao = CategoriesDataBase.getInstance(itemView.context).categoriesDao
 
-                titleOfWork.text = dao.getTypeOfWorkNameByTypeCategory(data._idTypeOfWork)
-            }
+              //  titleOfWork.text = dao.getTypeOfWorkNameByTypeCategory(data._idTypeOfWork)
+            }*/
             nameOfWork.text = data.CategoryName
             nameOfMeansure.text = data.UnitsOfMeasurement
 

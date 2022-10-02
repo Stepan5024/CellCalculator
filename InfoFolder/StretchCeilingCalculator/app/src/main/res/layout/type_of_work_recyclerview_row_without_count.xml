@@ -16,7 +16,7 @@
             android:background="@color/white"
             >
 
-            <TextView
+          <!--  <TextView
                 android:id="@+id/textTypeOfWorkTitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -26,18 +26,10 @@
                 android:textSize="12sp"
                 android:text="My Text"
                 android:textStyle="bold">
-            </TextView>
-            <!--  <TextView
-                  android:id="@+id/textNews"
-                  android:layout_width="match_parent"
-                  android:layout_height="wrap_content"
-                  android:gravity="center"
-                  android:textColor="@color/black"
-                  android:textSize="19dp"
-                  android:text="My text"
-                  android:textStyle="italic">
 
-              </TextView> -->
+            </TextView>
+               -->
+
         </LinearLayout>
 
 

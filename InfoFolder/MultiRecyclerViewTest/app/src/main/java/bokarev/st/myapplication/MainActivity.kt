@@ -3,7 +3,6 @@ package bokarev.st.myapplication
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
-import bokarev.st.myapplication.adapter.TripsAdapter
 import bokarev.st.myapplication.adapter.TypeOfWorkAdapter
 import bokarev.st.myapplication.adapter.TypeOfWorkRecyclerViewAdapter2
 import bokarev.st.myapplication.models.Ads
