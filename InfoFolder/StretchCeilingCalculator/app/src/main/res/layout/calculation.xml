@@ -21,14 +21,21 @@
             android:layout_weight="1"
             tools:ignore="NestedWeights">
 
-            <ImageView
+            <LinearLayout
                 android:id="@+id/btnReturnToHome"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
                 android:layout_alignParentStart="true"
                 android:layout_centerVertical="true"
                 android:layout_marginStart="20dp"
-                app:srcCompat="@drawable/ic_back_btn" />
+                android:gravity="center">
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    app:srcCompat="@drawable/ic_back_btn" />
+            </LinearLayout>
 
             <TextView
                 android:id="@+id/textView"

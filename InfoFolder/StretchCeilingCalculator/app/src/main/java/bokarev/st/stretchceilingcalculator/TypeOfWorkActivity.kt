@@ -8,6 +8,7 @@ import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.CheckBox
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -108,7 +109,7 @@ class TypeOfWorkActivity : AppCompatActivity(),
 
                 val finalList: MutableList<ClientAndEstimateModification> = arrayListOf()
 
-                lifecycleScope.launch {
+                val job = GlobalScope.launch(Dispatchers.Default) {
                     var getClientAndEstimate: MutableList<ClientAndEstimate>
 
                     if (needAllListTypesOfWork) {
@@ -146,9 +147,24 @@ class TypeOfWorkActivity : AppCompatActivity(),
 
                     // фильтрация нужна или нет?
 
-                }
 
+                }
+                runBlocking {
+                    // waiting for the coroutine to finish it"s work
+                    job.join()
+                    //set view
+
+
+                    if (needAllListTypesOfWork) {
+                        if (!btnCorrectListOfClients.isChecked) {
+                            btnCorrectListOfClients.isChecked = true
+                            filterList(btnCorrectListOfClients.isChecked)
+
+                        }
+                    }
+                }
             }
+
 
             // вывести значение суммы по категори
             if (previousActivity == "Calculation" || needAllListTypesOfWork) {
@@ -187,6 +203,7 @@ class TypeOfWorkActivity : AppCompatActivity(),
                         showHide(btnCorrectListOfClients)
 
                     }
+
                     Log.d("mytag", "Main Thread is Running")
                 }
             }
@@ -257,7 +274,7 @@ class TypeOfWorkActivity : AppCompatActivity(),
         }
 
 
-        val btnReturnToHome: ImageView = findViewById(R.id.btnReturnToHome)
+        val btnReturnToHome: LinearLayout = findViewById(R.id.btnReturnToHome)
         btnReturnToHome.setOnClickListener {
 
             saveResultInDataBase(dao, btnCorrectListOfClients, true)
@@ -310,7 +327,7 @@ class TypeOfWorkActivity : AppCompatActivity(),
                         finalList.add(i)
                         Log.d("mytag3", "check box is not switched")
                     } else if (!isResultFlagActivated)
-                        
+
                         finalList.add(i)
                 }
             }

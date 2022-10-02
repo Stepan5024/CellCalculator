@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -40,7 +41,7 @@ class Clients : AppCompatActivity(), ClientsRecyclerViewAdapter.RowClickListener
 
         }
 
-        val btnReturnToHome: ImageView = findViewById(R.id.btnReturnToHome)
+        val btnReturnToHome: LinearLayout = findViewById(R.id.btnReturnToHome)
         btnReturnToHome.setOnClickListener {
 
             returnToPreviousActivity()

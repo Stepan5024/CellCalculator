@@ -57,7 +57,7 @@ class Calculation : AppCompatActivity() {
 
         }
 
-        val btnReturnToHome: ImageView = findViewById(R.id.btnReturnToHome)
+        val btnReturnToHome: LinearLayout = findViewById(R.id.btnReturnToHome)
         btnReturnToHome.setOnClickListener {
             returnToPreviousActivity()
         }
