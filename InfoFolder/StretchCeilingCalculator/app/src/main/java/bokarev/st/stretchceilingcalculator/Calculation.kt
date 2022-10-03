@@ -153,7 +153,7 @@ class Calculation : AppCompatActivity() {
         val btnGoToSystem: Button = findViewById(R.id.btnGoToSystem)
         btnGoToSystem.setOnClickListener {
 
-            showMenu(it, R.menu.system_popup_menu)
+            showMenu(it, R.menu.system_popup_menu, 1, 8)
 
 
         }
@@ -179,17 +179,8 @@ class Calculation : AppCompatActivity() {
         }
         val btnGoToMaterials: Button = findViewById(R.id.btnGoToMaterials)
         btnGoToMaterials.setOnClickListener {
+            showMenu(it, R.menu.system_popup_menu, 11, 20)
 
-            val wantChange =
-                previousActivity == "StartActivity" || (previousActivity == "TypeOfWorkActivity") && getClientFromPreviousActivity().ClientName == ""
-
-            //по хорошему надо создать новую таблицу и из нее считывать значения констант
-            startNextTypeOfWorkActivity(
-                false,
-                arrayListOf(11, 12, 13, 14, 15, 16, 17, 18, 19, 20),
-                "Материалы",
-                wantChange
-            )
         }
 
     }
@@ -294,7 +285,12 @@ class Calculation : AppCompatActivity() {
         }
     }
 
-    private fun showMenu(v: View, @MenuRes menuRes: Int) {
+    private fun showMenu(
+        v: View,
+        @MenuRes menuRes: Int,
+        tupeOfWorkIdStart: Int,
+        typeOfWorkIdEnd: Int
+    ) {
 
         val wantChange =
             previousActivity == "StartActivity" || (previousActivity == "TypeOfWorkActivity") && getClientFromPreviousActivity().ClientName == ""
@@ -302,86 +298,18 @@ class Calculation : AppCompatActivity() {
         val popup = PopupMenu(this, v)
         popup.menuInflater.inflate(menuRes, popup.menu)
         lifecycleScope.launch {
-            for (i in 1..8) {
+            for (i in tupeOfWorkIdStart..typeOfWorkIdEnd) {
                 popup.menu.add(0, i, i, dao.getTypeOfWorkNameByTypeCategory(i))
             }
 
             popup.setOnMenuItemClickListener { menuItem: MenuItem ->
-                when (menuItem.itemId) {
-                    1 -> {
-                        startNextTypeOfWorkActivity(
-                            false,
-                            arrayListOf(1),
-                            "Система",
-                            wantChange
-                        )
-                        true
-                    }
-                    2 -> {
-                        startNextTypeOfWorkActivity(
-                            false,
-                            arrayListOf(2),
-                            "Система",
-                            wantChange
-                        )
-                        true
-                    }
-                    3 -> {
-                        startNextTypeOfWorkActivity(
-                            false,
-                            arrayListOf(3),
-                            "Система",
-                            wantChange
-                        )
-                        true
-                    }
-                    4 -> {
-                        startNextTypeOfWorkActivity(
-                            false,
-                            arrayListOf(4),
-                            "Система",
-                            wantChange
-                        )
-                        true
-                    }
-                    5 -> {
-                        startNextTypeOfWorkActivity(
-                            false,
-                            arrayListOf(5),
-                            "Система",
-                            wantChange
-                        )
-                        true
-                    }
-                    6 -> {
-                        startNextTypeOfWorkActivity(
-                            false,
-                            arrayListOf(6),
-                            "Система",
-                            wantChange
-                        )
-                        true
-                    }
-                    7 -> {
-                        startNextTypeOfWorkActivity(
-                            false,
-                            arrayListOf(7),
-                            "Система",
-                            wantChange
-                        )
-                        true
-                    }
-                    8 -> {
-                        startNextTypeOfWorkActivity(
-                            false,
-                            arrayListOf(8),
-                            "Система",
-                            wantChange
-                        )
-                        true
-                    }
-                    else -> true
-                }
+                startNextTypeOfWorkActivity(
+                    false,
+                    arrayListOf(menuItem.itemId),
+                    "Система",
+                    wantChange
+                )
+                true
             }
             popup.setOnDismissListener {
 
