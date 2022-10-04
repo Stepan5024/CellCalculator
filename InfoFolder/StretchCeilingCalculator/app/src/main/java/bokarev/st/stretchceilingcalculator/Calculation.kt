@@ -192,12 +192,25 @@ class Calculation : AppCompatActivity() {
         nameTypeOfWork: String,
         wantChange: Boolean
     ) {
+        var nameOfWork = nameTypeOfWork
+
+        for (i in idTypeOfWorkList) {
+            if (i in 11..20) {
+                nameOfWork = "Материалы"
+                break
+            }
+            if (i in 1..8) {
+                nameOfWork = "Система"
+                break
+            }
+        }
+
         val intent = Intent(this, TypeOfWorkActivity::class.java).also {
             it.putExtra("ClientEntity", getClientFromPreviousActivity())
             it.putExtra("PreviousActivity", "Calculation")
             it.putExtra("idTypeOfWork", allListTypesOfWork)
             it.putExtra("idTypeOfWorkList", idTypeOfWorkList)
-            it.putExtra("NameTypeOfWork", nameTypeOfWork)
+            it.putExtra("NameTypeOfWork", nameOfWork)
             it.putExtra("WantChange", wantChange)
 
         }

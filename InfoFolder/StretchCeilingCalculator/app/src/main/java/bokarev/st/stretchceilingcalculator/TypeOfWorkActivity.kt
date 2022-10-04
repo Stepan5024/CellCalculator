@@ -11,14 +11,12 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat.startActivity
 import androidx.core.widget.doOnTextChanged
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import bokarev.st.stretchceilingcalculator.adapters.TypeOfWorkRecyclerViewAdapterForCountInEstimate
-import bokarev.st.stretchceilingcalculator.adapters.TypeOfWorkRecyclerViewAdapterForPriceInEstimate
 import bokarev.st.stretchceilingcalculator.entities.Client
 import bokarev.st.stretchceilingcalculator.entities.ClientAndEstimateModification
 import bokarev.st.stretchceilingcalculator.entities.ViewEstimate
@@ -27,25 +25,19 @@ import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import kotlinx.android.synthetic.main.type_of_work_activity.*
 import kotlinx.coroutines.*
-import java.util.Locale.filter
 import kotlin.math.roundToInt
 
 
 @OptIn(DelicateCoroutinesApi::class)
-class TypeOfWorkActivity : AppCompatActivity(),
-    TypeOfWorkRecyclerViewAdapterForPriceInEstimate.RowClickListenerRecyclerPriceInEstimate {
+class TypeOfWorkActivity : AppCompatActivity(){
 
 
     private var wantChange = false
 
     private val constantCopyListClient: MutableList<ClientAndEstimateModification> =
         arrayListOf() // содержит в себе первозданную копию массива значений сметы клиента
-    private val constantCopyListPrices: MutableList<ViewEstimate> =
-        arrayListOf() // содержит в себе первозданную копию массива цен смет
-    private val dividingArray: MutableList<ClientAndEstimateModification> =
-        arrayListOf() // содержит разделительные элементы
+
     private lateinit var typeOfWorkRecyclerViewAdapter: TypeOfWorkRecyclerViewAdapterForCountInEstimate
-    private lateinit var typeOfWorkRecyclerViewAdapterForPriceInEstimate: TypeOfWorkRecyclerViewAdapterForPriceInEstimate
 
 
     @OptIn(DelicateCoroutinesApi::class)
@@ -77,7 +69,8 @@ class TypeOfWorkActivity : AppCompatActivity(),
             if (wantChange) {
 
 
-                createRecyclerViewAboutPrice(recyclerView)
+                createRecyclerViewAboutEstimate(recyclerView)
+                //createRecyclerViewAboutPrice(recyclerView)
 
 
                 val job = GlobalScope.launch(Dispatchers.Default) {
@@ -91,11 +84,52 @@ class TypeOfWorkActivity : AppCompatActivity(),
                             idTypesOfWorkList
                         )
 
+                    // преобразуем viewEstimate to ClientAndModification
+                    var idPreviousTypeOfWork = -1
+                    val finalList: MutableList<ClientAndEstimateModification> = arrayListOf()
 
-                    typeOfWorkRecyclerViewAdapterForPriceInEstimate.setListData(someList)
-                    typeOfWorkRecyclerViewAdapterForPriceInEstimate.notifyDataSetChanged()
-                    constantCopyListPrices.addAll(typeOfWorkRecyclerViewAdapterForPriceInEstimate.getListData())
+                    for (j in someList) {
+                        val nameOfWork = dao.getTypeOfWorkNameByTypeCategory(j._idTypeOfWork)
+                        if (idPreviousTypeOfWork != j._idTypeOfWork) {
 
+                            finalList.add(
+                                ClientAndEstimateModification(
+                                    "разделительный элемент",
+                                    0f,
+                                    j._id,
+                                    j._idTypeOfWork,
+                                    j.Price,
+                                    j.CategoryName,
+                                    nameOfWork,
+                                    2,
+                                    j.UnitsOfMeasurement,
+                                )
+                            )
+                            idPreviousTypeOfWork = j._idTypeOfWork
+                        }
+                        finalList.add(
+                            ClientAndEstimateModification(
+                                "меняем цены",
+                                0f,
+                                j._id,
+                                j._idTypeOfWork,
+                                j.Price,
+                                j.CategoryName,
+                                nameOfWork,
+                                3,
+                                j.UnitsOfMeasurement,
+                            )
+                        )
+
+                    }
+                    typeOfWorkRecyclerViewAdapter.setListData(finalList)
+                    typeOfWorkRecyclerViewAdapter.notifyDataSetChanged()
+                    constantCopyListClient.addAll(typeOfWorkRecyclerViewAdapter.getListData())
+
+                    /*                  typeOfWorkRecyclerViewAdapterForPriceInEstimate.setListData(someList)
+                                      typeOfWorkRecyclerViewAdapterForPriceInEstimate.notifyDataSetChanged()
+                                      constantCopyListPrices.addAll(typeOfWorkRecyclerViewAdapterForPriceInEstimate.getListData())
+                  */
                 }
                 runBlocking {
                     // waiting for the coroutine to finish it"s work
@@ -272,7 +306,8 @@ class TypeOfWorkActivity : AppCompatActivity(),
 
             } else {
                 // мы меняем цены, фильтруем позиции цен
-                val finalList: MutableList<ViewEstimate> = arrayListOf()
+
+                val finalList: MutableList<ClientAndEstimateModification> = arrayListOf()
 
                 finalList.clear()
                 finalList.addAll(
@@ -282,8 +317,9 @@ class TypeOfWorkActivity : AppCompatActivity(),
                         )
                 )
                 // обновим данные в финальный лист
-                typeOfWorkRecyclerViewAdapterForPriceInEstimate.setListData(finalList)
-                typeOfWorkRecyclerViewAdapterForPriceInEstimate.notifyDataSetChanged()
+
+                typeOfWorkRecyclerViewAdapter.setListData(finalList)
+                typeOfWorkRecyclerViewAdapter.notifyDataSetChanged()
 
 
             }
@@ -336,6 +372,7 @@ class TypeOfWorkActivity : AppCompatActivity(),
         temp.addAll(constantCopyListClient)
 
 
+
         constantCopyListClient.clear()
         constantCopyListClient.addAll(
             temp.filter { it.TypeLayout != 2 }
@@ -344,6 +381,7 @@ class TypeOfWorkActivity : AppCompatActivity(),
 
         val finalList: MutableList<ClientAndEstimateModification> = arrayListOf()
         var idPreviousTypeOfWork = -1
+
 
         if (editText.text.toString() == "") {
             // когда пользователь нажал очистить все и надо сохранить результат повышения/понижения кол-ва элементов
@@ -434,42 +472,10 @@ class TypeOfWorkActivity : AppCompatActivity(),
                 if (i.CategoryName.lowercase().contains(editText.text.toString().lowercase())) {
                     // наименование содержит введенный в поиск текст
                     // добавим найденный элемент в финалььный список
-                    /* if(i.TypeLayout == 2) {
-                         finalList.add(ClientAndEstimateModification(
-                             "разделительный элемент",
-                             i.Count,
-                             i._idTypeCategory,
-                             i._idTypeOfWork,
-                             i.Price,
-                             i.CategoryName,
-                             i.NameTypeOfWork,
-                             2,
-                             i.UnitsOfMeasurement,
-                         ))
-                     }
 
-                     */
 
                     if (isResultFlagActivated && i.Count > 0) {
-                        /*if (finalList.indexOf(ClientAndEstimateModification(
-                                "разделительный элемент",
-                                i.Count,
-                                i._idTypeCategory,
-                                i._idTypeOfWork,
-                                i.Price,
-                                i.CategoryName,
-                                i.NameTypeOfWork,
-                                2,
-                                i.UnitsOfMeasurement,
-                            )) == -1) {
-                            // надо добавить разделитель и потом его удалить т. к. он будет лишним
-                            val toast = Toast.makeText(
-                                applicationContext,
-                                "надо добавить разделитель и потом его удалить т. к. он будет лишним ",
-                                Toast.LENGTH_LONG
-                            )
-                            toast.show()
-                        }*/
+
                         if (idPreviousTypeOfWork != i._idTypeOfWork && finalList.indexOf(
                                 ClientAndEstimateModification(
                                     "разделительный элемент",
@@ -500,7 +506,6 @@ class TypeOfWorkActivity : AppCompatActivity(),
                             )
                             idPreviousTypeOfWork = i._idTypeOfWork
                         }
-
 
 
                         finalList.add(i)
@@ -549,27 +554,38 @@ class TypeOfWorkActivity : AppCompatActivity(),
     private fun saveChangesPricesInStringFilter(
         editText: TextInputEditText,
 
-        ): Collection<ViewEstimate> {
+        ): Collection<ClientAndEstimateModification> {
         // надо в ресуклер цен отфильтроваться по наименованию
 
+        val previousList: MutableList<ClientAndEstimateModification> =
+            typeOfWorkRecyclerViewAdapter.getListData() // хранятся измененные значения
 
-        val previousList: MutableList<ViewEstimate> =
-            typeOfWorkRecyclerViewAdapterForPriceInEstimate.getListData() // хранятся измененные значения
+        val temp: MutableList<ClientAndEstimateModification> = arrayListOf()
+        temp.addAll(constantCopyListClient)
 
-        val finalList: MutableList<ViewEstimate> = arrayListOf()
+
+
+        constantCopyListClient.clear()
+        constantCopyListClient.addAll(
+            temp.filter { it.TypeLayout != 2 }
+                .toMutableList()
+        )
+
+        val finalList: MutableList<ClientAndEstimateModification> = arrayListOf()
+        var idPreviousTypeOfWork = -1
 
         if (editText.text.toString() == "") {
             // когда пользователь нажал очистить все и надо сохранить результат повышения/понижения цен элементов
 
-            for (i in constantCopyListPrices) {
+            for (i in constantCopyListClient) {
                 if (previousList.indexOf(i) == -1) {
                     // индекс не найден, а это означает что кол-во у этой категории изменено
                     for (j in previousList) {
-                        if (j._id == i._id) {
-                            // одинаковое наименование, но разное кол-во
+                        if (j._idTypeCategory == i._idTypeCategory) {
+                            // одинаковое наименование, но разная цена
                             Log.d(
                                 "mytagRest",
-                                "j._id = ${j._id} = i._id ${i._id} price = ${i.Price} and  "
+                                "j._id = ${j._idTypeCategory} = i._id ${i._idTypeCategory} price = ${i.Price} and  "
                             )
                             // как показывает тестирование в этот цикл не заходит программа
                             i.Price = j.Price
@@ -577,17 +593,76 @@ class TypeOfWorkActivity : AppCompatActivity(),
                         }
                     }
                 }
+                if (idPreviousTypeOfWork != i._idTypeOfWork && finalList.indexOf(
+                        ClientAndEstimateModification(
+                            "разделительный элемент",
+                            i.Count,
+                            i._idTypeCategory,
+                            i._idTypeOfWork,
+                            i.Price,
+                            i.CategoryName,
+                            i.NameTypeOfWork,
+                            2,
+                            i.UnitsOfMeasurement,
+                        )
+                    ) == -1
+                ) {
+
+                    finalList.add(
+                        ClientAndEstimateModification(
+                            "разделительный элемент",
+                            i.Count,
+                            i._idTypeCategory,
+                            i._idTypeOfWork,
+                            i.Price,
+                            i.CategoryName,
+                            i.NameTypeOfWork,
+                            2,
+                            i.UnitsOfMeasurement,
+                        )
+                    )
+                    idPreviousTypeOfWork = i._idTypeOfWork
+                }
 
                 finalList.add(i)
 
             }
 
         } else
-            for (i in constantCopyListPrices) {
+            for (i in constantCopyListClient) {
                 if (i.CategoryName.lowercase().contains(editText.text.toString().lowercase())) {
                     // наименование содержит введенный в поиск текст
                     // добавим найденный элемент в финалььный список
+                    if (idPreviousTypeOfWork != i._idTypeOfWork && finalList.indexOf(
+                            ClientAndEstimateModification(
+                                "разделительный элемент",
+                                i.Count,
+                                i._idTypeCategory,
+                                i._idTypeOfWork,
+                                i.Price,
+                                i.CategoryName,
+                                i.NameTypeOfWork,
+                                2,
+                                i.UnitsOfMeasurement,
+                            )
+                        ) == -1
+                    ) {
 
+                        finalList.add(
+                            ClientAndEstimateModification(
+                                "разделительный элемент",
+                                i.Count,
+                                i._idTypeCategory,
+                                i._idTypeOfWork,
+                                i.Price,
+                                i.CategoryName,
+                                i.NameTypeOfWork,
+                                2,
+                                i.UnitsOfMeasurement,
+                            )
+                        )
+                        idPreviousTypeOfWork = i._idTypeOfWork
+                    }
 
                     finalList.add(i)
                 }
@@ -610,13 +685,13 @@ class TypeOfWorkActivity : AppCompatActivity(),
         if (wantChange) {
             // тут проверка признака wantChange если да, то с одним сохраняем типо или с другим типом
             // тип кол-во в смете
-            val someList = //constantCopyListPrices
-                typeOfWorkRecyclerViewAdapterForPriceInEstimate.getListData()
+            val someList =
+                typeOfWorkRecyclerViewAdapter.getListData()
             val job = GlobalScope.launch(Dispatchers.Default) {
 
                 for (i in someList) {
                     dao.updatePriceByTypeCategory(
-                        i._id,
+                        i._idTypeCategory,
                         i.Price,
                     )
                     Log.d("mytag", "items back print = ${i.CategoryName} prise = ${i.Price}")
@@ -736,29 +811,12 @@ class TypeOfWorkActivity : AppCompatActivity(),
                     StaggeredGridLayoutManager.VERTICAL
                 )
             addItemDecoration(divider)
-            //  recycledViewPool.setMaxRecycledViews(0, 300)
-        }
-    }
 
-    private fun createRecyclerViewAboutPrice(recyclerView: RecyclerView) {
-
-        recyclerView.apply {
-            layoutManager = LinearLayoutManager(this@TypeOfWorkActivity)
-            typeOfWorkRecyclerViewAdapterForPriceInEstimate =
-                TypeOfWorkRecyclerViewAdapterForPriceInEstimate(this@TypeOfWorkActivity)
-            adapter = typeOfWorkRecyclerViewAdapterForPriceInEstimate
-            val divider =
-                DividerItemDecoration(
-                    applicationContext,
-                    StaggeredGridLayoutManager.VERTICAL
-                )
-            addItemDecoration(divider)
-            //recycledViewPool.setMaxRecycledViews(0, 300)
         }
     }
 
 
-    private fun hasDuplicates(someList: MutableList<ClientAndEstimateModification>): ClientAndEstimateModification {
+   /* private fun hasDuplicates(someList: MutableList<ClientAndEstimateModification>): ClientAndEstimateModification {
 
         for (i in 0 until someList.size) {
             for (j in (i + 1) until someList.size) {
@@ -771,7 +829,7 @@ class TypeOfWorkActivity : AppCompatActivity(),
         }
         // return false
         return ClientAndEstimateModification("разделительный элемент", 0f, 0, 0, 0, "", "", 2, "")
-    }
+    }*/
 
     @SuppressLint("NotifyDataSetChanged")
     private fun filterList(isChecked: Boolean) {
@@ -814,7 +872,8 @@ class TypeOfWorkActivity : AppCompatActivity(),
                                 2,
                                 i.UnitsOfMeasurement,
                             )
-                        ) == -1 && i.CategoryName.lowercase().contains(editText.text.toString().lowercase()) && i.Count != 0f
+                        ) == -1 && i.CategoryName.lowercase()
+                            .contains(editText.text.toString().lowercase()) && i.Count != 0f
                     ) {
 
                         items2.add(
@@ -833,7 +892,9 @@ class TypeOfWorkActivity : AppCompatActivity(),
                         idPreviousTypeOfWork = i._idTypeOfWork
 
                     }
-                    if (i.CategoryName.lowercase().contains(editText.text.toString().lowercase()) && i.Count != 0f)
+                    if (i.CategoryName.lowercase()
+                            .contains(editText.text.toString().lowercase()) && i.Count != 0f
+                    )
                         items2.add(i)
                 }
                 /* items2.addAll(
@@ -926,7 +987,8 @@ class TypeOfWorkActivity : AppCompatActivity(),
                                 2,
                                 i.UnitsOfMeasurement,
                             )
-                        ) == -1 && i.CategoryName.lowercase().contains(editText.text.toString().lowercase())
+                        ) == -1 && i.CategoryName.lowercase()
+                            .contains(editText.text.toString().lowercase())
                     ) {
 
                         listDataShort2.add(
@@ -1045,7 +1107,7 @@ class TypeOfWorkActivity : AppCompatActivity(),
 
         }
 
-        var indexPrevious = typeOfWorkRecyclerViewAdapter.getListData().indexOf(
+        val indexPrevious = typeOfWorkRecyclerViewAdapter.getListData().indexOf(
             ClientAndEstimateModification(
                 data.ClientName,
                 countOld,
@@ -1060,9 +1122,6 @@ class TypeOfWorkActivity : AppCompatActivity(),
         )
         val items = typeOfWorkRecyclerViewAdapter.getListData()
 
-        /*items.add(indexPrevious, data)
-        items.removeAt(indexPrevious + 1)*/
-        // if (indexPrevious == -1) indexPrevious = 0
 
         items[indexPrevious] = data
 
@@ -1105,40 +1164,45 @@ class TypeOfWorkActivity : AppCompatActivity(),
         }
     }
 
-    override fun onDeletePriceClickListener(user: ViewEstimate) {
+    fun onDeletePriceClickListener(user: ViewEstimate) {
         TODO("Not yet implemented")
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    override fun onChangeClickPrice(data: ViewEstimate, oldPrice: Int, typeChange: String) {
+    fun onChangeClickPrice(data: ClientAndEstimateModification, oldPrice: Int, typeChange: String) {
 
-
-        val indexPrevious = typeOfWorkRecyclerViewAdapterForPriceInEstimate.getListData().indexOf(
-            ViewEstimate(
-                data._id,
+        val indexPrevious = typeOfWorkRecyclerViewAdapter.getListData().indexOf(
+            ClientAndEstimateModification(
+                data.ClientName,
+                data.Count,
+                data._idTypeCategory,
                 data._idTypeOfWork,
                 oldPrice,
                 data.CategoryName,
+                data.NameTypeOfWork,
+                data.TypeLayout,
                 data.UnitsOfMeasurement,
 
                 )
         )
 
-        val indexPreviousInConstantList = constantCopyListPrices.indexOf(
-            ViewEstimate(
-                data._id,
+
+        val indexPreviousInConstantList = constantCopyListClient.indexOf(
+            ClientAndEstimateModification(
+                data.ClientName,
+                data.Count,
+                data._idTypeCategory,
                 data._idTypeOfWork,
                 oldPrice,
                 data.CategoryName,
+                data.NameTypeOfWork,
+                data.TypeLayout,
                 data.UnitsOfMeasurement,
 
                 )
         )
+        val items = typeOfWorkRecyclerViewAdapter.getListData()
 
-        val items = typeOfWorkRecyclerViewAdapterForPriceInEstimate.getListData()
-
-        //items.add(indexPrevious, data)
-        //items.removeAt(indexPrevious + 1)
         Log.d(
             "mytagStepan",
             "index arr = $indexPrevious data new price = ${data.Price} | data old price = $oldPrice"
@@ -1153,10 +1217,10 @@ class TypeOfWorkActivity : AppCompatActivity(),
             "index arr items= $indexPrevious data new price = ${items[indexPrevious].Price} | data old price = $oldPrice"
         )
 
-        constantCopyListPrices[indexPreviousInConstantList] = data
-        typeOfWorkRecyclerViewAdapterForPriceInEstimate.setListData(items)
+        constantCopyListClient[indexPreviousInConstantList] = data
+        typeOfWorkRecyclerViewAdapter.setListData(items)
         try {
-            typeOfWorkRecyclerViewAdapterForPriceInEstimate.notifyDataSetChanged()
+            typeOfWorkRecyclerViewAdapter.notifyDataSetChanged()
         } catch (_: IllegalStateException) {
 
         }
@@ -1164,7 +1228,8 @@ class TypeOfWorkActivity : AppCompatActivity(),
 
     }
 
-    override fun onItemClickListener(user: ViewEstimate) {
+
+    fun onItemPriceClickListener(user: ViewEstimate) {
 
     }
 }
