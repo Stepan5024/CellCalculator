@@ -5,9 +5,12 @@ import android.content.Intent
 import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.util.Log
+import android.view.MenuItem
 import android.view.View
 import android.widget.*
+import androidx.annotation.MenuRes
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import bokarev.st.stretchceilingcalculator.entities.Client
 import bokarev.st.stretchceilingcalculator.entities.ClientAndEstimateModification
 import bokarev.st.stretchceilingcalculator.entities.PdfToDisplay
@@ -19,6 +22,7 @@ import kotlinx.coroutines.*
 class Calculation : AppCompatActivity() {
 
     private var previousActivity = ""
+    private lateinit var dao: TypeCategoryDao
 
     @SuppressLint("SetTextI18n")
     @OptIn(DelicateCoroutinesApi::class)
@@ -27,7 +31,7 @@ class Calculation : AppCompatActivity() {
         setContentView(R.layout.calculation)
 
         val tvNameOfClient: TextView = findViewById(R.id.textView2)
-        val dao = CategoriesDataBase.getInstance(this).categoriesDao
+        dao = CategoriesDataBase.getInstance(this).categoriesDao
 
         try {
 
@@ -146,20 +150,11 @@ class Calculation : AppCompatActivity() {
         }
 
 
-
         val btnGoToSystem: Button = findViewById(R.id.btnGoToSystem)
         btnGoToSystem.setOnClickListener {
 
-            val wantChange =
-                previousActivity == "StartActivity" || (previousActivity == "TypeOfWorkActivity") && getClientFromPreviousActivity().ClientName == ""
+            showMenu(it, R.menu.system_popup_menu, 1, 8)
 
-            //по хорошему надо создать новую таблицу и из нее считывать значения констант
-            startNextTypeOfWorkActivity(
-                false,
-                arrayListOf(1, 2, 3, 4, 5, 6, 7, 8),
-                "Система",
-                wantChange
-            )
 
         }
         val btnGoToLight: Button = findViewById(R.id.btnGoToLight)
@@ -184,17 +179,8 @@ class Calculation : AppCompatActivity() {
         }
         val btnGoToMaterials: Button = findViewById(R.id.btnGoToMaterials)
         btnGoToMaterials.setOnClickListener {
+            showMenu(it, R.menu.system_popup_menu, 11, 20)
 
-            val wantChange =
-                previousActivity == "StartActivity" || (previousActivity == "TypeOfWorkActivity") && getClientFromPreviousActivity().ClientName == ""
-
-            //по хорошему надо создать новую таблицу и из нее считывать значения констант
-            startNextTypeOfWorkActivity(
-                false,
-                arrayListOf(11, 12, 13, 14, 15, 16, 17, 18, 19, 20),
-                "Материалы",
-                wantChange
-            )
         }
 
     }
@@ -297,6 +283,41 @@ class Calculation : AppCompatActivity() {
 
             Log.d("mytag", "Main Thread is Running")
         }
+    }
+
+    private fun showMenu(
+        v: View,
+        @MenuRes menuRes: Int,
+        tupeOfWorkIdStart: Int,
+        typeOfWorkIdEnd: Int
+    ) {
+
+        val wantChange =
+            previousActivity == "StartActivity" || (previousActivity == "TypeOfWorkActivity") && getClientFromPreviousActivity().ClientName == ""
+
+        val popup = PopupMenu(this, v)
+        popup.menuInflater.inflate(menuRes, popup.menu)
+        lifecycleScope.launch {
+            for (i in tupeOfWorkIdStart..typeOfWorkIdEnd) {
+                popup.menu.add(0, i, i, dao.getTypeOfWorkNameByTypeCategory(i))
+            }
+
+            popup.setOnMenuItemClickListener { menuItem: MenuItem ->
+                startNextTypeOfWorkActivity(
+                    false,
+                    arrayListOf(menuItem.itemId),
+                    "Система",
+                    wantChange
+                )
+                true
+            }
+            popup.setOnDismissListener {
+
+            }
+
+            popup.show()
+        }
+
     }
 
 
