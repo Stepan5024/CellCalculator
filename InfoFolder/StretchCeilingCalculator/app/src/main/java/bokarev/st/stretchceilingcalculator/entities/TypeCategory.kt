@@ -7,7 +7,7 @@ import androidx.room.PrimaryKey
 data class TypeCategory(
 
     @PrimaryKey(autoGenerate = true)
-    val _id: Int,
+    val _id: Int = 0,
     val CategoryName: String,
     val UnitsOfMeasurement: String,
     val Price: Int,

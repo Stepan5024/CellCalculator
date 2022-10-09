@@ -1,19 +1,16 @@
 package bokarev.st.stretchceilingcalculator
 
 import android.annotation.SuppressLint
+import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.view.inputmethod.EditorInfo
-import android.widget.CheckBox
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.doOnTextChanged
-import androidx.lifecycle.lifecycleScope
+import androidx.fragment.app.DialogFragment
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -58,11 +55,13 @@ class TypeOfWorkActivity : AppCompatActivity(),
         val tvNameOfWork: TextView = findViewById(R.id.tvNameOfWork)
         val btnCorrectListOfClients: CheckBox = findViewById(R.id.btnCorrectListOfClients)
         val dao = CategoriesDataBase.getInstance(this).categoriesDao
-
         var idTypesOfWorkList: MutableList<Int>
-
+        val addDeleteLayout = findViewById<LinearLayout>(R.id.add_delete_layout)
+        val btnDelete = findViewById<Button>(R.id.btn_delete)
+        val btnAdd = findViewById<Button>(R.id.btn_add)
         val needAllListTypesOfWork: Boolean
         val previousActivity: String
+
 
 
         try {
@@ -79,6 +78,15 @@ class TypeOfWorkActivity : AppCompatActivity(),
 
                 createRecyclerViewAboutPrice(recyclerView)
 
+                addDeleteLayout.visibility = View.VISIBLE
+
+                btnAdd.setOnClickListener {
+                    val fragmentManager = supportFragmentManager
+                    val newFragment = AddWorkDialogFragment(recyclerView)
+
+                    newFragment.show(fragmentManager, "dialog")
+
+                }
 
                 val job = GlobalScope.launch(Dispatchers.Default) {
 
@@ -815,5 +823,8 @@ class TypeOfWorkActivity : AppCompatActivity(),
     override fun onItemClickListener(user: ViewEstimate) {
 
     }
+
 }
+
+
 

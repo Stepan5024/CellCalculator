@@ -288,7 +288,7 @@ class Calculation : AppCompatActivity() {
     private fun showMenu(
         v: View,
         @MenuRes menuRes: Int,
-        tupeOfWorkIdStart: Int,
+        typeOfWorkIdStart: Int,
         typeOfWorkIdEnd: Int
     ) {
 
@@ -298,7 +298,7 @@ class Calculation : AppCompatActivity() {
         val popup = PopupMenu(this, v)
         popup.menuInflater.inflate(menuRes, popup.menu)
         lifecycleScope.launch {
-            for (i in tupeOfWorkIdStart..typeOfWorkIdEnd) {
+            for (i in typeOfWorkIdStart..typeOfWorkIdEnd) {
                 popup.menu.add(0, i, i, dao.getTypeOfWorkNameByTypeCategory(i))
             }
 
