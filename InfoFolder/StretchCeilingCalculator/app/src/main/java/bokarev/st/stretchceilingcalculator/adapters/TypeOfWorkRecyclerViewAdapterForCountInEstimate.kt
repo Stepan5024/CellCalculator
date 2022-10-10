@@ -20,6 +20,7 @@ class TypeOfWorkRecyclerViewAdapterForCountInEstimate(private val listener: RowC
 
     private var items: MutableList<ClientAndEstimateModification> = arrayListOf()
 
+
     fun setListData(data: MutableList<ClientAndEstimateModification>) {
         this.items = data
     }
@@ -179,6 +180,7 @@ class TypeOfWorkRecyclerViewAdapterForCountInEstimate(private val listener: RowC
                     )
                 }
             }
+
             /* }else if (data.TypeLayout == 0){
                   //layoutType1.isInvisible = true
 
