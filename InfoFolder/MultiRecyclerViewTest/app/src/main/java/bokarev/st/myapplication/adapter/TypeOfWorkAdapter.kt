@@ -18,30 +18,34 @@ class TypeOfWorkAdapter(private val items: List<Item>) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         // 0 - trip, 1 - ads, 2 - news
-        if (viewType == 0) {
-            return TripViewHolder(
-                LayoutInflater.from(parent.context).inflate(
-                    R.layout.item_container_trip,
-                    parent,
-                    false
+        when (viewType) {
+            0 -> {
+                return TripViewHolder(
+                    LayoutInflater.from(parent.context).inflate(
+                        R.layout.item_container_trip,
+                        parent,
+                        false
+                    )
                 )
-            )
-        } else if (viewType == 1) {
-            return AdsViewHolder(
-                LayoutInflater.from(parent.context).inflate(
-                    R.layout.item_container_ads,
-                    parent,
-                    false
+            }
+            1 -> {
+                return AdsViewHolder(
+                    LayoutInflater.from(parent.context).inflate(
+                        R.layout.item_container_ads,
+                        parent,
+                        false
+                    )
                 )
-            )
-        } else  {
-            return NewsViewHolder(
-                LayoutInflater.from(parent.context).inflate(
-                    R.layout.item_container_news,
-                    parent,
-                    false
+            }
+            else -> {
+                return NewsViewHolder(
+                    LayoutInflater.from(parent.context).inflate(
+                        R.layout.item_container_news,
+                        parent,
+                        false
+                    )
                 )
-            )
+            }
         }
 
     }

@@ -9,7 +9,8 @@ import android.widget.*
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
-import bokarev.st.stretchceilingcalculator.adapters.TypeOfWorkRecyclerViewAdapterForPriceInEstimate
+import bokarev.st.stretchceilingcalculator.adapters.TypeOfWorkRecyclerViewAdapterForCountInEstimate
+import bokarev.st.stretchceilingcalculator.entities.ClientAndEstimateModification
 import bokarev.st.stretchceilingcalculator.entities.TypeCategory
 import bokarev.st.stretchceilingcalculator.entities.ViewEstimate
 import com.google.android.material.textfield.TextInputLayout
@@ -44,7 +45,7 @@ class AddWorkDialogFragment(private val recyclerView: RecyclerView) : DialogFrag
         val saveTv = view.findViewById<TextView>(R.id.tv_save)
         val cancelTv = view.findViewById<TextView>(R.id.tv_cancel)
 
-        val unitMeasureList = listOf("м2", "шт.", "у. е.", "м. п.")
+        val unitMeasureList = listOf("м2", "шт.", "у.е.", "м.п.")
         val typeOfWorkList = listOf("Система", "Освещение", "Доп. работы", "Материалы")
         var categoryList = mutableListOf<String>()
 
@@ -155,13 +156,49 @@ class AddWorkDialogFragment(private val recyclerView: RecyclerView) : DialogFrag
                             _idTypeOfWork = typeOfWorkId
                         )
                     )
-                    allCategories = dao.getEstimateByList(listOf(typeOfWorkId))
+                    allCategories = dao.getTypesCategory()
+                    val finalList = mutableListOf<ClientAndEstimateModification>()
+                    var idPreviousTypeOfWork = -1
+                    for (j in allCategories) {
+                        val nameOfWork = dao.getTypeOfWorkNameByTypeCategory(j._idTypeOfWork)
+                        if (idPreviousTypeOfWork != j._idTypeOfWork) {
+
+                            finalList.add(
+                                ClientAndEstimateModification(
+                                    "разделительный элемент",
+                                    0f,
+                                    j._id,
+                                    j._idTypeOfWork,
+                                    j.Price,
+                                    j.CategoryName,
+                                    nameOfWork,
+                                    2,
+                                    j.UnitsOfMeasurement,
+                                )
+                            )
+                            idPreviousTypeOfWork = j._idTypeOfWork
+                        }
+                        finalList.add(
+                            ClientAndEstimateModification(
+                                "меняем цены",
+                                0f,
+                                j._id,
+                                j._idTypeOfWork,
+                                j.Price,
+                                j.CategoryName,
+                                nameOfWork,
+                                3,
+                                j.UnitsOfMeasurement,
+                            )
+                        )
+
+                    }
 
 
-                    (recyclerView.adapter as TypeOfWorkRecyclerViewAdapterForPriceInEstimate).setListData(
-                        allCategories
+                    (recyclerView.adapter as TypeOfWorkRecyclerViewAdapterForCountInEstimate).setListData(
+                        finalList
                     )
-                    (recyclerView.adapter as TypeOfWorkRecyclerViewAdapterForPriceInEstimate).notifyDataSetChanged()
+                    (recyclerView.adapter as TypeOfWorkRecyclerViewAdapterForCountInEstimate).notifyDataSetChanged()
                     dialog?.dismiss()
                 }
             }

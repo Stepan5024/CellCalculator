@@ -16,7 +16,7 @@
             android:background="@color/white"
             >
 
-            <TextView
+          <!--  <TextView
                 android:id="@+id/textTypeOfWorkTitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -26,18 +26,10 @@
                 android:textSize="12sp"
                 android:text="My Text"
                 android:textStyle="bold">
-            </TextView>
-            <!--  <TextView
-                  android:id="@+id/textNews"
-                  android:layout_width="match_parent"
-                  android:layout_height="wrap_content"
-                  android:gravity="center"
-                  android:textColor="@color/black"
-                  android:textSize="19dp"
-                  android:text="My text"
-                  android:textStyle="italic">
 
-              </TextView> -->
+            </TextView>
+               -->
+
         </LinearLayout>
 
 
@@ -116,9 +108,9 @@
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/choose_unit_measure"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
                 android:hint="Ед. измерения">
 
                 <AutoCompleteTextView
@@ -126,6 +118,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="none"
+                    android:editable="false"
                     />
 
             </com.google.android.material.textfield.TextInputLayout>
