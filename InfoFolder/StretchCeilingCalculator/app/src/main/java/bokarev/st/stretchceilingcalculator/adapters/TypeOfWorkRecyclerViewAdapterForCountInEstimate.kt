@@ -1,6 +1,5 @@
 package bokarev.st.stretchceilingcalculator.adapters
 
-import android.icu.util.Measure
 import android.util.Log
 import android.view.KeyEvent
 import android.view.LayoutInflater
@@ -12,7 +11,6 @@ import androidx.recyclerview.widget.RecyclerView
 import bokarev.st.stretchceilingcalculator.R
 import bokarev.st.stretchceilingcalculator.TypeOfWorkActivity
 import bokarev.st.stretchceilingcalculator.entities.ClientAndEstimateModification
-import bokarev.st.stretchceilingcalculator.entities.ViewEstimate
 import com.google.android.material.textfield.TextInputLayout
 import kotlin.math.roundToInt
 import kotlin.math.truncate
@@ -257,7 +255,7 @@ class TypeOfWorkRecyclerViewAdapterForCountInEstimate(private val listener: Type
         class PricesEditing(
             view: View,
             private val listener: TypeOfWorkActivity,
-            private val measureAdapter: ArrayAdapter<CharSequence>?
+            private val measureAdapter: ArrayAdapter<CharSequence>?,
         ) :
             RecyclerView.ViewHolder(view) {
             private val nameOfWork = view.findViewById<EditText>(R.id.NameOfWork)!!
@@ -271,6 +269,7 @@ class TypeOfWorkRecyclerViewAdapterForCountInEstimate(private val listener: Type
 
 
             fun bind(data: ClientAndEstimateModification) {
+                
 
                 nameOfWork.setText(data.CategoryName)
 
@@ -326,6 +325,8 @@ class TypeOfWorkRecyclerViewAdapterForCountInEstimate(private val listener: Type
                         }
                         // clear focus and hide cursor from edit text
                         price.clearFocus()
+                    } else {
+                        listener.onItemClickListener(data)
                     }
                 }
 
@@ -349,7 +350,8 @@ class TypeOfWorkRecyclerViewAdapterForCountInEstimate(private val listener: Type
                         }
                         // clear focus and hide cursor from edit text
                         nameOfWork.clearFocus()
-
+                    } else {
+                        listener.onItemClickListener(data)
                     }
                 }
 
@@ -358,6 +360,8 @@ class TypeOfWorkRecyclerViewAdapterForCountInEstimate(private val listener: Type
                 // edit text enter key listener
                 (nameOfMeasure.editText as AutoCompleteTextView).onItemClickListener =
                     AdapterView.OnItemClickListener { _, _, itemId, _ ->
+
+                        listener.onItemClickListener(data)
                         val newUnitMeasure = (nameOfMeasure.editText as EditText).text.toString()
 
                         Log.d("mytag", "new unit = $newUnitMeasure")

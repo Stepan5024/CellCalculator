@@ -107,10 +107,13 @@
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/choose_unit_measure"
+                android:theme="@style/AppTheme.FullScreenDialog"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
+                android:layout_marginStart="4dp"
+                android:layout_marginEnd="4dp"
                 android:hint="Ед. измерения">
 
                 <AutoCompleteTextView

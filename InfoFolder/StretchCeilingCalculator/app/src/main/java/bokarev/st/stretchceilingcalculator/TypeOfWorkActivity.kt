@@ -43,6 +43,7 @@ class TypeOfWorkActivity : AppCompatActivity() {
 
     private lateinit var dao: TypeCategoryDao
     private lateinit var idTypesOfWorkList: MutableList<Int>
+    private var needAllListTypesOfWork = false
     private var isDeleteEnabled = false
 
     @OptIn(DelicateCoroutinesApi::class)
@@ -59,7 +60,6 @@ class TypeOfWorkActivity : AppCompatActivity() {
         val addDeleteLayout = findViewById<LinearLayout>(R.id.add_delete_layout)
         val btnDelete = findViewById<Button>(R.id.btn_delete)
         val btnAdd = findViewById<Button>(R.id.btn_add)
-        val needAllListTypesOfWork: Boolean
         val previousActivity: String
 
 
@@ -1191,7 +1191,14 @@ class TypeOfWorkActivity : AppCompatActivity() {
                     )
                     lifecycleScope.launch {
 
-                        val someList = dao.getEstimateByList(idTypesOfWorkList)
+                        val someList: MutableList<ViewEstimate> = if (needAllListTypesOfWork)
+                        // надо вывести весь список со всеми категориями
+                            dao.getTypesCategory()
+                        else
+                        // выводим список выбранных категорий
+                            dao.getEstimateByList(
+                                idTypesOfWorkList
+                            )
                         var idPreviousTypeOfWork = -1
                         val finalList: MutableList<ClientAndEstimateModification> = arrayListOf()
 
