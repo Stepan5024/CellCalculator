@@ -77,7 +77,6 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="10"
-        android:paddingBottom="100dp"
         android:orientation="vertical">
 
 
@@ -201,8 +200,43 @@
                     android:layout_height="match_parent" />
             </LinearLayout>
 
+            <LinearLayout
+                android:id="@+id/add_delete_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:visibility="gone"
+                android:layout_marginTop="48dp"
+                android:layout_marginBottom="16dp">
+
+                <android.widget.Button
+                    android:id="@+id/btn_add"
+                    android:layout_width="180dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:background="@drawable/button_background"
+                    android:textColor="@color/black"
+                    android:textSize="16sp"
+                    android:text="Добавить" />
+
+                <android.widget.Button
+                    android:id="@+id/btn_delete"
+                    android:layout_width="180dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:background="@drawable/button_background"
+                    android:textColor="@color/black"
+                    android:textSize="16sp"
+                    android:layout_marginStart="24dp"
+                    android:text="Удалить" />
+
+            </LinearLayout>
+
+
 
         </LinearLayout>
+
 
 
     </LinearLayout>

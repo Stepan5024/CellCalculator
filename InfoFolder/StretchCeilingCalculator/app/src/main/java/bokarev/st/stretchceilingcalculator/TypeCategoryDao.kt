@@ -105,10 +105,12 @@ interface TypeCategoryDao {
     )
 
     @Transaction
-    @Query("UPDATE TypeCategory SET Price = :newPrice  where _id = :typeCategoryId")
+    @Query("UPDATE TypeCategory SET Price = :newPrice, CategoryName = :newName, UnitsOfMeasurement = :newUnitMeasure  where _id = :typeCategoryId")
     suspend fun updatePriceByTypeCategory(
         typeCategoryId: Int,
         newPrice: Int,
+        newName: String,
+        newUnitMeasure: String
     )
 
     @Update
@@ -116,7 +118,10 @@ interface TypeCategoryDao {
 
 
     @Delete()
-    fun deleteEstimate(estimate: Estimate)
+    fun deleteViewEstimate(typeCategory: TypeCategory)
+
+    @Delete()
+    fun deleteTypeCategory(estimate: Estimate)
 
     @Transaction
     @Query("DELETE FROM Estimate where _id = :Id")

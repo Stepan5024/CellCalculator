@@ -1,17 +1,17 @@
 package bokarev.st.stretchceilingcalculator
 
 import android.annotation.SuppressLint
+import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.view.inputmethod.EditorInfo
-import android.widget.CheckBox
-import android.widget.LinearLayout
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.doOnTextChanged
+import androidx.fragment.app.DialogFragment
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -19,8 +19,10 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import bokarev.st.stretchceilingcalculator.adapters.TypeOfWorkRecyclerViewAdapterForCountInEstimate
 import bokarev.st.stretchceilingcalculator.entities.Client
 import bokarev.st.stretchceilingcalculator.entities.ClientAndEstimateModification
+import bokarev.st.stretchceilingcalculator.entities.TypeCategory
 import bokarev.st.stretchceilingcalculator.entities.ViewEstimate
 import bokarev.st.stretchceilingcalculator.entities.relations.ClientAndEstimate
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import kotlinx.android.synthetic.main.type_of_work_activity.*
@@ -29,7 +31,7 @@ import kotlin.math.roundToInt
 
 
 @OptIn(DelicateCoroutinesApi::class)
-class TypeOfWorkActivity : AppCompatActivity(){
+class TypeOfWorkActivity : AppCompatActivity() {
 
 
     private var wantChange = false
@@ -39,6 +41,10 @@ class TypeOfWorkActivity : AppCompatActivity(){
 
     private lateinit var typeOfWorkRecyclerViewAdapter: TypeOfWorkRecyclerViewAdapterForCountInEstimate
 
+    private lateinit var dao: TypeCategoryDao
+    private lateinit var idTypesOfWorkList: MutableList<Int>
+    private var needAllListTypesOfWork = false
+    private var isDeleteEnabled = false
 
     @OptIn(DelicateCoroutinesApi::class)
     @SuppressLint("NotifyDataSetChanged")
@@ -49,11 +55,11 @@ class TypeOfWorkActivity : AppCompatActivity(){
         val recyclerView: RecyclerView = findViewById(R.id.TypeOfWorkRecyclerView)
         val tvNameOfWork: TextView = findViewById(R.id.tvNameOfWork)
         val btnCorrectListOfClients: CheckBox = findViewById(R.id.btnCorrectListOfClients)
-        val dao = CategoriesDataBase.getInstance(this).categoriesDao
+        dao = CategoriesDataBase.getInstance(this).categoriesDao
 
-        var idTypesOfWorkList: MutableList<Int>
-
-        val needAllListTypesOfWork: Boolean
+        val addDeleteLayout = findViewById<LinearLayout>(R.id.add_delete_layout)
+        val btnDelete = findViewById<Button>(R.id.btn_delete)
+        val btnAdd = findViewById<Button>(R.id.btn_add)
         val previousActivity: String
 
 
@@ -70,8 +76,24 @@ class TypeOfWorkActivity : AppCompatActivity(){
 
 
                 createRecyclerViewAboutEstimate(recyclerView)
-                //createRecyclerViewAboutPrice(recyclerView)
+                typeOfWorkRecyclerViewAdapter.measureAdapter =
+                    ArrayAdapter(this, R.layout.list_item, listOf("м2", "шт.", "у.е.", "м.п."))
 
+                addDeleteLayout.visibility = View.VISIBLE
+
+                btnAdd.setOnClickListener {
+                    val fragmentManager = supportFragmentManager
+                    val newFragment = AddWorkDialogFragment(recyclerView)
+
+                    newFragment.show(fragmentManager, "dialog")
+
+                }
+
+                btnDelete.setOnClickListener {
+                    Toast.makeText(this, "Нажмите на запись, чтобы ее удалить", Toast.LENGTH_LONG)
+                        .show()
+                    isDeleteEnabled = true
+                }
 
                 val job = GlobalScope.launch(Dispatchers.Default) {
 
@@ -693,6 +715,8 @@ class TypeOfWorkActivity : AppCompatActivity(){
                     dao.updatePriceByTypeCategory(
                         i._idTypeCategory,
                         i.Price,
+                        i.CategoryName,
+                        i.UnitsOfMeasurement
                     )
                     Log.d("mytag", "items back print = ${i.CategoryName} prise = ${i.Price}")
                 }
@@ -816,7 +840,7 @@ class TypeOfWorkActivity : AppCompatActivity(){
     }
 
 
-   /* private fun hasDuplicates(someList: MutableList<ClientAndEstimateModification>): ClientAndEstimateModification {
+    /* private fun hasDuplicates(someList: MutableList<ClientAndEstimateModification>): ClientAndEstimateModification {
 
         for (i in 0 until someList.size) {
             for (j in (i + 1) until someList.size) {
@@ -1147,12 +1171,84 @@ class TypeOfWorkActivity : AppCompatActivity(){
 
     fun onItemClickListener(user: ClientAndEstimateModification) {
 
+        if (isDeleteEnabled) {
+            MaterialAlertDialogBuilder(this)
+                .setTitle("Вы действительно хотите удалить выбранную запись?")
+                .setMessage("Это приведет к тому, что вы удалите ${user.CategoryName}")
 
-        /*nameInput.setText(user.name)
-        emailInput.setText(user.email)
-        phoneInput.setText(user.phone)
-        nameInput.setTag(nameInput.id, user.id)
-        saveButton.setText("Update")*/
+                .setNegativeButton("Отмена") { dialog, _ ->
+                    dialog.dismiss()
+                }
+                .setPositiveButton("Удалить") { dialog, _ ->
+                    dao.deleteViewEstimate(
+                        TypeCategory(
+                            _id = user._idTypeCategory,
+                            _idTypeOfWork = user._idTypeOfWork,
+                            CategoryName = user.CategoryName,
+                            UnitsOfMeasurement = user.UnitsOfMeasurement,
+                            Price = user.Price
+                        )
+                    )
+                    lifecycleScope.launch {
+
+                        val someList: MutableList<ViewEstimate> = if (needAllListTypesOfWork)
+                        // надо вывести весь список со всеми категориями
+                            dao.getTypesCategory()
+                        else
+                        // выводим список выбранных категорий
+                            dao.getEstimateByList(
+                                idTypesOfWorkList
+                            )
+                        var idPreviousTypeOfWork = -1
+                        val finalList: MutableList<ClientAndEstimateModification> = arrayListOf()
+
+                        for (j in someList) {
+                            val nameOfWork = dao.getTypeOfWorkNameByTypeCategory(j._idTypeOfWork)
+                            if (idPreviousTypeOfWork != j._idTypeOfWork) {
+
+                                finalList.add(
+                                    ClientAndEstimateModification(
+                                        "разделительный элемент",
+                                        0f,
+                                        j._id,
+                                        j._idTypeOfWork,
+                                        j.Price,
+                                        j.CategoryName,
+                                        nameOfWork,
+                                        2,
+                                        j.UnitsOfMeasurement,
+                                    )
+                                )
+                                idPreviousTypeOfWork = j._idTypeOfWork
+                            }
+                            finalList.add(
+                                ClientAndEstimateModification(
+                                    "меняем цены",
+                                    0f,
+                                    j._id,
+                                    j._idTypeOfWork,
+                                    j.Price,
+                                    j.CategoryName,
+                                    nameOfWork,
+                                    3,
+                                    j.UnitsOfMeasurement,
+                                )
+                            )
+
+                        }
+                        typeOfWorkRecyclerViewAdapter.setListData(
+                            finalList
+                        )
+                        typeOfWorkRecyclerViewAdapter.notifyDataSetChanged()
+                        dialog.dismiss()
+                    }
+
+                }
+                .show()
+            isDeleteEnabled = false
+        } else {
+            Toast.makeText(this, "Для удаления нажмите на кнопку удалить", Toast.LENGTH_LONG).show()
+        }
 
     }
 
@@ -1166,6 +1262,10 @@ class TypeOfWorkActivity : AppCompatActivity(){
 
     fun onDeletePriceClickListener(user: ViewEstimate) {
         TODO("Not yet implemented")
+    }
+
+    fun onItemPriceClickListener(user: ViewEstimate) {
+
     }
 
     @SuppressLint("NotifyDataSetChanged")
@@ -1228,9 +1328,131 @@ class TypeOfWorkActivity : AppCompatActivity(){
 
     }
 
+    fun onChangeClickName(
+        data: ClientAndEstimateModification,
+        oldName: String,
+        typeChange: String
+    ) {
+        val indexPrevious = typeOfWorkRecyclerViewAdapter.getListData().indexOf(
+            ClientAndEstimateModification(
+                data.ClientName,
+                data.Count,
+                data._idTypeCategory,
+                data._idTypeOfWork,
+                data.Price,
+                oldName,
+                data.NameTypeOfWork,
+                data.TypeLayout,
+                data.UnitsOfMeasurement,
 
-    fun onItemPriceClickListener(user: ViewEstimate) {
+                )
+        )
 
+        val indexPreviousInConstantList = constantCopyListClient.indexOf(
+            ClientAndEstimateModification(
+                data.ClientName,
+                data.Count,
+                data._idTypeCategory,
+                data._idTypeOfWork,
+                data.Price,
+                oldName,
+                data.NameTypeOfWork,
+                data.TypeLayout,
+                data.UnitsOfMeasurement,
+
+                )
+        )
+
+        val items = typeOfWorkRecyclerViewAdapter.getListData()
+
+        //items.add(indexPrevious, data)
+        //items.removeAt(indexPrevious + 1)
+        Log.d(
+            "mytagStepan",
+            "index arr = $indexPrevious data new price = ${data.CategoryName} | data old price = $oldName"
+        )
+
+        items[indexPrevious] = data
+
+
+
+        Log.d(
+            "mytagStepan",
+            "index arr items= $indexPrevious data new price = ${items[indexPrevious].CategoryName} | data old name = $oldName"
+        )
+
+        constantCopyListClient[indexPreviousInConstantList] = data
+        typeOfWorkRecyclerViewAdapter.setListData(items)
+        try {
+            typeOfWorkRecyclerViewAdapter.notifyDataSetChanged()
+        } catch (_: IllegalStateException) {
+
+        }
     }
+
+    fun onChangeClickUnitMeasure(
+        data: ClientAndEstimateModification,
+        oldUnitMeasure: String,
+        typeChange: String
+    ) {
+        val indexPrevious = typeOfWorkRecyclerViewAdapter.getListData().indexOf(
+            ClientAndEstimateModification(
+                data.ClientName,
+                data.Count,
+                data._idTypeCategory,
+                data._idTypeOfWork,
+                data.Price,
+                data.CategoryName,
+                data.NameTypeOfWork,
+                data.TypeLayout,
+                oldUnitMeasure,
+
+                )
+        )
+
+        val indexPreviousInConstantList = constantCopyListClient.indexOf(
+            ClientAndEstimateModification(
+                data.ClientName,
+                data.Count,
+                data._idTypeCategory,
+                data._idTypeOfWork,
+                data.Price,
+                data.CategoryName,
+                data.NameTypeOfWork,
+                data.TypeLayout,
+                oldUnitMeasure,
+
+                )
+        )
+
+        val items = typeOfWorkRecyclerViewAdapter.getListData()
+
+        //items.add(indexPrevious, data)
+        //items.removeAt(indexPrevious + 1)
+        Log.d(
+            "mytagStepan",
+            "index arr = $indexPrevious data new price = ${data.UnitsOfMeasurement} | data old price = $oldUnitMeasure"
+        )
+
+        items[indexPrevious] = data
+
+
+
+        Log.d(
+            "mytagStepan",
+            "index arr items= $indexPrevious data new price = ${items[indexPrevious].UnitsOfMeasurement} | data old price = $oldUnitMeasure"
+        )
+
+        constantCopyListClient[indexPreviousInConstantList] = data
+        typeOfWorkRecyclerViewAdapter.setListData(items)
+        try {
+            typeOfWorkRecyclerViewAdapter.notifyDataSetChanged()
+        } catch (_: IllegalStateException) {
+
+        }
+    }
+
 }
+
+
 

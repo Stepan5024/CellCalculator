@@ -5,14 +5,13 @@ import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.EditText
-import android.widget.ImageView
-import android.widget.TextView
+import android.widget.*
+import androidx.core.widget.doOnTextChanged
 import androidx.recyclerview.widget.RecyclerView
 import bokarev.st.stretchceilingcalculator.R
 import bokarev.st.stretchceilingcalculator.TypeOfWorkActivity
 import bokarev.st.stretchceilingcalculator.entities.ClientAndEstimateModification
-import bokarev.st.stretchceilingcalculator.entities.ViewEstimate
+import com.google.android.material.textfield.TextInputLayout
 import kotlin.math.roundToInt
 import kotlin.math.truncate
 
@@ -23,6 +22,10 @@ class TypeOfWorkRecyclerViewAdapterForCountInEstimate(private val listener: Type
         () {
 
     private var items: MutableList<ClientAndEstimateModification> = arrayListOf()
+
+
+    var measureAdapter: ArrayAdapter<CharSequence>? = null
+
 
     fun setListData(data: MutableList<ClientAndEstimateModification>) {
         this.items = data
@@ -42,7 +45,13 @@ class TypeOfWorkRecyclerViewAdapterForCountInEstimate(private val listener: Type
             3 -> {
                 MyViewHolder.PricesEditing(
                     LayoutInflater.from(parent.context)
-                        .inflate(R.layout.type_of_work_recyclerview_row_without_count, parent, false), listener
+                        .inflate(
+                            R.layout.type_of_work_recyclerview_row_without_count,
+                            parent,
+                            false
+                        ),
+                    listener,
+                    measureAdapter
                 )
             }
             2 -> {
@@ -80,7 +89,7 @@ class TypeOfWorkRecyclerViewAdapterForCountInEstimate(private val listener: Type
                 listener.onItemClickListener(items[position])
             }
             (holder as MyViewHolder.PricesEditing).bind(items[position])
-        }else if (getItemViewType(position) == 1) {
+        } else if (getItemViewType(position) == 1) {
             holder.itemView.setOnClickListener {
                 listener.onItemClickListener(items[position])
             }
@@ -100,7 +109,8 @@ class TypeOfWorkRecyclerViewAdapterForCountInEstimate(private val listener: Type
 
         private val nameOfWork = view.findViewById<TextView>(R.id.NameOfWork)!!
         private val nameOfMeasure = view.findViewById<TextView>(R.id.tvMensure)!!
-       // private val titleOfWork = view.findViewById<TextView>(R.id.textTypeOfWorkTitle)!!
+
+        // private val titleOfWork = view.findViewById<TextView>(R.id.textTypeOfWorkTitle)!!
         private val price = view.findViewById<TextView>(R.id.Price)!!
         private val countOfElement = view.findViewById<EditText>(R.id.CountOfElement)
         private val btnUpCounter = view.findViewById<ImageView>(R.id.btnCounterUp)!!
@@ -110,7 +120,7 @@ class TypeOfWorkRecyclerViewAdapterForCountInEstimate(private val listener: Type
         fun bind(data: ClientAndEstimateModification) {
 
 
-           // titleOfWork.text = data.NameTypeOfWork
+            // titleOfWork.text = data.NameTypeOfWork
 
             nameOfWork.text = data.CategoryName
             nameOfMeasure.text = data.UnitsOfMeasurement
@@ -223,45 +233,58 @@ class TypeOfWorkRecyclerViewAdapterForCountInEstimate(private val listener: Type
             }
 
 
-
         }
+
         class TitleOfTypeOfWork(view: View, private val listener: TypeOfWorkActivity) :
             RecyclerView.ViewHolder(view) {
 
             private val textTitle = view.findViewById<TextView>(R.id.textTitle)!!
-           // private val description = view.findViewById<TextView>(R.id.description)!!
+            // private val description = view.findViewById<TextView>(R.id.description)!!
 
 
             fun bind(data: ClientAndEstimateModification) {
 
                 textTitle.text = data.NameTypeOfWork
 
-             //   description.text = data._idTypeOfWork.toString()
+                //   description.text = data._idTypeOfWork.toString()
 
             }
 
         }
 
-        class PricesEditing(view: View, private val listener: TypeOfWorkActivity) :
+        class PricesEditing(
+            view: View,
+            private val listener: TypeOfWorkActivity,
+            private val measureAdapter: ArrayAdapter<CharSequence>?,
+        ) :
             RecyclerView.ViewHolder(view) {
-            private val nameOfWork = view.findViewById<TextView>(R.id.NameOfWork)!!
-            private val nameOfMeansure = view.findViewById<TextView>(R.id.tvMensure)!!
+            private val nameOfWork = view.findViewById<EditText>(R.id.NameOfWork)!!
+            private val nameOfMeasure =
+                view.findViewById<TextInputLayout>(R.id.choose_unit_measure)!!
+
+            private val unitsOfMeasurement = listOf("м2", "шт.", "у.е.", "м.п.")
+
             //private val titleOfWork = view.findViewById<TextView>(R.id.textTypeOfWorkTitle)!!
             private val price = view.findViewById<EditText>(R.id.Price)!!
 
 
-
             fun bind(data: ClientAndEstimateModification) {
+                
 
-                nameOfWork.text = data.CategoryName
-                nameOfMeansure.text = data.UnitsOfMeasurement
+                nameOfWork.setText(data.CategoryName)
+
+                measureAdapter?.filter?.filter(null)
+                (nameOfMeasure.editText as AutoCompleteTextView).setAdapter(measureAdapter)
+                (nameOfMeasure.editText as AutoCompleteTextView).setText(
+                    data.UnitsOfMeasurement,
+                    false
+                )
 
                 val priseStr = "${data.Price}"
                 price.setText(priseStr)
 
                 var previousPrice = data.Price
 
-                // edit text enter key listener
                 price.setOnKeyListener(object : View.OnKeyListener {
                     override fun onKey(v: View?, keyCode: Int, event: KeyEvent): Boolean {
                         // if the event is a key down event on the enter button
@@ -291,19 +314,79 @@ class TypeOfWorkRecyclerViewAdapterForCountInEstimate(private val listener: Type
                         // code to execute when EditText loses focus
                         val newPrice = price.text.toString().split(" ")[0].toInt()
 
-                        Log.d("mytag", "new price = $newPrice")
-                        if (newPrice >= 0) {
+                        if (newPrice != previousPrice) {
+                            Log.d("mytag", "new price = $newPrice")
+                            if (newPrice >= 0) {
 
-                            updateInfoFromEditTextPrice(price, newPrice, data, previousPrice)
+                                updateInfoFromEditTextPrice(price, newPrice, data, previousPrice)
 
-                            previousPrice = newPrice
+                                previousPrice = newPrice
+                            }
                         }
                         // clear focus and hide cursor from edit text
                         price.clearFocus()
+                    } else {
+                        listener.onItemClickListener(data)
                     }
                 }
 
+                var previousName = data.CategoryName
+
+
+                nameOfWork.onFocusChangeListener = View.OnFocusChangeListener { _, hasFocus ->
+                    if (!hasFocus) {
+                        // code to execute when EditText loses focus
+                        val newName = nameOfWork.text.toString()
+
+                        if (newName != previousName) {
+                            Log.d("mytag", "new namee = $newName")
+                            if (newName != "") {
+
+                                updateInfoFromEditTextName(nameOfWork, newName, data, previousName)
+
+                                previousName = newName
+                            }
+
+                        }
+                        // clear focus and hide cursor from edit text
+                        nameOfWork.clearFocus()
+                    } else {
+                        listener.onItemClickListener(data)
+                    }
+                }
+
+                var previousUnitMeasure = data.UnitsOfMeasurement
+
+                // edit text enter key listener
+                (nameOfMeasure.editText as AutoCompleteTextView).onItemClickListener =
+                    AdapterView.OnItemClickListener { _, _, itemId, _ ->
+
+                        listener.onItemClickListener(data)
+                        val newUnitMeasure = (nameOfMeasure.editText as EditText).text.toString()
+
+                        Log.d("mytag", "new unit = $newUnitMeasure")
+                        if (newUnitMeasure != "" && unitsOfMeasurement.contains(newUnitMeasure)) {
+
+                            updateInfoFromEditTextUnitMeasure(
+                                nameOfMeasure.editText as EditText,
+                                newUnitMeasure,
+                                data,
+                                previousUnitMeasure
+                            )
+
+                            previousUnitMeasure = newUnitMeasure
+                        } else {
+                            nameOfMeasure.error = "Некоректные значения"
+                        }
+                        (nameOfMeasure.editText as EditText).clearFocus()
+                    }
+
+                (nameOfMeasure.editText as EditText).doOnTextChanged { _, _, _, _ ->
+                    nameOfMeasure.error = null
+                }
+
             }
+
             private fun updateInfoFromEditTextPrice(
                 price: EditText,
                 newPrice: Int,
@@ -327,6 +410,59 @@ class TypeOfWorkRecyclerViewAdapterForCountInEstimate(private val listener: Type
 
 
                         ), previousPrice, "set"
+                )
+
+            }
+
+            private fun updateInfoFromEditTextName(
+                name: EditText,
+                newName: String,
+                data: ClientAndEstimateModification,
+                previousName: String
+            ) {
+
+                name.setText(newName)
+                listener.onChangeClickName(
+                    ClientAndEstimateModification(
+                        data.ClientName,
+                        data.Count,
+                        data._idTypeCategory,
+                        data._idTypeOfWork,
+                        data.Price,
+                        newName,
+                        data.NameTypeOfWork,
+                        data.TypeLayout,
+                        data.UnitsOfMeasurement,
+
+
+                        ), previousName, "set"
+                )
+
+            }
+
+            private fun updateInfoFromEditTextUnitMeasure(
+                unitMeasure: EditText,
+                newUnitMeasure: String,
+                data: ClientAndEstimateModification,
+                previousUnitMeasure: String
+            ) {
+
+                unitMeasure.setText(newUnitMeasure)
+
+                listener.onChangeClickUnitMeasure(
+                    ClientAndEstimateModification(
+                        data.ClientName,
+                        data.Count,
+                        data._idTypeCategory,
+                        data._idTypeOfWork,
+                        data.Price,
+                        data.CategoryName,
+                        data.NameTypeOfWork,
+                        data.TypeLayout,
+                        newUnitMeasure,
+
+
+                        ), previousUnitMeasure, "set"
                 )
 
             }

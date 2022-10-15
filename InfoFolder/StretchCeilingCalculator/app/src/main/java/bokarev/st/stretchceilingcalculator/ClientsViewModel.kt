@@ -26,18 +26,18 @@ class ClientsViewModel(app: Application) : AndroidViewModel(app) {
 
         allUsers.postValue(list!!)
     }
+
     suspend fun getAllUsersForStepan(name: String, date:String): Client {
         val userDao = CategoriesDataBase.getInstance((getApplication())).categoriesDao
         return userDao.getClient(name, date)
 
 
     }
+
     @SuppressLint("SimpleDateFormat")
     fun insertUserInfo(entity: Client) {
         val userDao = CategoriesDataBase.getInstance(getApplication()).categoriesDao
         userDao.insertUser(entity)
-
-
         getAllUsers()
     }
 
