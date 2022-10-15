@@ -8,10 +8,18 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.core.widget.doOnTextChanged
 import androidx.recyclerview.widget.RecyclerView
+import bokarev.st.stretchceilingcalculator.CategoriesDataBase
 import bokarev.st.stretchceilingcalculator.R
 import bokarev.st.stretchceilingcalculator.TypeOfWorkActivity
 import bokarev.st.stretchceilingcalculator.entities.ClientAndEstimateModification
+<<<<<<< Updated upstream
 import com.google.android.material.textfield.TextInputLayout
+=======
+import bokarev.st.stretchceilingcalculator.entities.ViewEstimate
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+>>>>>>> Stashed changes
 import kotlin.math.roundToInt
 import kotlin.math.truncate
 
@@ -266,7 +274,7 @@ class TypeOfWorkRecyclerViewAdapterForCountInEstimate(private val listener: Type
 
             //private val titleOfWork = view.findViewById<TextView>(R.id.textTypeOfWorkTitle)!!
             private val price = view.findViewById<EditText>(R.id.Price)!!
-
+            val contextRecycler = view.context
 
             fun bind(data: ClientAndEstimateModification) {
                 
