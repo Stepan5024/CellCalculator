@@ -174,6 +174,7 @@
                     android:background="@drawable/stroke_black_line">
 
                     <TextView
+                        android:id="@+id/mensureOrPrice"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:text="Кол-во"

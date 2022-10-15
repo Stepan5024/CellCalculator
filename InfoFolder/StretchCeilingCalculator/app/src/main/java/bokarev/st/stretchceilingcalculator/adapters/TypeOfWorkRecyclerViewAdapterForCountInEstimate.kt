@@ -1,5 +1,8 @@
 package bokarev.st.stretchceilingcalculator.adapters
 
+import android.os.CountDownTimer
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import android.view.KeyEvent
 import android.view.LayoutInflater
@@ -8,25 +11,17 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.core.widget.doOnTextChanged
 import androidx.recyclerview.widget.RecyclerView
-import bokarev.st.stretchceilingcalculator.CategoriesDataBase
 import bokarev.st.stretchceilingcalculator.R
 import bokarev.st.stretchceilingcalculator.TypeOfWorkActivity
 import bokarev.st.stretchceilingcalculator.entities.ClientAndEstimateModification
-<<<<<<< Updated upstream
 import com.google.android.material.textfield.TextInputLayout
-=======
-import bokarev.st.stretchceilingcalculator.entities.ViewEstimate
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
->>>>>>> Stashed changes
 import kotlin.math.roundToInt
 import kotlin.math.truncate
 
 
 class TypeOfWorkRecyclerViewAdapterForCountInEstimate(private val listener: TypeOfWorkActivity) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>
-//RecyclerView.Adapter<TypeOfWorkRecyclerViewAdapterForCountInEstimate.MyViewHolder>
+
         () {
 
     private var items: MutableList<ClientAndEstimateModification> = arrayListOf()
@@ -272,9 +267,8 @@ class TypeOfWorkRecyclerViewAdapterForCountInEstimate(private val listener: Type
 
             private val unitsOfMeasurement = listOf("м2", "шт.", "у.е.", "м.п.")
 
-            //private val titleOfWork = view.findViewById<TextView>(R.id.textTypeOfWorkTitle)!!
+
             private val price = view.findViewById<EditText>(R.id.Price)!!
-            val contextRecycler = view.context
 
             fun bind(data: ClientAndEstimateModification) {
                 
@@ -340,7 +334,78 @@ class TypeOfWorkRecyclerViewAdapterForCountInEstimate(private val listener: Type
 
                 var previousName = data.CategoryName
 
+                /*nameOfWork.afterTextChangedDelayed {
+                    val newName = nameOfWork.text.toString()
 
+                    if (newName != previousName) {
+                        Log.d("mytag", "new namee = $newName")
+                        if (newName != "") {
+
+                            updateInfoFromEditTextName(nameOfWork, newName, data, previousName)
+
+                            previousName = newName
+                        }
+
+                    }
+                    // clear focus and hide cursor from edit text
+                    nameOfWork.clearFocus()
+                }*/
+               /* nameOfWork.setOnKeyListener(object : View.OnKeyListener {
+                    override fun onKey(v: View?, keyCode: Int, event: KeyEvent): Boolean {
+                        // if the event is a key down event on the enter button
+                        if (
+                            keyCode == KeyEvent.KEYCODE_ENTER
+                        ) {
+
+                            val newName = nameOfWork.text.toString()
+
+                            if (newName != previousName) {
+                                Log.d("mytag", "new namee = $newName")
+                                if (newName != "") {
+
+                                    updateInfoFromEditTextName(nameOfWork, newName, data, previousName)
+
+                                    previousName = newName
+                                }
+
+                            }
+                            // clear focus and hide cursor from edit text
+                            nameOfWork.clearFocus()
+
+                            return true
+                        }
+                        return false
+                    }
+                })*/
+
+                nameOfWork.setOnKeyListener(object : View.OnKeyListener {
+                    override fun onKey(v: View?, keyCode: Int, event: KeyEvent): Boolean {
+                        // if the event is a key down event on the enter button
+                        if (
+                            event.action == KeyEvent.ACTION_DOWN &&
+                            keyCode == KeyEvent.KEYCODE_ENTER
+                        ) {
+
+                            val newName = nameOfWork.text.toString()
+
+                            if (newName != previousName) {
+                                Log.d("mytag", "new namee = $newName")
+                                if (newName != "") {
+
+                                    updateInfoFromEditTextName(nameOfWork, newName, data, previousName)
+
+                                    previousName = newName
+                                }
+
+                            }
+                            // clear focus and hide cursor from edit text
+                            nameOfWork.clearFocus()
+
+                            return true
+                        }
+                        return false
+                    }
+                })
                 nameOfWork.onFocusChangeListener = View.OnFocusChangeListener { _, hasFocus ->
                     if (!hasFocus) {
                         // code to execute when EditText loses focus
@@ -394,7 +459,25 @@ class TypeOfWorkRecyclerViewAdapterForCountInEstimate(private val listener: Type
                 }
 
             }
+            fun TextView.afterTextChangedDelayed(afterTextChanged: (String) -> Unit) {
+                this.addTextChangedListener(object : TextWatcher {
+                    var timer: CountDownTimer? = null
 
+                    override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
+
+                    override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
+
+                    override fun afterTextChanged(editable: Editable?) {
+                        timer?.cancel()
+                        timer = object : CountDownTimer(1000, 1500) {
+                            override fun onTick(millisUntilFinished: Long) {}
+                            override fun onFinish() {
+                                afterTextChanged.invoke(editable.toString())
+                            }
+                        }.start()
+                    }
+                })
+            }
             private fun updateInfoFromEditTextPrice(
                 price: EditText,
                 newPrice: Int,

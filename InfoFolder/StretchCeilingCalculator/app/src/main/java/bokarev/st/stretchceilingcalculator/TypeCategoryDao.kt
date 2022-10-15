@@ -39,6 +39,9 @@ interface TypeCategoryDao {
     @Query("SELECT * FROM TypeCategory ORDER BY _id")
     suspend fun getTypeCategory(): List<TypeCategory>
 
+    @Transaction
+    @Query("SELECT _id FROM TypeCategory WHERE CategoryName = :nameOfTypeCategory")
+    suspend fun getTypeCategoryByName(nameOfTypeCategory: String): Int
 
     @Transaction
     @Query("SELECT * FROM Client WHERE ClientName = :clientName AND DateOfCreation = :dateOfCreation")

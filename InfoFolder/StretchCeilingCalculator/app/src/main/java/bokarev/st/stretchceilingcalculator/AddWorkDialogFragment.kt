@@ -16,7 +16,7 @@ import bokarev.st.stretchceilingcalculator.entities.ViewEstimate
 import com.google.android.material.textfield.TextInputLayout
 import kotlinx.coroutines.launch
 
-class AddWorkDialogFragment(private val recyclerView: RecyclerView) : DialogFragment() {
+class AddWorkDialogFragment(private val recyclerView: RecyclerView, private val constantCopyListClient: MutableList<ClientAndEstimateModification>) : DialogFragment() {
 
     private lateinit var dao: TypeCategoryDao
 
@@ -156,6 +156,19 @@ class AddWorkDialogFragment(private val recyclerView: RecyclerView) : DialogFrag
                             _idTypeOfWork = typeOfWorkId
                         )
                     )
+
+                    constantCopyListClient.add(ClientAndEstimateModification(
+                        "меняем цены",
+                        0f,
+                        dao.getTypeCategoryByName(nameInputLayout.editText?.text.toString()),
+                        typeOfWorkId,
+                        priceInputLayout.editText?.text.toString().toInt(),
+                        nameInputLayout.editText?.text.toString(),
+                        dao.getTypeOfWorkNameByTypeCategory(typeOfWorkId),
+                        3,
+                        chooseUnitMeasure.editText?.text.toString(),
+                    ))
+
                     allCategories = dao.getTypesCategory()
                     val finalList = mutableListOf<ClientAndEstimateModification>()
                     var idPreviousTypeOfWork = -1
@@ -194,7 +207,8 @@ class AddWorkDialogFragment(private val recyclerView: RecyclerView) : DialogFrag
 
                     }
 
-
+                    constantCopyListClient
+                    // тут по хорошему вызывать метод вывода списка категорий той, которая была выбрана ранее перед открытием меню
                     (recyclerView.adapter as TypeOfWorkRecyclerViewAdapterForCountInEstimate).setListData(
                         finalList
                     )

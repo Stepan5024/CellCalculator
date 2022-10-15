@@ -60,6 +60,7 @@ class TypeOfWorkActivity : AppCompatActivity() {
         val addDeleteLayout = findViewById<LinearLayout>(R.id.add_delete_layout)
         val btnDelete = findViewById<Button>(R.id.btn_delete)
         val btnAdd = findViewById<Button>(R.id.btn_add)
+        val textViewMensureOrPrice = findViewById<TextView>(R.id.mensureOrPrice)
         val previousActivity: String
 
 
@@ -83,11 +84,12 @@ class TypeOfWorkActivity : AppCompatActivity() {
 
                 btnAdd.setOnClickListener {
                     val fragmentManager = supportFragmentManager
-                    val newFragment = AddWorkDialogFragment(recyclerView)
+                    val newFragment = AddWorkDialogFragment(recyclerView, constantCopyListClient)
 
                     newFragment.show(fragmentManager, "dialog")
 
                 }
+                textViewMensureOrPrice.text = "Ед. измер."
 
                 btnDelete.setOnClickListener {
                     Toast.makeText(this, "Нажмите на запись, чтобы ее удалить", Toast.LENGTH_LONG)
@@ -1149,7 +1151,7 @@ class TypeOfWorkActivity : AppCompatActivity() {
 
         items[indexPrevious] = data
 
-        var indexPreviousInConstantList = constantCopyListClient.indexOf(
+        val indexPreviousInConstantList = constantCopyListClient.indexOf(
             ClientAndEstimateModification(
                 data.ClientName,
                 countOld,
@@ -1162,7 +1164,7 @@ class TypeOfWorkActivity : AppCompatActivity() {
                 data.UnitsOfMeasurement,
             )
         )
-        //if (indexPreviousInConstantList == -1) indexPreviousInConstantList = 0
+
 
         constantCopyListClient[indexPreviousInConstantList] = data
         typeOfWorkRecyclerViewAdapter.setListData(items)
@@ -1178,6 +1180,7 @@ class TypeOfWorkActivity : AppCompatActivity() {
 
                 .setNegativeButton("Отмена") { dialog, _ ->
                     dialog.dismiss()
+                    isDeleteEnabled = false
                 }
                 .setPositiveButton("Удалить") { dialog, _ ->
                     dao.deleteViewEstimate(
@@ -1247,7 +1250,7 @@ class TypeOfWorkActivity : AppCompatActivity() {
                 .show()
             isDeleteEnabled = false
         } else {
-            Toast.makeText(this, "Для удаления нажмите на кнопку удалить", Toast.LENGTH_LONG).show()
+            //Toast.makeText(this, "Для удаления нажмите на кнопку удалить", Toast.LENGTH_LONG).show()
         }
 
     }
@@ -1310,14 +1313,12 @@ class TypeOfWorkActivity : AppCompatActivity() {
 
         items[indexPrevious] = data
 
-
-
         Log.d(
             "mytagStepan",
             "index arr items= $indexPrevious data new price = ${items[indexPrevious].Price} | data old price = $oldPrice"
         )
-
-        constantCopyListClient[indexPreviousInConstantList] = data
+        if (indexPreviousInConstantList != -1)
+            constantCopyListClient[indexPreviousInConstantList] = data
         typeOfWorkRecyclerViewAdapter.setListData(items)
         try {
             typeOfWorkRecyclerViewAdapter.notifyDataSetChanged()
@@ -1443,7 +1444,8 @@ class TypeOfWorkActivity : AppCompatActivity() {
             "index arr items= $indexPrevious data new price = ${items[indexPrevious].UnitsOfMeasurement} | data old price = $oldUnitMeasure"
         )
 
-        constantCopyListClient[indexPreviousInConstantList] = data
+        if (indexPreviousInConstantList != -1)
+            constantCopyListClient[indexPreviousInConstantList] = data
         typeOfWorkRecyclerViewAdapter.setListData(items)
         try {
             typeOfWorkRecyclerViewAdapter.notifyDataSetChanged()
