@@ -3,8 +3,13 @@ package bokarev.st.stretchceilingcalculator
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
+import android.text.InputType
 import android.util.Log
+import android.view.KeyEvent
+import android.view.View
+import android.view.inputmethod.EditorInfo
 import android.widget.*
+import android.widget.TextView.OnEditorActionListener
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import bokarev.st.stretchceilingcalculator.entities.Client
@@ -14,7 +19,8 @@ import kotlinx.coroutines.*
 import java.text.SimpleDateFormat
 import java.util.*
 
-class ClientActivity : AppCompatActivity() {
+
+class ClientActivity : AppCompatActivity(),TextView.OnEditorActionListener {
 
     private lateinit var viewModel: ClientsViewModel
 
@@ -52,8 +58,6 @@ class ClientActivity : AppCompatActivity() {
         val btnReturnToHome: LinearLayout = findViewById(R.id.btnReturnToHome)
         btnReturnToHome.setOnClickListener {
             returnToPreviousActivity()
-
-
         }
 
 
@@ -218,6 +222,21 @@ class ClientActivity : AppCompatActivity() {
 
     private fun getClientFromPreviousActivity(): Client =
         intent.getSerializableExtra("ClientEntity") as Client
+
+    override fun onEditorAction(p0: TextView?, actionId: Int, p2: KeyEvent?): Boolean {
+
+        if (actionId == EditorInfo.IME_ACTION_GO) {
+            // обрабатываем нажатие кнопки GO
+            val toast = Toast.makeText(
+                applicationContext,
+                "Enter",
+                Toast.LENGTH_LONG
+            )
+            toast.show()
+            return true
+        }
+        return false
+    }
 
 
 }
